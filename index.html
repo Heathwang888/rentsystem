@@ -1634,55 +1634,16 @@
 
     // 渲染客戶列表
     function renderCustomerList(customers) {
-  const customerList = document.querySelector('.customer-cards');
-  customerList.innerHTML = '';
+      const customerList = document.querySelector('.customer-cards');
+      if (!customerList) return;
 
-  if (!customers || customers.length === 0) {
-    customerList.innerHTML = '<p class="no-data">暫無客戶資料</p>';
-    return;
-  }
-
-  customers.forEach(customer => {
-    const card = document.createElement('div');
-    card.className = 'customer-card';
-
-    const header = document.createElement('div');
-    header.className = 'card-header';
-    header.onclick = function () {
-      card.classList.toggle('expanded');
-    };
-
-    const name = document.createElement('h3');
-    name.textContent = customer.name;
-    header.appendChild(name);
-
-    const statusBadge = document.createElement('span');
-    statusBadge.className = 'status-badge';
-    statusBadge.textContent = customer.status || '租賃中';
-    header.appendChild(statusBadge);
-
-    const content = document.createElement('div');
-    content.className = 'card-content';
-
-    const details = document.createElement('div');
-    details.className = 'customer-details';
-    details.innerHTML = `
-      <div class="detail-group">
-        <div class="detail-item"><span class="detail-label">身分證字號</span><span class="detail-value">${customer.idNumber || ''}</span></div>
-        <div class="detail-item"><span class="detail-label">手機號碼</span><span class="detail-value">${customer.phone || ''}</span></div>
-        <div class="detail-item"><span class="detail-label">戶籍地址</span><span class="detail-value">${customer.address || ''}</span></div>
-        <div class="detail-item"><span class="detail-label">通訊地址</span><span class="detail-value">${customer.contactAddress || customer.address || ''}</span></div>
-      </div>
-    `;
-
-    content.appendChild(details);
-    card.appendChild(header);
-    card.appendChild(content);
-    customerList.appendChild(card);
-  });
-}
-
-
+      customerList.innerHTML = '';
+      
+      if (customers.length === 0) {
+        customerList.innerHTML = '<p class="no-data">暫無客戶資料</p>';
+        return;
+      }
+console.log('Fetched customers:', customers);
       customers.forEach(function(customer) {
         const card = document.createElement('div');
         card.className = 'customer-card';
