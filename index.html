@@ -517,6 +517,65 @@
       color: white;
       border-color: #1976d2;
     }
+
+    /* 新增樣式 */
+    .address-options {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    .list-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .search-box {
+      position: relative;
+    }
+
+    .search-box input {
+      padding: 0.5rem 1rem;
+      padding-left: 2.5rem;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      width: 300px;
+    }
+
+    .search-box::before {
+      content: '🔍';
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .customer-list {
+      margin-top: 2rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .form-group input[type="file"] {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body>
@@ -634,16 +693,16 @@
     <!-- 客戶管理頁面 -->
     <section id="customers" class="page-section">
       <div class="container">
-        <!-- 客戶資訊上傳/編輯表單 -->
+        <!-- 客戶資訊上傳表單 -->
         <div class="customer-form">
           <div class="form-header" onclick="toggleFormSection(this)">
-            <h3>客戶資訊管理</h3>
+            <h3>新增客戶</h3>
             <i class="toggle-icon">▼</i>
           </div>
 
-          <!-- 上傳新客戶表單 -->
           <form id="uploadForm" class="form-section">
             <div class="form-grid">
+              <!-- 基本資料 -->
               <div class="form-group">
                 <label>姓名</label>
                 <input type="text" name="name" placeholder="請輸入姓名" required>
@@ -657,22 +716,81 @@
                 <input type="tel" name="phone" placeholder="請輸入手機號碼" required>
               </div>
               <div class="form-group">
-                <label>地址</label>
-                <input type="text" name="address" placeholder="請輸入完整地址" required>
+                <label>戶籍地址</label>
+                <input type="text" name="address" placeholder="請輸入戶籍地址" required>
               </div>
               <div class="form-group">
-                <label>銀行分行</label>
-                <input type="text" name="bankBranch" placeholder="請輸入銀行分行" required>
+                <label>通訊地址</label>
+                <div class="address-options">
+                  <input type="text" name="mailingAddress" placeholder="請輸入通訊地址">
+                  <label class="checkbox-label">
+                    <input type="checkbox" name="sameAsResidence" onchange="toggleMailingAddress(this)">
+                    同戶籍地址
+                  </label>
+                </div>
+              </div>
+
+              <!-- 手機資訊 -->
+              <div class="form-group">
+                <label>手機型號</label>
+                <select name="phoneModel" required>
+                  <option value="">請選擇型號</option>
+                  <option>iPhone 12</option>
+                  <option>iPhone 12 mini</option>
+                  <option>iPhone 12 Pro</option>
+                  <option>iPhone 12 Pro Max</option>
+                  <option>iPhone 13</option>
+                  <option>iPhone 13 mini</option>
+                  <option>iPhone 13 Pro</option>
+                  <option>iPhone 13 Pro Max</option>
+                  <option>iPhone 14</option>
+                  <option>iPhone 14 Plus</option>
+                  <option>iPhone 14 Pro</option>
+                  <option>iPhone 14 Pro Max</option>
+                  <option>iPhone 15</option>
+                  <option>iPhone 15 Plus</option>
+                  <option>iPhone 15 Pro</option>
+                  <option>iPhone 15 Pro Max</option>
+                </select>
               </div>
               <div class="form-group">
-                <label>戶名</label>
-                <input type="text" name="accountName" placeholder="請輸入戶名" required>
+                <label>IMEI</label>
+                <input type="text" name="imei" placeholder="請輸入IMEI碼" required>
               </div>
               <div class="form-group">
-                <label>帳號</label>
-                <input type="text" name="accountNumber" placeholder="請輸入帳號" required>
+                <label>螢幕密碼</label>
+                <input type="text" name="screenPassword" placeholder="請輸入螢幕密碼">
+              </div>
+
+              <!-- 合約資訊 -->
+              <div class="form-group">
+                <label>買賣價金</label>
+                <input type="number" name="price" placeholder="請輸入買賣價金" required>
+              </div>
+              <div class="form-group">
+                <label>租金</label>
+                <input type="number" name="rent" placeholder="請輸入租金" required>
+              </div>
+              <div class="form-group">
+                <label>合約日期</label>
+                <input type="date" name="contractDate" required>
+              </div>
+
+              <!-- 文件上傳 -->
+              <div class="form-group">
+                <label>上傳契約書</label>
+                <input type="file" name="contractFile" accept=".pdf,.jpg,.jpeg,.png" required>
+              </div>
+              <div class="form-group">
+                <label>上傳身分證正面</label>
+                <input type="file" name="idFront" accept=".jpg,.jpeg,.png" required>
+              </div>
+              <div class="form-group">
+                <label>上傳身分證反面</label>
+                <input type="file" name="idBack" accept=".jpg,.jpeg,.png" required>
               </div>
             </div>
+
             <div class="form-actions">
               <button type="submit" class="button button-primary">儲存</button>
               <button type="button" class="button button-danger" onclick="this.form.reset()">取消</button>
@@ -680,12 +798,21 @@
           </form>
         </div>
 
-        <div class="customer-cards">
-          <!-- 客戶卡片將在這裡動態生成 -->
-        </div>
+        <!-- 客戶列表 -->
+        <div class="customer-list">
+          <div class="list-header">
+            <h3>客戶列表</h3>
+            <div class="search-box">
+              <input type="text" id="searchInput" placeholder="搜尋客戶...">
+            </div>
+          </div>
 
-        <!-- 分頁容器 -->
-        <div class="pagination"></div>
+          <div class="customer-cards">
+            <!-- 客戶卡片將由 JavaScript 動態生成 -->
+          </div>
+
+          <div class="pagination"></div>
+        </div>
       </div>
     </section>
 
@@ -1202,6 +1329,10 @@
                   <span class="detail-label">戶籍地址</span>
                   <span class="detail-value">${customer.address}</span>
                 </div>
+                <div class="detail-item">
+                  <span class="detail-label">通訊地址</span>
+                  <span class="detail-value">${customer.mailingAddress}</span>
+                </div>
               </div>
               <div class="detail-group">
                 <h4>合約資訊</h4>
@@ -1214,23 +1345,20 @@
                   <span class="detail-value">${customer.imei}</span>
                 </div>
                 <div class="detail-item">
-                  <span class="detail-label">容量</span>
-                  <span class="detail-value">${customer.capacity}</span>
-                </div>
-              </div>
-              <div class="detail-group">
-                <h4>銀行資訊</h4>
-                <div class="detail-item">
-                  <span class="detail-label">銀行分行</span>
-                  <span class="detail-value">${customer.bankBranch}</span>
+                  <span class="detail-label">螢幕密碼</span>
+                  <span class="detail-value">${customer.screenPassword}</span>
                 </div>
                 <div class="detail-item">
-                  <span class="detail-label">戶名</span>
-                  <span class="detail-value">${customer.accountName}</span>
+                  <span class="detail-label">買賣價金</span>
+                  <span class="detail-value">$${formatNumber(customer.price)}</span>
                 </div>
                 <div class="detail-item">
-                  <span class="detail-label">帳號</span>
-                  <span class="detail-value">${customer.accountNumber}</span>
+                  <span class="detail-label">租金</span>
+                  <span class="detail-value">$${formatNumber(customer.rent)}/週</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">合約日期</span>
+                  <span class="detail-value">${formatDate(customer.contractDate)}</span>
                 </div>
               </div>
             </div>
@@ -1595,20 +1723,95 @@
       const customer = getCustomerById(customerId);
       if (customer) {
         const form = document.getElementById('editForm');
-        form.customerId.value = customer._id;
-        form.name.value = customer.name;
-        form.idNumber.value = customer.idNumber;
-        form.phone.value = customer.phone;
-        form.address.value = customer.address;
-        form.bankBranch.value = customer.bankBranch;
-        form.accountName.value = customer.accountName;
-        form.accountNumber.value = customer.accountNumber;
-        
-        // 切換到編輯表單
-        document.querySelector('.form-header').click();
-        document.querySelector('.form-tab[onclick*="edit"]').click();
+        if (form) {
+          form.customerId.value = customer._id;
+          form.name.value = customer.name;
+          form.idNumber.value = customer.idNumber;
+          form.phone.value = customer.phone;
+          form.address.value = customer.address;
+          form.bankBranch.value = customer.bankBranch;
+          form.accountName.value = customer.accountName;
+          form.accountNumber.value = customer.accountNumber;
+          
+          // 切換到編輯表單
+          const formHeader = document.querySelector('.form-header');
+          if (formHeader) {
+            formHeader.click();
+          }
+          const editTab = document.querySelector('.form-tab[onclick*="edit"]');
+          if (editTab) {
+            editTab.click();
+          }
+        }
       }
     }
+
+    // 獲取客戶資訊
+    function getCustomerById(customerId) {
+      // 這裡應該從 API 獲取客戶資訊
+      // 目前返回示例數據
+      return {
+        _id: customerId,
+        name: '張三',
+        idNumber: 'A123456789',
+        phone: '0912-345-678',
+        address: '台北市信義區信義路五段7號',
+        bankBranch: '台北富邦銀行信義分行',
+        accountName: '張三',
+        accountNumber: '1234-5678-9012'
+      };
+    }
+
+    // 切換通訊地址
+    function toggleMailingAddress(checkbox) {
+      const mailingAddressInput = checkbox.closest('.form-group').querySelector('input[name="mailingAddress"]');
+      if (checkbox.checked) {
+        const residenceAddress = document.querySelector('input[name="address"]').value;
+        mailingAddressInput.value = residenceAddress;
+        mailingAddressInput.disabled = true;
+      } else {
+        mailingAddressInput.disabled = false;
+      }
+    }
+
+    // 處理表單提交
+    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      
+      // 處理文件上傳
+      const files = {
+        contractFile: formData.get('contractFile'),
+        idFront: formData.get('idFront'),
+        idBack: formData.get('idBack')
+      };
+
+      // 創建客戶數據
+      const customerData = {
+        name: formData.get('name'),
+        idNumber: formData.get('idNumber'),
+        phone: formData.get('phone'),
+        address: formData.get('address'),
+        mailingAddress: formData.get('mailingAddress'),
+        phoneModel: formData.get('phoneModel'),
+        imei: formData.get('imei'),
+        screenPassword: formData.get('screenPassword'),
+        price: formData.get('price'),
+        rent: formData.get('rent'),
+        contractDate: formData.get('contractDate'),
+        files: files
+      };
+
+      try {
+        await createCustomer(customerData);
+        e.target.reset();
+        alert('客戶創建成功');
+        fetchCustomers(); // 刷新客戶列表
+      } catch (error) {
+        console.error('Error:', error);
+        alert('創建客戶失敗，請稍後再試');
+      }
+    });
   </script>
 </body>
 </html> 
