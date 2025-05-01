@@ -4,67 +4,182 @@
   <meta charset="UTF-8">
   <title>新增客戶資料</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --primary-color: #1976d2;
+      --primary-hover: #1565c0;
+      --error-color: #d32f2f;
+      --success-color: #2e7d32;
+      --border-color: #e0e0e0;
+      --text-color: #333;
+      --text-secondary: #666;
+      --background-color: #f5f5f5;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
       font-family: 'Noto Sans TC', sans-serif;
-      background-color: #f5f5f5;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      line-height: 1.6;
       margin: 0;
       padding: 2rem;
     }
+
     .form-container {
       background: white;
-      padding: 2rem;
-      border-radius: 12px;
-      max-width: 800px;
+      padding: 2.5rem;
+      border-radius: 16px;
+      max-width: 900px;
       margin: auto;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
     }
+
     h2 {
       text-align: center;
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
+      color: var(--text-color);
+      font-weight: 700;
     }
+
     .form-group {
-      margin-bottom: 1.2rem;
+      margin-bottom: 1.5rem;
+      position: relative;
     }
+
     label {
       display: block;
       margin-bottom: 0.5rem;
-      font-weight: bold;
+      font-weight: 500;
+      color: var(--text-color);
     }
+
     input, select, textarea {
       width: 100%;
-      padding: 0.5rem;
+      padding: 0.75rem;
       font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      transition: border-color 0.3s, box-shadow 0.3s;
     }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
+    }
+
+    input.error, select.error, textarea.error {
+      border-color: var(--error-color);
+    }
+
+    .error-message {
+      color: var(--error-color);
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+      display: none;
+    }
+
     .form-group.inline {
       display: flex;
-      gap: 1rem;
+      gap: 1.5rem;
     }
+
     .form-group.inline > div {
       flex: 1;
     }
+
+    .file-preview {
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+      color: var(--text-secondary);
+    }
+
     .checkbox-group {
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      margin-top: 0.5rem;
     }
-    .file-preview {
-      font-size: 0.9rem;
-      margin-top: 0.25rem;
-      color: #555;
+
+    .checkbox-group input[type="checkbox"] {
+      width: auto;
+      margin-right: 0.5rem;
     }
+
     button {
       width: 100%;
       padding: 1rem;
-      font-size: 1rem;
-      background: #1976d2;
+      font-size: 1.1rem;
+      background: var(--primary-color);
       color: white;
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      margin-top: 1.5rem;
+      margin-top: 2rem;
+      transition: background-color 0.3s;
+      font-weight: 500;
+    }
+
+    button:hover {
+      background: var(--primary-hover);
+    }
+
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .loading {
+      position: relative;
+      pointer-events: none;
+    }
+
+    .loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      margin: -10px 0 0 -10px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .success-message {
+      display: none;
+      text-align: center;
+      color: var(--success-color);
+      margin-top: 1rem;
+      font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+
+      .form-container {
+        padding: 1.5rem;
+      }
+
+      .form-group.inline {
+        flex-direction: column;
+        gap: 1rem;
+      }
     }
   </style>
 </head>
@@ -75,84 +190,100 @@
       <div class="form-group">
         <label for="name">姓名</label>
         <input type="text" id="name" required>
+        <div class="error-message" id="nameError">請輸入姓名</div>
       </div>
       <div class="form-group">
         <label for="id">身分證字號</label>
-        <input type="text" id="id" required>
+        <input type="text" id="id" required pattern="[A-Z][12]\d{8}">
+        <div class="error-message" id="idError">請輸入正確的身分證字號</div>
       </div>
       <div class="form-group">
         <label for="mobile">手機號碼</label>
         <input type="tel" id="mobile" pattern="09\\d{8}" required>
+        <div class="error-message" id="mobileError">請輸入正確的手機號碼</div>
       </div>
       <div class="form-group">
         <label for="address">戶籍地址</label>
         <input type="text" id="address" required>
+        <div class="error-message" id="addressError">請輸入戶籍地址</div>
       </div>
       <div class="form-group">
         <label for="contactAddress">通訊地址</label>
         <input type="text" id="contactAddress">
-        <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-top: -10px;">
-  <input type="checkbox" id="sameAddressCheckbox" style="transform: scale(1.2); margin: 0;">
-  <label for="sameAddressCheckbox" style="margin: 0; white-space: nowrap;">與戶籍地址相同</label>
-</div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="sameAddressCheckbox">
+          <label for="sameAddressCheckbox">與戶籍地址相同</label>
+        </div>
       </div>
       <div class="form-group inline">
         <div>
           <label for="model">手機型號</label>
-          <select id="model">
+          <select id="model" required>
             <option value="">請選擇</option>
             <option>iPhone 13</option>
             <option>iPhone 14</option>
             <option>iPhone 15 Pro Max</option>
           </select>
+          <div class="error-message" id="modelError">請選擇手機型號</div>
         </div>
         <div>
           <label for="capacity">容量</label>
-          <select id="capacity">
+          <select id="capacity" required>
             <option value="">請選擇</option>
             <option>128G</option>
             <option>256G</option>
             <option>512G</option>
             <option>1TB</option>
           </select>
+          <div class="error-message" id="capacityError">請選擇容量</div>
         </div>
       </div>
       <div class="form-group">
         <label for="imei">IMEI</label>
-        <input type="text" id="imei">
+        <input type="text" id="imei" pattern="\d{15}">
+        <div class="error-message" id="imeiError">請輸入正確的IMEI號碼</div>
       </div>
       <div class="form-group inline">
         <div>
           <label for="price">總價</label>
-          <input type="number" id="price">
+          <input type="number" id="price" min="0" required>
+          <div class="error-message" id="priceError">請輸入總價</div>
         </div>
         <div>
           <label for="rent">每週租金</label>
-          <input type="number" id="rent">
+          <input type="number" id="rent" min="0" required>
+          <div class="error-message" id="rentError">請輸入每週租金</div>
         </div>
       </div>
       <div class="form-group inline">
         <div>
           <label for="startDate">起始日</label>
-          <input type="date" id="startDate">
+          <input type="date" id="startDate" required>
+          <div id="startDatePreview" style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.5rem;"></div>
+          <div class="error-message" id="startDateError">請選擇起始日</div>
         </div>
         <div>
           <label for="endDate">到期日</label>
-          <input type="date" id="endDate">
+          <input type="date" id="endDate" required>
+          <div id="endDatePreview" style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.5rem;"></div>
+          <div class="error-message" id="endDateError">請選擇到期日</div>
         </div>
       </div>
       <div class="form-group inline">
         <div>
           <label for="bank">銀行分行</label>
-          <input type="text" id="bank">
+          <input type="text" id="bank" required>
+          <div class="error-message" id="bankError">請輸入銀行分行</div>
         </div>
         <div>
           <label for="accountName">戶名</label>
-          <input type="text" id="accountName">
+          <input type="text" id="accountName" required>
+          <div class="error-message" id="accountNameError">請輸入戶名</div>
         </div>
         <div>
           <label for="account">帳號</label>
-          <input type="text" id="account">
+          <input type="text" id="account" required>
+          <div class="error-message" id="accountError">請輸入帳號</div>
         </div>
       </div>
       <div class="form-group">
@@ -161,30 +292,102 @@
       </div>
       <div class="form-group">
         <label for="contractPDF">上傳契約 PDF</label>
-        <input type="file" id="contractPDF" accept="application/pdf">
+        <input type="file" id="contractPDF" accept="application/pdf" required>
         <div class="file-preview" id="contractPDFPreview"></div>
+        <div class="error-message" id="contractPDFError">請上傳契約 PDF</div>
       </div>
       <div class="form-group inline">
         <div>
           <label for="idFront">身分證正面</label>
-          <input type="file" id="idFront" accept="image/*">
+          <input type="file" id="idFront" accept="image/*" required>
           <div class="file-preview" id="idFrontPreview"></div>
+          <div class="error-message" id="idFrontError">請上傳身分證正面</div>
         </div>
         <div>
           <label for="idBack">身分證反面</label>
-          <input type="file" id="idBack" accept="image/*">
+          <input type="file" id="idBack" accept="image/*" required>
           <div class="file-preview" id="idBackPreview"></div>
+          <div class="error-message" id="idBackError">請上傳身分證反面</div>
         </div>
       </div>
-      <button type="submit">儲存客戶資料</button>
+      <button type="submit" id="submitButton">儲存客戶資料</button>
+      <div class="success-message" id="successMessage">資料已成功儲存！</div>
     </form>
   </div>
 
   <script>
+    function toTaiwanDateString(dateStr) {
+      if (!dateStr) return '';
+      const date = new Date(dateStr);
+      const y = date.getFullYear() - 1911;
+      const m = date.getMonth() + 1;
+      const d = date.getDate();
+      return `民國${y}年${m.toString().padStart(2, '0')}月${d.toString().padStart(2, '0')}日`;
+    }
+
+    function validateForm() {
+      let isValid = true;
+      const requiredFields = [
+        'name', 'id', 'mobile', 'address', 'model', 'capacity',
+        'price', 'rent', 'startDate', 'endDate', 'bank',
+        'accountName', 'account', 'contractPDF', 'idFront', 'idBack'
+      ];
+
+      requiredFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        const errorElement = document.getElementById(fieldId + 'Error');
+        
+        if (!field.value) {
+          field.classList.add('error');
+          errorElement.style.display = 'block';
+          isValid = false;
+        } else {
+          field.classList.remove('error');
+          errorElement.style.display = 'none';
+        }
+      });
+
+      // 驗證身分證字號格式
+      const idField = document.getElementById('id');
+      const idPattern = /^[A-Z][12]\d{8}$/;
+      if (idField.value && !idPattern.test(idField.value)) {
+        idField.classList.add('error');
+        document.getElementById('idError').style.display = 'block';
+        isValid = false;
+      }
+
+      // 驗證手機號碼格式
+      const mobileField = document.getElementById('mobile');
+      const mobilePattern = /^09\d{8}$/;
+      if (mobileField.value && !mobilePattern.test(mobileField.value)) {
+        mobileField.classList.add('error');
+        document.getElementById('mobileError').style.display = 'block';
+        isValid = false;
+      }
+
+      // 驗證 IMEI 格式
+      const imeiField = document.getElementById('imei');
+      if (imeiField.value && !/^\d{15}$/.test(imeiField.value)) {
+        imeiField.classList.add('error');
+        document.getElementById('imeiError').style.display = 'block';
+        isValid = false;
+      }
+
+      return isValid;
+    }
+
     document.getElementById('sameAddressCheckbox').addEventListener('change', function () {
       const reg = document.getElementById('address');
       const contact = document.getElementById('contactAddress');
       contact.value = this.checked ? reg.value : '';
+    });
+
+    document.getElementById('startDate').addEventListener('change', function () {
+      document.getElementById('startDatePreview').textContent = toTaiwanDateString(this.value);
+    });
+
+    document.getElementById('endDate').addEventListener('change', function () {
+      document.getElementById('endDatePreview').textContent = toTaiwanDateString(this.value);
     });
 
     const fileInputs = ['contractPDF', 'idFront', 'idBack'];
@@ -196,28 +399,70 @@
       });
     });
 
-    document.getElementById('customerForm').addEventListener('submit', function (e) {
+    document.getElementById('customerForm').addEventListener('submit', async function (e) {
       e.preventDefault();
-      const data = {
-        name: document.getElementById('name').value,
-        id: document.getElementById('id').value,
-        mobile: document.getElementById('mobile').value,
-        address: document.getElementById('address').value,
-        contactAddress: document.getElementById('contactAddress').value,
-        model: document.getElementById('model').value,
-        capacity: document.getElementById('capacity').value,
-        imei: document.getElementById('imei').value,
-        price: document.getElementById('price').value,
-        rent: document.getElementById('rent').value,
-        startDate: document.getElementById('startDate').value,
-        endDate: document.getElementById('endDate').value,
-        bank: document.getElementById('bank').value,
-        accountName: document.getElementById('accountName').value,
-        account: document.getElementById('account').value,
-        note: document.getElementById('note').value
-      };
-      console.log('客戶資料：', data);
-      alert('資料已儲存（模擬）');
+      
+      if (!validateForm()) {
+        return;
+      }
+
+      const submitButton = document.getElementById('submitButton');
+      const successMessage = document.getElementById('successMessage');
+      
+      submitButton.disabled = true;
+      submitButton.classList.add('loading');
+
+      try {
+        const formData = new FormData();
+        const data = {
+          name: document.getElementById('name').value,
+          id: document.getElementById('id').value,
+          mobile: document.getElementById('mobile').value,
+          address: document.getElementById('address').value,
+          contactAddress: document.getElementById('contactAddress').value,
+          model: document.getElementById('model').value,
+          capacity: document.getElementById('capacity').value,
+          imei: document.getElementById('imei').value,
+          price: document.getElementById('price').value,
+          rent: document.getElementById('rent').value,
+          startDate: document.getElementById('startDate').value,
+          endDate: document.getElementById('endDate').value,
+          bank: document.getElementById('bank').value,
+          accountName: document.getElementById('accountName').value,
+          account: document.getElementById('account').value,
+          note: document.getElementById('note').value
+        };
+
+        // 添加文件到 FormData
+        const files = ['contractPDF', 'idFront', 'idBack'];
+        files.forEach(id => {
+          const file = document.getElementById(id).files[0];
+          if (file) {
+            formData.append(id, file);
+          }
+        });
+
+        // 添加其他數據到 FormData
+        Object.entries(data).forEach(([key, value]) => {
+          formData.append(key, value);
+        });
+
+        // 模擬 API 請求
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        successMessage.style.display = 'block';
+        setTimeout(() => {
+          successMessage.style.display = 'none';
+        }, 3000);
+        
+        console.log('客戶資料：', data);
+      } catch (error) {
+        console.error('儲存失敗：', error);
+        alert('儲存失敗，請稍後再試');
+      } finally {
+        submitButton.disabled = false;
+        submitButton.classList.remove('loading');
+      }
     });
   </script>
 </body>
