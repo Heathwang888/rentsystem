@@ -1126,790 +1126,247 @@
     // API 基礎 URL
     const API_BASE_URL = 'https://five-iridescent-flyaway.glitch.me/api';
 
-    // 分頁相關變數
-    let currentPage = 1;
-    const itemsPerPage = 5;
-    let totalPages = 1;
-
-    // 頁面載入時初始化
-    document.addEventListener('DOMContentLoaded', () => {
-      // 初始化分頁
-      updatePaginationButtons();
-      // 獲取客戶列表
-      fetchCustomers();
-
-      // 設置導航欄事件監聽器
-      const navLinks = document.querySelectorAll('.nav-link');
-      const sections = document.querySelectorAll('.page-section');
-
-      navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          
-          // 移除所有活動狀態
-          navLinks.forEach(nav => nav.classList.remove('active'));
-          sections.forEach(section => section.classList.remove('active'));
-          
-          // 添加當前活動狀態
-          link.classList.add('active');
-          const sectionId = link.getAttribute('data-section');
-          document.getElementById(sectionId).classList.add('active');
-        });
-      });
-
-      // 初始化第一個頁面
-      document.querySelector('.nav-link.active').click();
-
-      // 設置表單事件監聽器
-      const uploadForm = document.getElementById('uploadForm');
-      if (uploadForm) {
-        uploadForm.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const formData = new FormData(e.target);
-          const customerData = {
-            name: formData.get('name'),
-            idNumber: formData.get('idNumber'),
-            phone: formData.get('phone'),
-            address: formData.get('address'),
-            bankBranch: formData.get('bankBranch'),
-            accountName: formData.get('accountName'),
-            accountNumber: formData.get('accountNumber')
-          };
-          await createCustomer(customerData);
-          e.target.reset();
-        });
-      }
-
-      const editForm = document.getElementById('editForm');
-      if (editForm) {
-        editForm.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const formData = new FormData(e.target);
-          const customerId = formData.get('customerId');
-          if (!customerId) {
-            alert('請先搜尋並選擇要編輯的客戶');
-            return;
-          }
-          const customerData = {
-            name: formData.get('name'),
-            idNumber: formData.get('idNumber'),
-            phone: formData.get('phone'),
-            address: formData.get('address'),
-            bankBranch: formData.get('bankBranch'),
-            accountName: formData.get('accountName'),
-            accountNumber: formData.get('accountNumber')
-          };
-          await updateCustomer(customerId, customerData);
-          e.target.reset();
-        });
-      }
-
-      // 設置搜尋功能
-      const searchInput = document.getElementById('searchInput');
-      if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-          const query = e.target.value.trim();
-          if (query.length >= 2) {
-            searchCustomer(query);
-          } else if (query.length === 0) {
-            fetchCustomers();
-          }
-        });
-      }
-    });
-
-    // 更新分頁按鈕
-    function updatePaginationButtons() {
-      const pagination = document.querySelector('.pagination');
-      if (!pagination) return;
-      
-      pagination.innerHTML = '';
-
-      // 上一頁按鈕
-      const prevButton = document.createElement('button');
-      prevButton.className = 'page-button';
-      prevButton.innerHTML = '&lt;';
-      prevButton.disabled = currentPage === 1;
-      prevButton.onclick = () => {
-        if (currentPage > 1) {
-          currentPage--;
-          fetchCustomers();
-        }
-      };
-      pagination.appendChild(prevButton);
-
-      // 頁碼按鈕
-      for (let i = 1; i <= totalPages; i++) {
-        const button = document.createElement('button');
-        button.className = `page-button ${i === currentPage ? 'active' : ''}`;
-        button.textContent = i;
-        button.onclick = () => {
-          currentPage = i;
-          fetchCustomers();
-        };
-        pagination.appendChild(button);
-      }
-
-      // 下一頁按鈕
-      const nextButton = document.createElement('button');
-      nextButton.className = 'page-button';
-      nextButton.innerHTML = '&gt;';
-      nextButton.disabled = currentPage === totalPages;
-      nextButton.onclick = () => {
-        if (currentPage < totalPages) {
-          currentPage++;
-          fetchCustomers();
-        }
-      };
-      pagination.appendChild(nextButton);
-    }
-
-    // 修改 fetchCustomers 函數以支持分頁
-    async function fetchCustomers() {
+    // API 函數
+    async function fetchCustomers(page = 1, limit = 5) {
       try {
-        const response = await fetch(`${API_BASE_URL}/customers?page=${currentPage}&limit=${itemsPerPage}`);
+        const response = await fetch(`${API_BASE_URL}/customers?page=${page}&limit=${limit}`);
         if (!response.ok) throw new Error('獲取客戶列表失敗');
         const data = await response.json();
-        
-        // 更新總頁數
-        totalPages = Math.ceil(data.total / itemsPerPage);
-        
-        // 更新分頁按鈕
-        updatePaginationButtons();
-        
-        // 渲染客戶列表
-        renderCustomerList(data.customers);
+        return data;
       } catch (error) {
         console.error('Error:', error);
-        alert('獲取客戶列表失敗，請稍後再試');
+        showError('獲取客戶列表失敗');
+        return { customers: [], total: 0 };
       }
     }
 
-    // 修改 createCustomer 函數以在創建後刷新列表
-    async function createCustomer(customerData) {
+    async function searchCustomers(query, page = 1, limit = 5) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/customers/search?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}`);
+        if (!response.ok) throw new Error('搜尋客戶失敗');
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error('Error:', error);
+        showError('搜尋客戶失敗');
+        return { customers: [], total: 0 };
+      }
+    }
+
+    async function createCustomer(formData) {
       try {
         const response = await fetch(`${API_BASE_URL}/customers`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(customerData)
+          body: formData
         });
         if (!response.ok) throw new Error('創建客戶失敗');
-        const result = await response.json();
-        alert('客戶創建成功');
-        currentPage = 1; // 重置到第一頁
-        fetchCustomers(); // 刷新列表
-        return result;
+        const customer = await response.json();
+        showSuccess('客戶創建成功');
+        return customer;
       } catch (error) {
         console.error('Error:', error);
-        alert('創建客戶失敗，請稍後再試');
+        showError('創建客戶失敗');
+        throw error;
       }
     }
 
-    // 修改 updateCustomer 函數以在更新後刷新列表
-    async function updateCustomer(customerId, customerData) {
+    async function updateCustomer(id, formData) {
       try {
-        const response = await fetch(`${API_BASE_URL}/customers/${customerId}`, {
+        const response = await fetch(`${API_BASE_URL}/customers/${id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(customerData)
+          body: JSON.stringify(formData)
         });
         if (!response.ok) throw new Error('更新客戶失敗');
-        const result = await response.json();
-        alert('客戶更新成功');
-        fetchCustomers(); // 刷新列表
-        return result;
+        const customer = await response.json();
+        showSuccess('客戶資料更新成功');
+        return customer;
       } catch (error) {
         console.error('Error:', error);
-        alert('更新客戶失敗，請稍後再試');
+        showError('更新客戶失敗');
+        throw error;
       }
     }
 
-    // 修改 deleteCustomer 函數以在刪除後刷新列表
-    async function deleteCustomer(customerId) {
-      if (!confirm('確定要刪除這個客戶嗎？')) return;
-      
+    async function updateCustomerStatus(id, status) {
       try {
-        const response = await fetch(`${API_BASE_URL}/customers/${customerId}`, {
-          method: 'DELETE'
-        });
-        if (!response.ok) throw new Error('刪除客戶失敗');
-        alert('客戶刪除成功');
-        fetchCustomers(); // 刷新列表
-      } catch (error) {
-        console.error('Error:', error);
-        alert('刪除客戶失敗，請稍後再試');
-      }
-    }
-
-    // 修改 searchCustomer 函數以支持分頁搜索
-    async function searchCustomer(query) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/customers/search?q=${encodeURIComponent(query)}&page=${currentPage}&limit=${itemsPerPage}`);
-        if (!response.ok) throw new Error('搜尋客戶失敗');
-        const data = await response.json();
-        
-        // 更新總頁數
-        totalPages = Math.ceil(data.total / itemsPerPage);
-        
-        // 更新分頁按鈕
-        updatePaginationButtons();
-        
-        // 渲染客戶列表
-        renderCustomerList(data.customers);
-      } catch (error) {
-        console.error('Error:', error);
-        alert('搜尋客戶失敗，請稍後再試');
-      }
-    }
-
-    // 渲染客戶列表
-    function renderCustomerList(customers) {
-      const container = document.querySelector('.customer-cards');
-      if (!container) return;
-      
-      container.innerHTML = '';
-
-      if (!customers || customers.length === 0) {
-        container.innerHTML = '<div class="no-customers">暫無客戶資料</div>';
-        return;
-      }
-
-      customers.forEach(customer => {
-        const remainingDays = calculateRemainingDays(customer.endDate);
-        const dueText = remainingDays === 0 ? '今日到期' : `下次繳款剩餘 ${remainingDays} 天`;
-        
-        const card = document.createElement('div');
-        card.className = 'customer-card';
-        card.setAttribute('data-customer-id', customer._id);
-        
-        card.innerHTML = `
-          <div class="card-header" onclick="toggleCustomerDetails(this)">
-            <h3>
-              ${customer.name} 
-              <span class="status-badge status-${customer.status}">${getStatusText(customer.status)}</span>
-              <span class="due-date">${dueText}</span>
-            </h3>
-            <button class="edit-button" onclick="editCustomer('${customer._id}')">✏️</button>
-          </div>
-          <div class="card-content">
-            <div class="customer-details">
-              <div class="detail-group">
-                <h4>基本資料</h4>
-                <div class="detail-item">
-                  <span class="detail-label">身分證字號</span>
-                  <span class="detail-value">${customer.idNumber}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">手機號碼</span>
-                  <span class="detail-value">${customer.phone}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">戶籍地址</span>
-                  <span class="detail-value">${customer.address}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">通訊地址</span>
-                  <span class="detail-value">${customer.mailingAddress}</span>
-                </div>
-              </div>
-              <div class="detail-group">
-                <h4>合約資訊</h4>
-                <div class="detail-item">
-                  <span class="detail-label">手機型號</span>
-                  <span class="detail-value">${customer.phoneModel}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">IMEI</span>
-                  <span class="detail-value">${customer.imei}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">螢幕密碼</span>
-                  <span class="detail-value">${customer.screenPassword}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">買賣價金</span>
-                  <span class="detail-value">$${formatNumber(customer.price)}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">租金</span>
-                  <span class="detail-value">$${formatNumber(customer.rent)}/週</span>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">合約日期</span>
-                  <span class="detail-value">${formatDate(customer.contractDate)}</span>
-                </div>
-              </div>
-            </div>
-            <div class="action-buttons">
-              <button class="button button-success" onclick="markAsPaid('${customer._id}')">已繳款並續約</button>
-              <button class="button button-primary" onclick="markAsBuyback('${customer._id}')">已繳款買回</button>
-              <button class="button button-danger" onclick="markAsUnpaid('${customer._id}')">未繳款</button>
-              <button class="button button-warning" onclick="showPartialPaymentForm('${customer._id}')">未繳足款</button>
-            </div>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    // 狀態更新函數
-    async function updateCustomerStatus(customerId, status) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/customers/${customerId}/status`, {
+        const response = await fetch(`${API_BASE_URL}/customers/${id}/status`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ status })
         });
-        if (!response.ok) throw new Error('更新狀態失敗');
-        fetchCustomers(); // 刷新列表
+        if (!response.ok) throw new Error('更新客戶狀態失敗');
+        const customer = await response.json();
+        showSuccess('客戶狀態更新成功');
+        return customer;
       } catch (error) {
         console.error('Error:', error);
-        alert('更新狀態失敗，請稍後再試');
+        showError('更新客戶狀態失敗');
+        throw error;
       }
     }
 
-    // 狀態更新快捷函數
-    function markAsPaid(customerId) {
-      updateCustomerStatus(customerId, 'paid');
+    async function deleteCustomer(id) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/customers/${id}`, {
+          method: 'DELETE'
+        });
+        if (!response.ok) throw new Error('刪除客戶失敗');
+        showSuccess('客戶刪除成功');
+      } catch (error) {
+        console.error('Error:', error);
+        showError('刪除客戶失敗');
+        throw error;
+      }
     }
 
-    function markAsBuyback(customerId) {
-      updateCustomerStatus(customerId, 'buyback');
+    // 渲染客戶列表
+    function renderCustomerList(customers) {
+      const customerList = document.querySelector('.customer-cards');
+      if (!customerList) return;
+
+      customerList.innerHTML = '';
+      
+      if (customers.length === 0) {
+        customerList.innerHTML = '<p class="no-data">暫無客戶資料</p>';
+        return;
+      }
+
+      customers.forEach(customer => {
+        const card = document.createElement('div');
+        card.className = 'customer-card';
+        card.innerHTML = `
+          <div class="card-header" onclick="toggleCustomerDetails(this)">
+            <h3>${customer.name}</h3>
+            <span class="status ${customer.status}">${getStatusText(customer.status)}</span>
+          </div>
+          <div class="card-details">
+            <p><strong>身份證字號：</strong>${customer.idNumber}</p>
+            <p><strong>電話：</strong>${customer.phone}</p>
+            <p><strong>地址：</strong>${customer.address}</p>
+            <p><strong>手機型號：</strong>${customer.model}</p>
+            <p><strong>IMEI：</strong>${customer.imei}</p>
+            <p><strong>售價：</strong>${formatCurrency(customer.salePrice)}</p>
+            <p><strong>租金：</strong>${formatCurrency(customer.rent)}/週</p>
+            <p><strong>合約日期：</strong>${formatDate(customer.contractDate)}</p>
+            <div class="card-actions">
+              <button onclick="editCustomer('${customer._id}')" class="btn-edit">編輯</button>
+              <button onclick="updateStatus('${customer._id}', 'paid')" class="btn-status">已付款</button>
+              <button onclick="updateStatus('${customer._id}', 'unpaid')" class="btn-status">未付款</button>
+              <button onclick="updateStatus('${customer._id}', 'completed')" class="btn-status">已完成</button>
+            </div>
+          </div>
+        `;
+        customerList.appendChild(card);
+      });
     }
 
-    function markAsUnpaid(customerId) {
-      updateCustomerStatus(customerId, 'unpaid');
+    // 工具函數
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('zh-TW', { style: 'currency', currency: 'TWD' }).format(amount);
     }
 
-    function markAsPartial(customerId) {
-      updateCustomerStatus(customerId, 'partial');
+    function formatDate(dateString) {
+      return new Date(dateString).toLocaleDateString('zh-TW');
     }
 
-    // 輔助函數
     function getStatusText(status) {
       const statusMap = {
-        active: '租約中',
-        paid: '已繳款',
-        unpaid: '未繳款',
-        partial: '未繳足款',
-        buyback: '已買回'
+        active: '進行中',
+        paid: '已付款',
+        unpaid: '未付款',
+        completed: '已完成'
       };
       return statusMap[status] || status;
     }
 
-    function formatDate(dateString) {
-      const date = new Date(dateString);
-      const year = date.getFullYear() - 1911;
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}/${month}/${day}`;
+    function showError(message) {
+      alert(message);
     }
 
-    // 客戶卡片展開/收起功能
-    function toggleCustomerDetails(header) {
-      const card = header.parentElement;
-      card.classList.toggle('expanded');
+    function showSuccess(message) {
+      alert(message);
     }
 
-    // 格式化數字（加上千分位）
-    function formatNumber(num) {
-      if (!num || isNaN(num)) return num;
-      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
+    // 事件處理
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 初始化客戶列表
+      const { customers } = await fetchCustomers();
+      renderCustomerList(customers);
 
-    // 轉換為民國年日期
-    function toTaiwanDateParts(date) {
-      const y = date.getFullYear() - 1911;
-      const m = String(date.getMonth() + 1).padStart(2, '0');
-      const d = String(date.getDate()).padStart(2, '0');
-      return { year: y, month: m, day: d };
-    }
-
-    // 增加天數
-    function addDays(date, days) {
-      const result = new Date(date);
-      result.setDate(result.getDate() + days);
-      return result;
-    }
-
-    // 填入合約資料
-    function fillContract() {
-      // PAGE 1
-      document.getElementById('sellerNameField').innerText = document.getElementById('name').value;
-      document.getElementById('sellerIdField').innerText = document.getElementById('id').value;
-      document.getElementById('sellerAddressField').innerText = document.getElementById('address').value;
-      document.getElementById('phoneModelField').innerText = document.getElementById('model').value;
-      document.getElementById('imeiField').innerText = document.getElementById('imei').value;
-      document.getElementById('totalPriceField').innerText = formatNumber(document.getElementById('price').value);
-      document.getElementById('bankBranchField').innerText = document.getElementById('bank').value;
-      document.getElementById('accountNameField').innerText = document.getElementById('accountName').value;
-      document.getElementById('accountNumberField').innerText = document.getElementById('account').value;
-      document.getElementById('signerIdField').innerText = document.getElementById('id').value;
-
-      const today = new Date();
-      const taiwan = toTaiwanDateParts(today);
-      document.getElementById('yearField').innerText = taiwan.year;
-      document.getElementById('monthField').innerText = taiwan.month;
-      document.getElementById('dayField').innerText = taiwan.day;
-
-      // 處理債權人選項
-      const hasCreditor = document.getElementById('hasCreditor').value;
-      document.getElementById('creditorNoneField').style.visibility = hasCreditor === '無' ? 'visible' : 'hidden';
-      document.getElementById('creditorYesField').style.visibility = hasCreditor === '有' ? 'visible' : 'hidden';
-
-      // 處理瑕疵選項
-      const defect = document.getElementById('defect').value;
-      if (defect === '無') {
-        document.getElementById('normalFunctionField').style.visibility = 'visible';
-        document.getElementById('noDamageField').style.visibility = 'visible';
-        document.getElementById('defectTouch').style.visibility = 'hidden';
-        document.getElementById('defectCrack').style.visibility = 'hidden';
-        document.getElementById('defectDisplay').style.visibility = 'hidden';
-        document.getElementById('defectCharge').style.visibility = 'hidden';
-        document.getElementById('defectHardware').style.visibility = 'hidden';
-      } else {
-        document.getElementById('normalFunctionField').style.visibility = 'hidden';
-        document.getElementById('noDamageField').style.visibility = 'hidden';
-        document.getElementById('defectTouch').style.visibility = defect === '螢幕觸控異常' ? 'visible' : 'hidden';
-        document.getElementById('defectCrack').style.visibility = defect === '螢幕破裂' ? 'visible' : 'hidden';
-        document.getElementById('defectDisplay').style.visibility = defect === '螢幕顯示功能異常' ? 'visible' : 'hidden';
-        document.getElementById('defectCharge').style.visibility = defect === '充電功能異常' ? 'visible' : 'hidden';
-        document.getElementById('defectHardware').style.visibility = defect === '實體部件異常' ? 'visible' : 'hidden';
-      }
-
-      // PAGE 2
-      document.getElementById('contractorNameField').innerText = document.getElementById('name').value;
-      document.getElementById('model2Field').innerText = document.getElementById('model').value;
-      document.getElementById('imei2Field').innerText = document.getElementById('imei').value;
-      document.getElementById('price2Field').innerText = formatNumber(document.getElementById('price').value);
-      document.getElementById('startYearField').innerText = taiwan.year;
-      document.getElementById('startMonthField').innerText = taiwan.month;
-      document.getElementById('startDayField').innerText = taiwan.day;
-
-      const endDate = addDays(today, 7);
-      const endTaiwan = toTaiwanDateParts(endDate);
-      document.getElementById('endYearField').innerText = endTaiwan.year;
-      document.getElementById('endMonthField').innerText = endTaiwan.month;
-      document.getElementById('endDayField').innerText = endTaiwan.day;
-
-      document.getElementById('rent2Field').innerText = formatNumber(document.getElementById('rent').value);
-      document.getElementById('address2Field').innerText = document.getElementById('address').value;
-      document.getElementById('id2Field').innerText = document.getElementById('id').value;
-      document.getElementById('year2Field').innerText = taiwan.year;
-      document.getElementById('month2Field').innerText = taiwan.month;
-      document.getElementById('day2Field').innerText = taiwan.day;
-
-      // PAGE 3
-      document.getElementById('signerId3Field').innerText = document.getElementById('id').value;
-      document.getElementById('year3Field').innerText = taiwan.year;
-      document.getElementById('month3Field').innerText = taiwan.month;
-      document.getElementById('day3Field').innerText = taiwan.day;
-
-      // 啟用下載按鈕
-      document.getElementById('downloadBtn').disabled = false;
-    }
-
-    // 顯示載入動畫
-    function showLoading() {
-      document.querySelector('.loading-overlay').style.display = 'flex';
-    }
-
-    // 隱藏載入動畫
-    function hideLoading() {
-      document.querySelector('.loading-overlay').style.display = 'none';
-    }
-
-    // 下載 PDF
-    async function downloadPDF() {
-      showLoading();
-      const jsPDF = window.jspdf.jsPDF;
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pages = [
-        document.getElementById('contractPage1'),
-        document.getElementById('contractPage2'),
-        document.getElementById('contractPage3')
-      ];
-
-      try {
-        for (let i = 0; i < pages.length; i++) {
-          const page = pages[i];
-          const bg = page.style.backgroundImage;
-          
-          // 確保頁面可見
-          page.style.visibility = 'visible';
-          page.style.display = 'block';
-          page.style.position = 'relative';
-          page.style.left = '0';
-          page.style.backgroundColor = 'white';
-
-          // 等待背景圖片加載
-          if (bg) {
-            const url = bg.slice(5, -2);
-            await new Promise((resolve) => {
-              const img = new Image();
-              img.crossOrigin = "anonymous";
-              img.onload = () => {
-                // 設置背景圖片
-                page.style.backgroundImage = `url(${img.src})`;
-                resolve();
-              };
-              img.onerror = () => {
-                console.error('Image failed to load:', url);
-                resolve();
-              };
-              img.src = url;
-            });
+      // 搜索功能
+      const searchInput = document.querySelector('#customerSearch');
+      if (searchInput) {
+        searchInput.addEventListener('input', async (e) => {
+          const query = e.target.value.trim();
+          if (query) {
+            const { customers } = await searchCustomers(query);
+            renderCustomerList(customers);
+          } else {
+            const { customers } = await fetchCustomers();
+            renderCustomerList(customers);
           }
-
-          // 確保所有字段可見
-          const fields = page.querySelectorAll('.field');
-          fields.forEach(field => {
-            field.style.visibility = 'visible';
-            field.style.display = 'block';
-          });
-
-          const canvas = await html2canvas(page, {
-            scale: 2,
-            useCORS: true,
-            allowTaint: true,
-            backgroundColor: 'white',
-            logging: true,
-            onclone: function(clonedDoc) {
-              const clonedElement = clonedDoc.getElementById(`contractPage${i+1}`);
-              if (clonedElement) {
-                clonedElement.style.visibility = 'visible';
-                clonedElement.style.display = 'block';
-                clonedElement.style.position = 'relative';
-                clonedElement.style.left = '0';
-                clonedElement.style.backgroundColor = 'white';
-
-                // 處理債權人和瑕疵選項
-                const hasCreditor = document.getElementById('hasCreditor').value;
-                const defect = document.getElementById('defect').value;
-
-                const creditorNoneField = clonedElement.querySelector('#creditorNoneField');
-                const creditorYesField = clonedElement.querySelector('#creditorYesField');
-                if (creditorNoneField) creditorNoneField.style.visibility = hasCreditor === '無' ? 'visible' : 'hidden';
-                if (creditorYesField) creditorYesField.style.visibility = hasCreditor === '有' ? 'visible' : 'hidden';
-
-                const normalFunctionField = clonedElement.querySelector('#normalFunctionField');
-                const noDamageField = clonedElement.querySelector('#noDamageField');
-                const defectTouch = clonedElement.querySelector('#defectTouch');
-                const defectCrack = clonedElement.querySelector('#defectCrack');
-                const defectDisplay = clonedElement.querySelector('#defectDisplay');
-                const defectCharge = clonedElement.querySelector('#defectCharge');
-                const defectHardware = clonedElement.querySelector('#defectHardware');
-
-                if (defect === '無') {
-                  if (normalFunctionField) normalFunctionField.style.visibility = 'visible';
-                  if (noDamageField) noDamageField.style.visibility = 'visible';
-                  if (defectTouch) defectTouch.style.visibility = 'hidden';
-                  if (defectCrack) defectCrack.style.visibility = 'hidden';
-                  if (defectDisplay) defectDisplay.style.visibility = 'hidden';
-                  if (defectCharge) defectCharge.style.visibility = 'hidden';
-                  if (defectHardware) defectHardware.style.visibility = 'hidden';
-                } else {
-                  if (normalFunctionField) normalFunctionField.style.visibility = 'hidden';
-                  if (noDamageField) noDamageField.style.visibility = 'hidden';
-                  if (defectTouch) defectTouch.style.visibility = defect === '螢幕觸控異常' ? 'visible' : 'hidden';
-                  if (defectCrack) defectCrack.style.visibility = defect === '螢幕破裂' ? 'visible' : 'hidden';
-                  if (defectDisplay) defectDisplay.style.visibility = defect === '螢幕顯示功能異常' ? 'visible' : 'hidden';
-                  if (defectCharge) defectCharge.style.visibility = defect === '充電功能異常' ? 'visible' : 'hidden';
-                  if (defectHardware) defectHardware.style.visibility = defect === '實體部件異常' ? 'visible' : 'hidden';
-                }
-
-                // 確保其他字段可見
-                const allFields = clonedElement.querySelectorAll('.field');
-                allFields.forEach(field => {
-                  if (!field.id.includes('creditor') && 
-                      !field.id.includes('defect') && 
-                      !field.id.includes('normalFunction') && 
-                      !field.id.includes('noDamage')) {
-                    field.style.visibility = 'visible';
-                    field.style.display = 'block';
-                  }
-                });
-              }
-            }
-          });
-
-          const imgData = canvas.toDataURL('image/jpeg', 1.0);
-          const imgProps = pdf.getImageProperties(imgData);
-          const pdfWidth = pdf.internal.pageSize.getWidth();
-          const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-          if (i > 0) pdf.addPage();
-          pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-
-          // 恢復頁面原始狀態
-          page.style.visibility = 'hidden';
-          page.style.display = 'none';
-        }
-
-        const name = document.getElementById('name').value || '合約';
-        pdf.save(`${name}-手機對保合約.pdf`);
-      } catch (error) {
-        console.error('PDF generation failed:', error);
-        alert('PDF 生成失敗，請稍後再試');
-      } finally {
-        hideLoading();
-      }
-    }
-
-    // 切換表單顯示
-    function toggleFormSection(header) {
-      const form = header.nextElementSibling;
-      header.classList.toggle('active');
-      form.classList.toggle('active');
-    }
-
-    // 計算剩餘天數
-    function calculateRemainingDays(endDate) {
-      const today = new Date();
-      const end = new Date(endDate);
-      const diffTime = end - today;
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return diffDays;
-    }
-
-    // 顯示未繳足款表單
-    function showPartialPaymentForm(customerId) {
-      const amount = prompt('請輸入本次繳款金額：');
-      if (amount) {
-        const remaining = prompt('請輸入尚餘租金金額：');
-        if (remaining) {
-          updatePartialPayment(customerId, amount, remaining);
-        }
-      }
-    }
-
-    // 更新未繳足款資訊
-    function updatePartialPayment(customerId, amount, remaining) {
-      const card = document.querySelector(`[data-customer-id="${customerId}"]`);
-      if (card) {
-        const paymentInfo = document.createElement('div');
-        paymentInfo.className = 'payment-remaining';
-        paymentInfo.textContent = `本次繳款：$${formatNumber(amount)}，尚餘租金：$${formatNumber(remaining)}`;
-        card.querySelector('.card-content').appendChild(paymentInfo);
-      }
-    }
-
-    // 編輯客戶資訊
-    function editCustomer(customerId) {
-      const customer = getCustomerById(customerId);
-      if (customer) {
-        const form = document.getElementById('editForm');
-        if (form) {
-          form.customerId.value = customer._id;
-          form.name.value = customer.name;
-          form.idNumber.value = customer.idNumber;
-          form.phone.value = customer.phone;
-          form.address.value = customer.address;
-          form.bankBranch.value = customer.bankBranch;
-          form.accountName.value = customer.accountName;
-          form.accountNumber.value = customer.accountNumber;
-          
-          // 切換到編輯表單
-          const formHeader = document.querySelector('.form-header');
-          if (formHeader) {
-            formHeader.click();
-          }
-          const editTab = document.querySelector('.form-tab[onclick*="edit"]');
-          if (editTab) {
-            editTab.click();
-          }
-        }
-      }
-    }
-
-    // 獲取客戶資訊
-    function getCustomerById(customerId) {
-      // 這裡應該從 API 獲取客戶資訊
-      // 目前返回示例數據
-      return {
-        _id: customerId,
-        name: '張三',
-        idNumber: 'A123456789',
-        phone: '0912-345-678',
-        address: '台北市信義區信義路五段7號',
-        bankBranch: '台北富邦銀行信義分行',
-        accountName: '張三',
-        accountNumber: '1234-5678-9012'
-      };
-    }
-
-    // 切換通訊地址
-    function toggleMailingAddress(checkbox) {
-      const mailingAddressInput = checkbox.closest('.form-group').querySelector('input[name="mailingAddress"]');
-      if (checkbox.checked) {
-        const residenceAddress = document.querySelector('input[name="address"]').value;
-        mailingAddressInput.value = residenceAddress;
-        mailingAddressInput.disabled = true;
-      } else {
-        mailingAddressInput.disabled = false;
-      }
-    }
-
-    // 處理表單提交
-    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      
-      // 處理文件上傳
-      const files = {
-        contractFile: formData.get('contractFile'),
-        idFront: formData.get('idFront'),
-        idBack: formData.get('idBack')
-      };
-
-      // 創建客戶數據
-      const customerData = {
-        name: formData.get('name'),
-        idNumber: formData.get('idNumber'),
-        phone: formData.get('phone'),
-        address: formData.get('address'),
-        mailingAddress: formData.get('mailingAddress'),
-        phoneModel: formData.get('phoneModel'),
-        imei: formData.get('imei'),
-        screenPassword: formData.get('screenPassword'),
-        price: formData.get('price'),
-        rent: formData.get('rent'),
-        contractDate: formData.get('contractDate'),
-        files: files
-      };
-
-      try {
-        const response = await fetch(`${API_BASE_URL}/customers`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(customerData)
         });
+      }
 
-        if (!response.ok) throw new Error('創建客戶失敗');
-        
-        const result = await response.json();
-        alert('客戶創建成功');
-        e.target.reset();
-        
-        // 切換到客戶列表頁面
-        document.querySelector('.nav-link[data-section="customers"]').click();
-        
-        // 刷新客戶列表
-        currentPage = 1;
-        fetchCustomers();
-      } catch (error) {
-        console.error('Error:', error);
-        alert('創建客戶失敗，請稍後再試');
+      // 新增客戶表單提交
+      const newCustomerForm = document.querySelector('#newCustomerForm');
+      if (newCustomerForm) {
+        newCustomerForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const formData = new FormData(newCustomerForm);
+          try {
+            await createCustomer(formData);
+            newCustomerForm.reset();
+            const { customers } = await fetchCustomers();
+            renderCustomerList(customers);
+            // 切換到客戶列表頁面
+            switchPage('customer-management');
+          } catch (error) {
+            console.error('Error submitting form:', error);
+          }
+        });
       }
     });
+
+    // 客戶卡片展開/收起
+    function toggleCustomerDetails(header) {
+      const details = header.nextElementSibling;
+      const isExpanded = details.style.maxHeight;
+      
+      // 收起其他所有展開的卡片
+      document.querySelectorAll('.card-details').forEach(detail => {
+        detail.style.maxHeight = null;
+      });
+
+      if (!isExpanded) {
+        details.style.maxHeight = details.scrollHeight + 'px';
+      }
+    }
+
+    // 更新客戶狀態
+    async function updateStatus(customerId, status) {
+      try {
+        await updateCustomerStatus(customerId, status);
+        const { customers } = await fetchCustomers();
+        renderCustomerList(customers);
+      } catch (error) {
+        console.error('Error updating status:', error);
+      }
+    }
+
+    // 編輯客戶資料
+    async function editCustomer(customerId) {
+      // TODO: 實現編輯功能
+      // 1. 獲取客戶資料
+      // 2. 填充編輯表單
+      // 3. 顯示編輯表單
+      alert('編輯功能開發中');
+    }
   </script>
 </body>
 </html> 
