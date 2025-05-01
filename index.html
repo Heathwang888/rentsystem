@@ -903,6 +903,49 @@
       border-radius: 4px;
       margin-right: 0.5rem;
     }
+
+    /* 新增備註欄樣式 */
+    .notes-section {
+      background: rgba(0, 0, 0, 0.07);
+      padding: 0.5rem;
+      border-radius: 4px;
+      margin-top: 0.5rem;
+    }
+
+    /* 新增繳款紀錄樣式 */
+    .payment-history {
+      margin-top: 1rem;
+    }
+    
+    .payment-history-content {
+      margin-top: 0.5rem;
+    }
+    
+    .payment-record {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.25rem 0;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+    
+    .payment-record:last-child {
+      border-bottom: none;
+    }
+    
+    .payment-date {
+      color: #666;
+      font-size: 0.875rem;
+    }
+    
+    .payment-amount {
+      font-weight: 500;
+    }
+    
+    .payment-status {
+      color: #1976d2;
+      font-size: 0.875rem;
+    }
   </style>
 </head>
 <body>
@@ -1050,7 +1093,7 @@
                     <span class="due-date ${daysLeft === 0 ? 'today' : ''}">${dueDateText}</span>
                   </div>
                 </div>
-                <span class="status-badge status-${customer.status}">${getStatusBadgeText(customer.status)}</span>
+                <span class="status-badge status-${customer.status}">${customer.status === 'active' ? '租賃中' : getStatusBadgeText(customer.status)}</span>
               </div>
               <div class="card-content">
                 <div class="customer-details">
@@ -1073,11 +1116,23 @@
                       <span class="detail-value">${customer.contactAddress || customer.address}</span>
                     </div>
                     ${customer.notes ? `
-                    <div class="detail-item">
+                    <div class="detail-item notes-section">
                       <span class="detail-label">備註</span>
                       <span class="detail-value">${customer.notes}</span>
                     </div>
                     ` : ''}
+                    <div class="detail-item payment-history">
+                      <span class="detail-label">繳款紀錄</span>
+                      <div class="payment-history-content">
+                        ${customer.paymentHistory ? customer.paymentHistory.map(payment => `
+                          <div class="payment-record">
+                            <span class="payment-date">${formatDate(payment.date)}</span>
+                            <span class="payment-amount">${formatAmount(payment.amount)}</span>
+                            <span class="payment-status">${payment.status}</span>
+                          </div>
+                        `).join('') : '無繳款紀錄'}
+                      </div>
+                    </div>
                   </div>
                   <div class="detail-group">
                     <h4>手機資訊</h4>
@@ -1096,7 +1151,6 @@
                   </div>
                 </div>
                 <div class="action-buttons">
-                  <button class="button button-success" onclick="updateStatus('${customer._id}', 'paid')">${getStatusButtonText('paid')}</button>
                   <button class="button button-primary" onclick="updateStatus('${customer._id}', 'buyback')">${getStatusButtonText('buyback')}</button>
                   <button class="button button-warning" onclick="showPartialPaymentForm('${customer._id}')">${getStatusButtonText('partial')}</button>
                   <button class="button button-danger" onclick="updateStatus('${customer._id}', 'locked')">${getStatusButtonText('locked')}</button>
@@ -1601,11 +1655,12 @@
 
         const daysLeft = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
         const dueDateText = daysLeft === 0 ? '今日須繳款' : 
-                           daysLeft < 0 ? '已逾期' :
+                           daysLeft < 0 ? `已遲繳 ${Math.abs(daysLeft)} 日` :
                            `剩餘 ${daysLeft} 天`;
         
         // 格式化金額
         const formatAmount = (amount) => {
+          if (!amount) return '0';
           return new Intl.NumberFormat('zh-TW').format(Math.round(amount));
         };
 
@@ -1622,7 +1677,7 @@
                 <span class="due-date ${daysLeft === 0 ? 'today' : ''}">${dueDateText}</span>
               </div>
             </div>
-            <span class="status-badge status-${customer.status}">${getStatusBadgeText(customer.status)}</span>
+            <span class="status-badge status-${customer.status}">${customer.status === 'active' ? '租賃中' : getStatusBadgeText(customer.status)}</span>
           </div>
           <div class="card-content">
             <div class="customer-details">
@@ -1645,11 +1700,23 @@
                   <span class="detail-value">${customer.contactAddress || customer.address}</span>
                 </div>
                 ${customer.notes ? `
-                <div class="detail-item">
+                <div class="detail-item notes-section">
                   <span class="detail-label">備註</span>
                   <span class="detail-value">${customer.notes}</span>
                 </div>
                 ` : ''}
+                <div class="detail-item payment-history">
+                  <span class="detail-label">繳款紀錄</span>
+                  <div class="payment-history-content">
+                    ${customer.paymentHistory ? customer.paymentHistory.map(payment => `
+                      <div class="payment-record">
+                        <span class="payment-date">${formatDate(payment.date)}</span>
+                        <span class="payment-amount">${formatAmount(payment.amount)}</span>
+                        <span class="payment-status">${payment.status}</span>
+                      </div>
+                    `).join('') : '無繳款紀錄'}
+                  </div>
+                </div>
               </div>
               <div class="detail-group">
                 <h4>手機資訊</h4>
@@ -1668,7 +1735,6 @@
               </div>
             </div>
             <div class="action-buttons">
-              <button class="button button-success" onclick="updateStatus('${customer._id}', 'paid')">${getStatusButtonText('paid')}</button>
               <button class="button button-primary" onclick="updateStatus('${customer._id}', 'buyback')">${getStatusButtonText('buyback')}</button>
               <button class="button button-warning" onclick="showPartialPaymentForm('${customer._id}')">${getStatusButtonText('partial')}</button>
               <button class="button button-danger" onclick="updateStatus('${customer._id}', 'locked')">${getStatusButtonText('locked')}</button>
@@ -1713,10 +1779,15 @@
       }
 
       try {
-        await updateCustomerStatus(customerId, 'partial', {
-          paidAmount: parseFloat(paidAmount),
-          unpaidAmount: parseFloat(unpaidAmount)
-        });
+        // 如果未繳金額為0，則更新狀態為active
+        if (parseFloat(unpaidAmount) === 0) {
+          await updateCustomerStatus(customerId, 'active');
+        } else {
+          await updateCustomerStatus(customerId, 'partial', {
+            paidAmount: parseFloat(paidAmount),
+            unpaidAmount: parseFloat(unpaidAmount)
+          });
+        }
         showSuccess('更新成功');
         const { customers } = await fetchCustomers();
         renderCustomerList(customers);
@@ -1804,7 +1875,7 @@
 
     function getStatusBadgeText(status) {
       const statusMap = {
-        active: '租約中',
+        active: '租賃中',
         paid: '已繳款續約',
         unpaid: '未繳款',
         partial: '未繳足額',
@@ -1928,6 +1999,14 @@
             formData.append('price', newCustomerForm.querySelector('[name="price"]').value);
             formData.append('rent', newCustomerForm.querySelector('[name="rent"]').value);
             formData.append('contractDate', newCustomerForm.querySelector('[name="contractDate"]').value);
+            
+            // 添加初始繳款紀錄
+            const initialPayment = {
+              date: newCustomerForm.querySelector('[name="contractDate"]').value,
+              amount: newCustomerForm.querySelector('[name="rent"]').value,
+              status: '第一期租金'
+            };
+            formData.append('paymentHistory', JSON.stringify([initialPayment]));
             
             // 文件上傳
             const contractFile = newCustomerForm.querySelector('[name="contractFile"]').files[0];
