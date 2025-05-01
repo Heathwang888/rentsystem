@@ -929,10 +929,97 @@
     const itemsPerPage = 5;
     let totalPages = 1;
 
+    // 頁面載入時初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      // 初始化分頁
+      updatePaginationButtons();
+      // 獲取客戶列表
+      fetchCustomers();
+
+      // 設置導航欄事件監聽器
+      const navLinks = document.querySelectorAll('.nav-link');
+      const sections = document.querySelectorAll('.page-section');
+
+      navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          
+          // 移除所有活動狀態
+          navLinks.forEach(nav => nav.classList.remove('active'));
+          sections.forEach(section => section.classList.remove('active'));
+          
+          // 添加當前活動狀態
+          link.classList.add('active');
+          const sectionId = link.getAttribute('data-section');
+          document.getElementById(sectionId).classList.add('active');
+        });
+      });
+
+      // 初始化第一個頁面
+      document.querySelector('.nav-link.active').click();
+
+      // 設置表單事件監聽器
+      const uploadForm = document.getElementById('uploadForm');
+      if (uploadForm) {
+        uploadForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const formData = new FormData(e.target);
+          const customerData = {
+            name: formData.get('name'),
+            idNumber: formData.get('idNumber'),
+            phone: formData.get('phone'),
+            address: formData.get('address'),
+            bankBranch: formData.get('bankBranch'),
+            accountName: formData.get('accountName'),
+            accountNumber: formData.get('accountNumber')
+          };
+          await createCustomer(customerData);
+          e.target.reset();
+        });
+      }
+
+      const editForm = document.getElementById('editForm');
+      if (editForm) {
+        editForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const formData = new FormData(e.target);
+          const customerId = formData.get('customerId');
+          if (!customerId) {
+            alert('請先搜尋並選擇要編輯的客戶');
+            return;
+          }
+          const customerData = {
+            name: formData.get('name'),
+            idNumber: formData.get('idNumber'),
+            phone: formData.get('phone'),
+            address: formData.get('address'),
+            bankBranch: formData.get('bankBranch'),
+            accountName: formData.get('accountName'),
+            accountNumber: formData.get('accountNumber')
+          };
+          await updateCustomer(customerId, customerData);
+          e.target.reset();
+        });
+      }
+
+      // 設置搜尋功能
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          const query = e.target.value.trim();
+          if (query.length >= 2) {
+            searchCustomer(query);
+          } else if (query.length === 0) {
+            fetchCustomers();
+          }
+        });
+      }
+    });
+
     // 更新分頁按鈕
     function updatePaginationButtons() {
       const pagination = document.querySelector('.pagination');
-      if (!pagination) return; // 如果找不到分頁容器，直接返回
+      if (!pagination) return;
       
       pagination.innerHTML = '';
 
@@ -1159,54 +1246,6 @@
       });
     }
 
-    // 處理表單提交
-    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      const customerData = {
-        name: formData.get('name'),
-        idNumber: formData.get('idNumber'),
-        phone: formData.get('phone'),
-        address: formData.get('address'),
-        bankBranch: formData.get('bankBranch'),
-        accountName: formData.get('accountName'),
-        accountNumber: formData.get('accountNumber')
-      };
-      await createCustomer(customerData);
-      e.target.reset();
-    });
-
-    document.getElementById('editForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      const customerId = formData.get('customerId');
-      if (!customerId) {
-        alert('請先搜尋並選擇要編輯的客戶');
-        return;
-      }
-      const customerData = {
-        name: formData.get('name'),
-        idNumber: formData.get('idNumber'),
-        phone: formData.get('phone'),
-        address: formData.get('address'),
-        bankBranch: formData.get('bankBranch'),
-        accountName: formData.get('accountName'),
-        accountNumber: formData.get('accountNumber')
-      };
-      await updateCustomer(customerId, customerData);
-      e.target.reset();
-    });
-
-    // 搜尋功能
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-      const query = e.target.value.trim();
-      if (query.length >= 2) {
-        searchCustomer(query);
-      } else if (query.length === 0) {
-        fetchCustomers();
-      }
-    });
-
     // 狀態更新函數
     async function updateCustomerStatus(customerId, status) {
       try {
@@ -1261,36 +1300,6 @@
       const day = String(date.getDate()).padStart(2, '0');
       return `${year}/${month}/${day}`;
     }
-
-    // 頁面載入時獲取客戶列表
-    document.addEventListener('DOMContentLoaded', () => {
-      // 初始化分頁
-      updatePaginationButtons();
-      // 獲取客戶列表
-      fetchCustomers();
-
-      // 設置導航欄事件監聽器
-      const navLinks = document.querySelectorAll('.nav-link');
-      const sections = document.querySelectorAll('.page-section');
-
-      navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          
-          // 移除所有活動狀態
-          navLinks.forEach(nav => nav.classList.remove('active'));
-          sections.forEach(section => section.classList.remove('active'));
-          
-          // 添加當前活動狀態
-          link.classList.add('active');
-          const sectionId = link.getAttribute('data-section');
-          document.getElementById(sectionId).classList.add('active');
-        });
-      });
-
-      // 初始化第一個頁面
-      document.querySelector('.nav-link.active').click();
-    });
 
     // 客戶卡片展開/收起功能
     function toggleCustomerDetails(header) {
