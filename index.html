@@ -1406,26 +1406,47 @@
 
       try {
         for (let i = 0; i < pages.length; i++) {
-          await new Promise((resolve) => {
-            const bg = pages[i].style.backgroundImage;
-            if (!bg) return resolve();
-            
+          const page = pages[i];
+          const bg = page.style.backgroundImage;
+          
+          // 確保頁面可見
+          page.style.visibility = 'visible';
+          page.style.display = 'block';
+          page.style.position = 'relative';
+          page.style.left = '0';
+          page.style.backgroundColor = 'white';
+
+          // 等待背景圖片加載
+          if (bg) {
             const url = bg.slice(5, -2);
-            const img = new Image();
-            img.crossOrigin = "anonymous";
-            img.onload = resolve;
-            img.onerror = () => {
-              console.error('Image failed to load:', url);
-              resolve();
-            };
-            img.src = url;
+            await new Promise((resolve) => {
+              const img = new Image();
+              img.crossOrigin = "anonymous";
+              img.onload = () => {
+                // 設置背景圖片
+                page.style.backgroundImage = `url(${img.src})`;
+                resolve();
+              };
+              img.onerror = () => {
+                console.error('Image failed to load:', url);
+                resolve();
+              };
+              img.src = url;
+            });
+          }
+
+          // 確保所有字段可見
+          const fields = page.querySelectorAll('.field');
+          fields.forEach(field => {
+            field.style.visibility = 'visible';
+            field.style.display = 'block';
           });
 
-          const canvas = await html2canvas(pages[i], {
+          const canvas = await html2canvas(page, {
             scale: 2,
             useCORS: true,
             allowTaint: true,
-            backgroundColor: null,
+            backgroundColor: 'white',
             logging: true,
             onclone: function(clonedDoc) {
               const clonedElement = clonedDoc.getElementById(`contractPage${i+1}`);
@@ -1434,7 +1455,9 @@
                 clonedElement.style.display = 'block';
                 clonedElement.style.position = 'relative';
                 clonedElement.style.left = '0';
-                
+                clonedElement.style.backgroundColor = 'white';
+
+                // 處理債權人和瑕疵選項
                 const hasCreditor = document.getElementById('hasCreditor').value;
                 const defect = document.getElementById('defect').value;
 
@@ -1469,8 +1492,9 @@
                   if (defectHardware) defectHardware.style.visibility = defect === '實體部件異常' ? 'visible' : 'hidden';
                 }
 
-                const fields = clonedElement.querySelectorAll('.field');
-                fields.forEach(field => {
+                // 確保其他字段可見
+                const allFields = clonedElement.querySelectorAll('.field');
+                allFields.forEach(field => {
                   if (!field.id.includes('creditor') && 
                       !field.id.includes('defect') && 
                       !field.id.includes('normalFunction') && 
@@ -1490,6 +1514,10 @@
 
           if (i > 0) pdf.addPage();
           pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+
+          // 恢復頁面原始狀態
+          page.style.visibility = 'hidden';
+          page.style.display = 'none';
         }
 
         const name = document.getElementById('name').value || '合約';
