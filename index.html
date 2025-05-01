@@ -116,6 +116,59 @@
     .customer-card .card-header {
       cursor: pointer;
       padding: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .customer-card .card-header h3 {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .customer-card .card-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .customer-card.expanded .card-content {
+      max-height: 1000px;
+      padding: 1.5rem;
+    }
+
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .status-active { background: #e3f2fd; color: #1976d2; }
+    .status-paid { background: #e8f5e9; color: #2e7d32; }
+    .status-unpaid { background: #ffebee; color: #d32f2f; }
+    .status-partial { background: #fff3e0; color: #f57c00; }
+    .status-buyback { background: #f3e5f5; color: #7b1fa2; }
+
+    .edit-button {
+      background: none;
+      border: none;
+      color: #1976d2;
+      cursor: pointer;
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .edit-button:hover {
+      opacity: 0.8;
+    }
+
+    .payment-remaining {
+      color: #d32f2f;
+      font-weight: 500;
+      margin-top: 0.5rem;
     }
 
     select {
@@ -123,11 +176,6 @@
       background-repeat: no-repeat;
       background-position: right center;
       padding-right: 24px;
-    }
-
-    .customer-card.expanded .card-content {
-      max-height: 1000px;
-      padding: 1.5rem;
     }
 
     .customer-details {
@@ -384,11 +432,29 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 1.5rem;
+      cursor: pointer;
     }
 
     .form-header h3 {
       color: var(--text-color);
       font-size: 1.25rem;
+    }
+
+    .form-section {
+      display: none;
+      transition: all 0.3s ease;
+    }
+
+    .form-section.active {
+      display: block;
+    }
+
+    .form-header .toggle-icon {
+      transition: transform 0.3s ease;
+    }
+
+    .form-header.active .toggle-icon {
+      transform: rotate(180deg);
     }
 
     .form-tabs {
@@ -410,14 +476,6 @@
     .form-tab.active {
       background: var(--primary-color);
       color: white;
-    }
-
-    .form-section {
-      display: none;
-    }
-
-    .form-section.active {
-      display: block;
     }
 
     .form-grid {
@@ -551,16 +609,13 @@
       <div class="container">
         <!-- 客戶資訊上傳/編輯表單 -->
         <div class="customer-form">
-          <div class="form-header">
+          <div class="form-header" onclick="toggleFormSection(this)">
             <h3>客戶資訊管理</h3>
-            <div class="form-tabs">
-              <button class="form-tab active" onclick="switchFormTab('upload')">上傳新客戶</button>
-              <button class="form-tab" onclick="switchFormTab('edit')">編輯客戶</button>
-            </div>
+            <i class="toggle-icon">▼</i>
           </div>
 
           <!-- 上傳新客戶表單 -->
-          <form id="uploadForm" class="form-section active">
+          <form id="uploadForm" class="form-section">
             <div class="form-grid">
               <div class="form-group">
                 <label>姓名</label>
@@ -596,50 +651,6 @@
               <button type="button" class="button button-danger" onclick="this.form.reset()">取消</button>
             </div>
           </form>
-
-          <!-- 編輯客戶表單 -->
-          <form id="editForm" class="form-section">
-            <div class="form-group">
-              <label>搜尋客戶</label>
-              <input type="text" id="searchInput" placeholder="請輸入姓名或身分證字號">
-            </div>
-            <div class="form-grid">
-              <div class="form-group">
-                <label>姓名</label>
-                <input type="text" name="name" placeholder="請輸入姓名" required>
-              </div>
-              <div class="form-group">
-                <label>身分證字號</label>
-                <input type="text" name="idNumber" placeholder="請輸入身分證字號" required>
-              </div>
-              <div class="form-group">
-                <label>手機號碼</label>
-                <input type="tel" name="phone" placeholder="請輸入手機號碼" required>
-              </div>
-              <div class="form-group">
-                <label>地址</label>
-                <input type="text" name="address" placeholder="請輸入完整地址" required>
-              </div>
-              <div class="form-group">
-                <label>銀行分行</label>
-                <input type="text" name="bankBranch" placeholder="請輸入銀行分行" required>
-              </div>
-              <div class="form-group">
-                <label>戶名</label>
-                <input type="text" name="accountName" placeholder="請輸入戶名" required>
-              </div>
-              <div class="form-group">
-                <label>帳號</label>
-                <input type="text" name="accountNumber" placeholder="請輸入帳號" required>
-              </div>
-            </div>
-            <div class="form-actions">
-              <button type="submit" class="button button-primary">更新</button>
-              <button type="button" class="button button-danger" onclick="deleteCustomer(this.form.customerId.value)">刪除</button>
-              <button type="button" class="button" onclick="this.form.reset()">取消</button>
-            </div>
-            <input type="hidden" name="customerId">
-          </form>
         </div>
 
         <div class="filter-tabs">
@@ -653,30 +664,12 @@
           <!-- 客戶卡片範例 -->
           <div class="customer-card">
             <div class="card-header" onclick="toggleCustomerDetails(this)">
-              <h3>張三 <span class="status-badge status-active">租約中</span></h3>
-              <div class="customer-info">
-                <div class="info-row">
-                  <span class="label">合約期間</span>
-                  <span>112/10/01 - 112/10/08</span>
-                </div>
-                <div class="info-row">
-                  <span class="label">手機型號</span>
-                  <span>iPhone 15 Pro Max</span>
-                </div>
-                <div class="info-row">
-                  <span class="label">價金</span>
-                  <span>$40,000</span>
-                </div>
-                <div class="info-row">
-                  <span class="label">每週租金</span>
-                  <span>$1,000</span>
-                </div>
-                <div class="info-row">
-                  <span class="label">剩餘期數</span>
-                  <span>4 週</span>
-                </div>
-              </div>
-              <i class="expand-icon">▼</i>
+              <h3>
+                張三 
+                <span class="status-badge status-active">租約中</span>
+                <span class="due-date">下次繳款剩餘 3 天</span>
+              </h3>
+              <button class="edit-button" onclick="editCustomer('customer1')">✏️</button>
             </div>
             <div class="card-content">
               <div class="customer-details">
@@ -698,16 +691,16 @@
                 <div class="detail-group">
                   <h4>合約資訊</h4>
                   <div class="detail-item">
+                    <span class="detail-label">手機型號</span>
+                    <span class="detail-value">iPhone 15 Pro Max</span>
+                  </div>
+                  <div class="detail-item">
                     <span class="detail-label">IMEI</span>
                     <span class="detail-value">123456789012345</span>
                   </div>
                   <div class="detail-item">
                     <span class="detail-label">容量</span>
                     <span class="detail-value">256GB</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="detail-label">已繳期數</span>
-                    <span class="detail-value">8 週</span>
                   </div>
                 </div>
                 <div class="detail-group">
@@ -730,7 +723,7 @@
                 <button class="button button-success" onclick="markAsPaid('customer1')">已繳款並續約</button>
                 <button class="button button-primary" onclick="markAsBuyback('customer1')">已繳款買回</button>
                 <button class="button button-danger" onclick="markAsUnpaid('customer1')">未繳款</button>
-                <button class="button button-warning" onclick="markAsPartial('customer1')">未繳足款</button>
+                <button class="button button-warning" onclick="showPartialPaymentForm('customer1')">未繳足款</button>
               </div>
             </div>
           </div>
@@ -1066,34 +1059,21 @@
       container.innerHTML = '';
 
       customers.forEach(customer => {
+        const remainingDays = calculateRemainingDays(customer.endDate);
+        const dueText = remainingDays === 0 ? '今日到期' : `下次繳款剩餘 ${remainingDays} 天`;
+        
         const card = document.createElement('div');
         card.className = 'customer-card';
+        card.setAttribute('data-customer-id', customer._id);
+        
         card.innerHTML = `
           <div class="card-header" onclick="toggleCustomerDetails(this)">
-            <h3>${customer.name} <span class="status-badge status-${customer.status}">${getStatusText(customer.status)}</span></h3>
-            <div class="customer-info">
-              <div class="info-row">
-                <span class="label">合約期間</span>
-                <span>${formatDate(customer.startDate)} - ${formatDate(customer.endDate)}</span>
-              </div>
-              <div class="info-row">
-                <span class="label">手機型號</span>
-                <span>${customer.phoneModel}</span>
-              </div>
-              <div class="info-row">
-                <span class="label">價金</span>
-                <span>$${formatNumber(customer.price)}</span>
-              </div>
-              <div class="info-row">
-                <span class="label">每週租金</span>
-                <span>$${formatNumber(customer.weeklyRent)}</span>
-              </div>
-              <div class="info-row">
-                <span class="label">剩餘期數</span>
-                <span>${customer.remainingWeeks} 週</span>
-              </div>
-            </div>
-            <i class="expand-icon">▼</i>
+            <h3>
+              ${customer.name} 
+              <span class="status-badge status-${customer.status}">${getStatusText(customer.status)}</span>
+              <span class="due-date">${dueText}</span>
+            </h3>
+            <button class="edit-button" onclick="editCustomer('${customer._id}')">✏️</button>
           </div>
           <div class="card-content">
             <div class="customer-details">
@@ -1115,16 +1095,16 @@
               <div class="detail-group">
                 <h4>合約資訊</h4>
                 <div class="detail-item">
+                  <span class="detail-label">手機型號</span>
+                  <span class="detail-value">${customer.phoneModel}</span>
+                </div>
+                <div class="detail-item">
                   <span class="detail-label">IMEI</span>
                   <span class="detail-value">${customer.imei}</span>
                 </div>
                 <div class="detail-item">
                   <span class="detail-label">容量</span>
                   <span class="detail-value">${customer.capacity}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">已繳期數</span>
-                  <span class="detail-value">${customer.paidWeeks} 週</span>
                 </div>
               </div>
               <div class="detail-group">
@@ -1147,7 +1127,7 @@
               <button class="button button-success" onclick="markAsPaid('${customer._id}')">已繳款並續約</button>
               <button class="button button-primary" onclick="markAsBuyback('${customer._id}')">已繳款買回</button>
               <button class="button button-danger" onclick="markAsUnpaid('${customer._id}')">未繳款</button>
-              <button class="button button-warning" onclick="markAsPartial('${customer._id}')">未繳足款</button>
+              <button class="button button-warning" onclick="showPartialPaymentForm('${customer._id}')">未繳足款</button>
             </div>
           </div>
         `;
@@ -1530,29 +1510,62 @@
       }
     }
 
-    // 切換客戶資訊表單
-    function switchFormTab(tab) {
-      const tabs = document.querySelectorAll('.form-tab');
-      const sections = document.querySelectorAll('.form-section');
-      
-      tabs.forEach(t => t.classList.remove('active'));
-      sections.forEach(s => s.classList.remove('active'));
-      
-      document.querySelector(`.form-tab[onclick*="${tab}"]`).classList.add('active');
-      document.getElementById(`${tab}Form`).classList.add('active');
+    // 切換表單顯示
+    function toggleFormSection(header) {
+      const form = header.nextElementSibling;
+      header.classList.toggle('active');
+      form.classList.toggle('active');
     }
 
-    // 選擇客戶進行編輯
-    function selectCustomerForEdit(customer) {
-      const form = document.getElementById('editForm');
-      form.customerId.value = customer._id;
-      form.name.value = customer.name;
-      form.idNumber.value = customer.idNumber;
-      form.phone.value = customer.phone;
-      form.address.value = customer.address;
-      form.bankBranch.value = customer.bankBranch;
-      form.accountName.value = customer.accountName;
-      form.accountNumber.value = customer.accountNumber;
+    // 計算剩餘天數
+    function calculateRemainingDays(endDate) {
+      const today = new Date();
+      const end = new Date(endDate);
+      const diffTime = end - today;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays;
+    }
+
+    // 顯示未繳足款表單
+    function showPartialPaymentForm(customerId) {
+      const amount = prompt('請輸入本次繳款金額：');
+      if (amount) {
+        const remaining = prompt('請輸入尚餘租金金額：');
+        if (remaining) {
+          updatePartialPayment(customerId, amount, remaining);
+        }
+      }
+    }
+
+    // 更新未繳足款資訊
+    function updatePartialPayment(customerId, amount, remaining) {
+      const card = document.querySelector(`[data-customer-id="${customerId}"]`);
+      if (card) {
+        const paymentInfo = document.createElement('div');
+        paymentInfo.className = 'payment-remaining';
+        paymentInfo.textContent = `本次繳款：$${formatNumber(amount)}，尚餘租金：$${formatNumber(remaining)}`;
+        card.querySelector('.card-content').appendChild(paymentInfo);
+      }
+    }
+
+    // 編輯客戶資訊
+    function editCustomer(customerId) {
+      const customer = getCustomerById(customerId);
+      if (customer) {
+        const form = document.getElementById('editForm');
+        form.customerId.value = customer._id;
+        form.name.value = customer.name;
+        form.idNumber.value = customer.idNumber;
+        form.phone.value = customer.phone;
+        form.address.value = customer.address;
+        form.bankBranch.value = customer.bankBranch;
+        form.accountName.value = customer.accountName;
+        form.accountNumber.value = customer.accountNumber;
+        
+        // 切換到編輯表單
+        document.querySelector('.form-header').click();
+        document.querySelector('.form-tab[onclick*="edit"]').click();
+      }
     }
   </script>
 </body>
