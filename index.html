@@ -680,87 +680,12 @@
           </form>
         </div>
 
-        <div class="filter-tabs">
-          <button class="filter-tab active">全部</button>
-          <button class="filter-tab">租約中</button>
-          <button class="filter-tab">已結清</button>
-          <button class="filter-tab">逾期</button>
-        </div>
-
         <div class="customer-cards">
-          <!-- 客戶卡片範例 -->
-          <div class="customer-card">
-            <div class="card-header" onclick="toggleCustomerDetails(this)">
-              <h3>
-                張三 
-                <span class="status-badge status-active">租約中</span>
-                <span class="due-date">下次繳款剩餘 3 天</span>
-              </h3>
-              <button class="edit-button" onclick="editCustomer('customer1')">✏️</button>
-            </div>
-            <div class="card-content">
-              <div class="customer-details">
-                <div class="detail-group">
-                  <h4>基本資料</h4>
-                  <div class="detail-item">
-                    <span class="detail-label">身分證字號</span>
-                    <span class="detail-value">A123456789</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="detail-label">手機號碼</span>
-                    <span class="detail-value">0912-345-678</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="detail-label">戶籍地址</span>
-                    <span class="detail-value">台北市信義區信義路五段7號</span>
-                  </div>
-                </div>
-                <div class="detail-group">
-                  <h4>合約資訊</h4>
-                  <div class="detail-item">
-                    <span class="detail-label">手機型號</span>
-                    <span class="detail-value">iPhone 15 Pro Max</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="detail-label">IMEI</span>
-                    <span class="detail-value">123456789012345</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="detail-label">容量</span>
-                    <span class="detail-value">256GB</span>
-                  </div>
-                </div>
-                <div class="detail-group">
-                  <h4>銀行資訊</h4>
-                  <div class="detail-item">
-                    <span class="detail-label">銀行分行</span>
-                    <span class="detail-value">台北富邦銀行信義分行</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="detail-label">戶名</span>
-                    <span class="detail-value">張三</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="detail-label">帳號</span>
-                    <span class="detail-value">1234-5678-9012</span>
-                  </div>
-                </div>
-              </div>
-              <div class="action-buttons">
-                <button class="button button-success" onclick="markAsPaid('customer1')">已繳款並續約</button>
-                <button class="button button-primary" onclick="markAsBuyback('customer1')">已繳款買回</button>
-                <button class="button button-danger" onclick="markAsUnpaid('customer1')">未繳款</button>
-                <button class="button button-warning" onclick="showPartialPaymentForm('customer1')">未繳足款</button>
-              </div>
-            </div>
-          </div>
+          <!-- 客戶卡片將在這裡動態生成 -->
         </div>
 
-        <div class="pagination">
-          <button class="page-button">1</button>
-          <button class="page-button">2</button>
-          <button class="page-button">3</button>
-        </div>
+        <!-- 分頁容器 -->
+        <div class="pagination"></div>
       </div>
     </section>
 
@@ -1007,6 +932,8 @@
     // 更新分頁按鈕
     function updatePaginationButtons() {
       const pagination = document.querySelector('.pagination');
+      if (!pagination) return; // 如果找不到分頁容器，直接返回
+      
       pagination.innerHTML = '';
 
       // 上一頁按鈕
@@ -1337,6 +1264,9 @@
 
     // 頁面載入時獲取客戶列表
     document.addEventListener('DOMContentLoaded', () => {
+      // 初始化分頁
+      updatePaginationButtons();
+      // 獲取客戶列表
       fetchCustomers();
     });
 
