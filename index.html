@@ -1394,34 +1394,55 @@
       if (newCustomerForm) {
         newCustomerForm.addEventListener('submit', async (e) => {
           e.preventDefault();
-          const formData = new FormData(newCustomerForm);
           
-          // 檢查必填欄位
-          const requiredFields = ['name', 'idNumber', 'phone', 'address', 'phoneModel', 'imei', 'price', 'rent', 'contractDate'];
-          for (const field of requiredFields) {
-            if (!formData.get(field)) {
-              showError(`請填寫 ${field} 欄位`);
-              return;
-            }
-          }
-
+          // 顯示載入中
+          document.querySelector('.loading-overlay').style.display = 'flex';
+          
           try {
-            // 顯示載入中
-            document.querySelector('.loading-overlay').style.display = 'flex';
+            // 收集表單數據
+            const formData = new FormData();
+            
+            // 基本資料
+            formData.append('name', newCustomerForm.querySelector('[name="name"]').value);
+            formData.append('idNumber', newCustomerForm.querySelector('[name="idNumber"]').value);
+            formData.append('phone', newCustomerForm.querySelector('[name="phone"]').value);
+            formData.append('address', newCustomerForm.querySelector('[name="address"]').value);
+            formData.append('mailingAddress', newCustomerForm.querySelector('[name="mailingAddress"]').value);
+            
+            // 手機資訊
+            formData.append('phoneModel', newCustomerForm.querySelector('[name="phoneModel"]').value);
+            formData.append('imei', newCustomerForm.querySelector('[name="imei"]').value);
+            formData.append('screenPassword', newCustomerForm.querySelector('[name="screenPassword"]').value);
+            
+            // 合約資訊
+            formData.append('price', newCustomerForm.querySelector('[name="price"]').value);
+            formData.append('rent', newCustomerForm.querySelector('[name="rent"]').value);
+            formData.append('contractDate', newCustomerForm.querySelector('[name="contractDate"]').value);
+            
+            // 文件上傳
+            const contractFile = newCustomerForm.querySelector('[name="contractFile"]').files[0];
+            const idFront = newCustomerForm.querySelector('[name="idFront"]').files[0];
+            const idBack = newCustomerForm.querySelector('[name="idBack"]').files[0];
+            
+            if (contractFile) formData.append('contractFile', contractFile);
+            if (idFront) formData.append('idFront', idFront);
+            if (idBack) formData.append('idBack', idBack);
             
             // 發送請求
             const response = await fetch(`${API_BASE_URL}/customers`, {
               method: 'POST',
               body: formData
             });
-
+            
             if (!response.ok) {
               const errorData = await response.json();
               throw new Error(errorData.message || '創建客戶失敗');
             }
-
+            
             const customer = await response.json();
             showSuccess('客戶創建成功');
+            
+            // 重置表單
             newCustomerForm.reset();
             
             // 切換到客戶列表頁面
@@ -1430,9 +1451,10 @@
             // 重新載入客戶列表
             const { customers } = await fetchCustomers();
             renderCustomerList(customers);
+            
           } catch (error) {
             console.error('Error submitting form:', error);
-            showError(error.message || '創建客戶失敗');
+            showError(error.message || '創建客戶失敗，請檢查所有必填欄位');
           } finally {
             // 隱藏載入中
             document.querySelector('.loading-overlay').style.display = 'none';
@@ -1443,17 +1465,18 @@
 
     // 客戶卡片展開/收起
     function toggleCustomerDetails(header) {
+      const card = header.closest('.customer-card');
       const details = header.nextElementSibling;
-      const isExpanded = details.style.maxHeight;
       
       // 收起其他所有展開的卡片
-      document.querySelectorAll('.card-details').forEach(detail => {
-        detail.style.maxHeight = null;
+      document.querySelectorAll('.customer-card').forEach(card => {
+        if (card !== header.closest('.customer-card')) {
+          card.classList.remove('expanded');
+        }
       });
 
-      if (!isExpanded) {
-        details.style.maxHeight = details.scrollHeight + 'px';
-      }
+      // 切換當前卡片的展開狀態
+      card.classList.toggle('expanded');
     }
 
     // 更新客戶狀態
@@ -1464,6 +1487,7 @@
         renderCustomerList(customers);
       } catch (error) {
         console.error('Error updating status:', error);
+        showError('更新狀態失敗');
       }
     }
 
