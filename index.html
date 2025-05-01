@@ -1046,7 +1046,7 @@
                     <span class="value">${formatAmount(customer.salePrice)}</span>
                     <span class="label">租金：</span>
                     <span class="value">${formatAmount(customer.rent)}/週</span>
-                    ${customer.unpaidAmount ? `<span class="unpaid-amount">未繳：${formatAmount(customer.unpaidAmount)}</span>` : ''}
+                    ${customer.status === 'partial' ? `<span class="unpaid-amount">尚餘：${formatAmount(customer.unpaidAmount)}</span>` : ''}
                     <span class="due-date ${daysLeft === 0 ? 'today' : ''}">${dueDateText}</span>
                   </div>
                 </div>
@@ -1072,6 +1072,12 @@
                       <span class="detail-label">通訊地址</span>
                       <span class="detail-value">${customer.contactAddress || customer.address}</span>
                     </div>
+                    ${customer.notes ? `
+                    <div class="detail-item">
+                      <span class="detail-label">備註</span>
+                      <span class="detail-value">${customer.notes}</span>
+                    </div>
+                    ` : ''}
                   </div>
                   <div class="detail-group">
                     <h4>手機資訊</h4>
@@ -1589,6 +1595,10 @@
         const contractDate = new Date(customer.contractDate);
         const dueDate = calculateDueDate(contractDate);
         const today = new Date();
+        // 將日期設為當天開始時間（00:00:00）進行比較
+        today.setHours(0, 0, 0, 0);
+        dueDate.setHours(0, 0, 0, 0);
+
         const daysLeft = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
         const dueDateText = daysLeft === 0 ? '今日須繳款' : 
                            daysLeft < 0 ? '已逾期' :
@@ -1608,7 +1618,7 @@
                 <span class="value">${formatAmount(customer.salePrice)}</span>
                 <span class="label">租金：</span>
                 <span class="value">${formatAmount(customer.rent)}/週</span>
-                ${customer.unpaidAmount ? `<span class="unpaid-amount">未繳：${formatAmount(customer.unpaidAmount)}</span>` : ''}
+                ${customer.status === 'partial' ? `<span class="unpaid-amount">尚餘：${formatAmount(customer.unpaidAmount)}</span>` : ''}
                 <span class="due-date ${daysLeft === 0 ? 'today' : ''}">${dueDateText}</span>
               </div>
             </div>
@@ -1634,6 +1644,12 @@
                   <span class="detail-label">通訊地址</span>
                   <span class="detail-value">${customer.contactAddress || customer.address}</span>
                 </div>
+                ${customer.notes ? `
+                <div class="detail-item">
+                  <span class="detail-label">備註</span>
+                  <span class="detail-value">${customer.notes}</span>
+                </div>
+                ` : ''}
               </div>
               <div class="detail-group">
                 <h4>手機資訊</h4>
@@ -1761,7 +1777,13 @@
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${type}-${customerId}.pdf`;
+        // 獲取客戶姓名
+        const customer = await fetch(`${API_BASE_URL}/customers/${customerId}`).then(res => res.json());
+        
+        // 根據檔案類型設定副檔名
+        const fileExtension = type === 'contract' ? '.pdf' : '.jpg';
+        a.download = type === 'contract' ? `${customer.name}-租賃契約${fileExtension}` : `${type}-${customerId}${fileExtension}`;
+        
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
