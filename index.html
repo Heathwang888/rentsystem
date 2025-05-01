@@ -599,6 +599,12 @@
           </a>
         </li>
         <li class="nav-item">
+          <a href="#new-customer" class="nav-link" data-section="new-customer">
+            <i>➕</i>
+            <span>新增客戶</span>
+          </a>
+        </li>
+        <li class="nav-item">
           <a href="#contract" class="nav-link" data-section="contract">
             <i>📝</i>
             <span>合約管理</span>
@@ -693,14 +699,99 @@
     <!-- 客戶管理頁面 -->
     <section id="customers" class="page-section">
       <div class="container">
-        <!-- 客戶資訊上傳表單 -->
-        <div class="customer-form">
-          <div class="form-header" onclick="toggleFormSection(this)">
-            <h3>新增客戶</h3>
-            <i class="toggle-icon">▼</i>
+        <!-- 客戶列表 -->
+        <div class="customer-list">
+          <div class="list-header">
+            <h3>客戶列表</h3>
+            <div class="search-box">
+              <input type="text" id="searchInput" placeholder="搜尋客戶...">
+            </div>
           </div>
 
-          <form id="uploadForm" class="form-section">
+          <div class="customer-cards">
+            <!-- 客戶卡片範例 -->
+            <div class="customer-card">
+              <div class="card-header" onclick="toggleCustomerDetails(this)">
+                <h3>
+                  張三 
+                  <span class="status-badge status-active">租約中</span>
+                  <span class="due-date">下次繳款剩餘 3 天</span>
+                </h3>
+                <button class="edit-button" onclick="editCustomer('customer1')">✏️</button>
+              </div>
+              <div class="card-content">
+                <div class="customer-details">
+                  <div class="detail-group">
+                    <h4>基本資料</h4>
+                    <div class="detail-item">
+                      <span class="detail-label">身分證字號</span>
+                      <span class="detail-value">A123456789</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">手機號碼</span>
+                      <span class="detail-value">0912-345-678</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">戶籍地址</span>
+                      <span class="detail-value">台北市信義區信義路五段7號</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">通訊地址</span>
+                      <span class="detail-value">台北市信義區信義路五段7號</span>
+                    </div>
+                  </div>
+                  <div class="detail-group">
+                    <h4>合約資訊</h4>
+                    <div class="detail-item">
+                      <span class="detail-label">手機型號</span>
+                      <span class="detail-value">iPhone 15 Pro Max</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">IMEI</span>
+                      <span class="detail-value">123456789012345</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">螢幕密碼</span>
+                      <span class="detail-value">1234</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">買賣價金</span>
+                      <span class="detail-value">$45,000</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">租金</span>
+                      <span class="detail-value">$2,000/週</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">合約日期</span>
+                      <span class="detail-value">2024/03/01</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="action-buttons">
+                  <button class="button button-success" onclick="markAsPaid('customer1')">已繳款並續約</button>
+                  <button class="button button-primary" onclick="markAsBuyback('customer1')">已繳款買回</button>
+                  <button class="button button-danger" onclick="markAsUnpaid('customer1')">未繳款</button>
+                  <button class="button button-warning" onclick="showPartialPaymentForm('customer1')">未繳足款</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pagination"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 新增客戶頁面 -->
+    <section id="new-customer" class="page-section">
+      <div class="container">
+        <div class="customer-form">
+          <div class="form-header">
+            <h3>新增客戶</h3>
+          </div>
+
+          <form id="uploadForm" class="form-section active">
             <div class="form-grid">
               <!-- 基本資料 -->
               <div class="form-group">
@@ -796,22 +887,6 @@
               <button type="button" class="button button-danger" onclick="this.form.reset()">取消</button>
             </div>
           </form>
-        </div>
-
-        <!-- 客戶列表 -->
-        <div class="customer-list">
-          <div class="list-header">
-            <h3>客戶列表</h3>
-            <div class="search-box">
-              <input type="text" id="searchInput" placeholder="搜尋客戶...">
-            </div>
-          </div>
-
-          <div class="customer-cards">
-            <!-- 客戶卡片將由 JavaScript 動態生成 -->
-          </div>
-
-          <div class="pagination"></div>
         </div>
       </div>
     </section>
@@ -1294,7 +1369,14 @@
     // 渲染客戶列表
     function renderCustomerList(customers) {
       const container = document.querySelector('.customer-cards');
+      if (!container) return;
+      
       container.innerHTML = '';
+
+      if (!customers || customers.length === 0) {
+        container.innerHTML = '<div class="no-customers">暫無客戶資料</div>';
+        return;
+      }
 
       customers.forEach(customer => {
         const remainingDays = calculateRemainingDays(customer.endDate);
@@ -1803,10 +1885,26 @@
       };
 
       try {
-        await createCustomer(customerData);
-        e.target.reset();
+        const response = await fetch(`${API_BASE_URL}/customers`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(customerData)
+        });
+
+        if (!response.ok) throw new Error('創建客戶失敗');
+        
+        const result = await response.json();
         alert('客戶創建成功');
-        fetchCustomers(); // 刷新客戶列表
+        e.target.reset();
+        
+        // 切換到客戶列表頁面
+        document.querySelector('.nav-link[data-section="customers"]').click();
+        
+        // 刷新客戶列表
+        currentPage = 1;
+        fetchCustomers();
       } catch (error) {
         console.error('Error:', error);
         alert('創建客戶失敗，請稍後再試');
