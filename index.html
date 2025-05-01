@@ -1095,6 +1095,23 @@
                   <button class="button button-warning" onclick="showPartialPaymentForm('${customer._id}')">${getStatusButtonText('partial')}</button>
                   <button class="button button-danger" onclick="updateStatus('${customer._id}', 'locked')">${getStatusButtonText('locked')}</button>
                 </div>
+                <div class="partial-payment-form" id="partial-payment-${customer._id}">
+                  <input type="number" placeholder="已繳金額" id="paid-amount-${customer._id}">
+                  <input type="number" placeholder="未繳金額" id="unpaid-amount-${customer._id}">
+                  <button class="button button-warning" onclick="submitPartialPayment('${customer._id}')">確認</button>
+                </div>
+                <div class="notes">
+                  <textarea placeholder="備註" id="notes-${customer._id}">${customer.notes || ''}</textarea>
+                  <button class="button button-info" onclick="saveNotes('${customer._id}')">儲存備註</button>
+                </div>
+                <div class="file-downloads">
+                  <button class="file-download-button" onclick="downloadFile('${customer._id}', 'contract')">
+                    <i>📄</i> 下載合約
+                  </button>
+                  <button class="file-download-button" onclick="downloadFile('${customer._id}', 'id')">
+                    <i>🪪</i> 下載身分證
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -1639,6 +1656,23 @@
               <button class="button button-primary" onclick="updateStatus('${customer._id}', 'buyback')">${getStatusButtonText('buyback')}</button>
               <button class="button button-warning" onclick="showPartialPaymentForm('${customer._id}')">${getStatusButtonText('partial')}</button>
               <button class="button button-danger" onclick="updateStatus('${customer._id}', 'locked')">${getStatusButtonText('locked')}</button>
+            </div>
+            <div class="partial-payment-form" id="partial-payment-${customer._id}">
+              <input type="number" placeholder="已繳金額" id="paid-amount-${customer._id}">
+              <input type="number" placeholder="未繳金額" id="unpaid-amount-${customer._id}">
+              <button class="button button-warning" onclick="submitPartialPayment('${customer._id}')">確認</button>
+            </div>
+            <div class="notes">
+              <textarea placeholder="備註" id="notes-${customer._id}">${customer.notes || ''}</textarea>
+              <button class="button button-info" onclick="saveNotes('${customer._id}')">儲存備註</button>
+            </div>
+            <div class="file-downloads">
+              <button class="file-download-button" onclick="downloadFile('${customer._id}', 'contract')">
+                <i>📄</i> 下載合約
+              </button>
+              <button class="file-download-button" onclick="downloadFile('${customer._id}', 'id')">
+                <i>🪪</i> 下載身分證
+              </button>
             </div>
           </div>
         `;
