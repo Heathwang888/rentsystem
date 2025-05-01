@@ -8,67 +8,55 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
-    :root {
-      --primary-color: #1976d2;
-      --primary-hover: #1565c0;
-      --error-color: #d32f2f;
-      --success-color: #2e7d32;
-      --warning-color: #ff9800;
-      --border-color: #e0e0e0;
-      --text-color: #333;
-      --text-secondary: #666;
-      --background-color: #f5f5f5;
-      --card-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      --card-hover-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      --sidebar-width: 240px;
-    }
-
     * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
     }
 
     body {
       font-family: 'Noto Sans TC', sans-serif;
-      background-color: var(--background-color);
-      color: var(--text-color);
-      line-height: 1.6;
-      display: flex;
-      min-height: 100vh;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 0;
+      overscroll-behavior: none;
     }
 
-    /* 側邊欄樣式 */
-    .sidebar {
-      width: var(--sidebar-width);
-      background: white;
-      padding: 1rem;
-      position: fixed;
-      left: 0;
+    /* App-like header */
+    .app-header {
+      background: #1976d2;
+      color: white;
+      padding: 16px;
+      position: sticky;
       top: 0;
       bottom: 0;
       box-shadow: var(--card-shadow);
       z-index: 1000;
-    }
-
-    .sidebar-header {
-      padding: 1rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       text-align: center;
-      border-bottom: 1px solid var(--border-color);
-      margin-bottom: 1rem;
+      font-size: 18px;
+      font-weight: 500;
     }
 
-    .sidebar-header h1 {
-      font-size: 1.25rem;
-      color: var(--text-color);
+    .container {
+      padding: 16px;
+      max-width: 600px;
+      margin: 0 auto;
     }
 
-    .nav-menu {
-      list-style: none;
+    form {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      overflow: hidden;
+      margin-bottom: 16px;
     }
 
-    .nav-item {
-      margin-bottom: 0.5rem;
+    .form-group {
+      margin: 0;
+      padding: 16px;
+      border-bottom: 1px solid #f0f0f0;
     }
 
     .nav-link {
@@ -130,11 +118,11 @@
       padding: 1.5rem;
     }
 
-    .customer-card .card-content {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease-out;
-      background: var(--background-color);
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23666' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right center;
+      padding-right: 24px;
     }
 
     .customer-card.expanded .card-content {
@@ -339,6 +327,119 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
+    /* 總覽頁面樣式 */
+    .overview-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .overview-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: var(--card-shadow);
+      padding: 1.5rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .overview-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--card-hover-shadow);
+    }
+
+    .overview-card h3 {
+      color: var(--text-color);
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--primary-color);
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .info-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .info-row .label {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+
+    .info-row .value {
+      font-weight: 500;
+      font-size: 1.125rem;
+    }
+
+    /* 客戶資訊上傳/編輯表單樣式 */
+    .customer-form {
+      background: white;
+      border-radius: 12px;
+      box-shadow: var(--card-shadow);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .form-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-header h3 {
+      color: var(--text-color);
+      font-size: 1.25rem;
+    }
+
+    .form-tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-tab {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 6px;
+      background: var(--background-color);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .form-tab.active {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .form-section {
+      display: none;
+    }
+
+    .form-section.active {
+      display: block;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
@@ -393,6 +494,10 @@
               <span class="label">應收本金</span>
               <span class="value">$200,000</span>
             </div>
+            <div class="info-row">
+              <span class="label">客戶數</span>
+              <span class="value">5</span>
+            </div>
           </div>
         </div>
         <div class="overview-card">
@@ -405,6 +510,10 @@
             <div class="info-row">
               <span class="label">月收租金</span>
               <span class="value">$200,000</span>
+            </div>
+            <div class="info-row">
+              <span class="label">平均租金</span>
+              <span class="value">$8,000</span>
             </div>
           </div>
         </div>
@@ -419,6 +528,10 @@
               <span class="label">累計</span>
               <span class="value">$5,000,000</span>
             </div>
+            <div class="info-row">
+              <span class="label">平均支出</span>
+              <span class="value">$200,000</span>
+            </div>
           </div>
         </div>
         <div class="overview-card">
@@ -432,6 +545,10 @@
               <span class="label">金額</span>
               <span class="value">$75,000</span>
             </div>
+            <div class="info-row">
+              <span class="label">逾期率</span>
+              <span class="value">12%</span>
+            </div>
           </div>
         </div>
       </div>
@@ -440,6 +557,98 @@
     <!-- 客戶管理頁面 -->
     <section id="customers" class="page-section">
       <div class="container">
+        <!-- 客戶資訊上傳/編輯表單 -->
+        <div class="customer-form">
+          <div class="form-header">
+            <h3>客戶資訊管理</h3>
+            <div class="form-tabs">
+              <button class="form-tab active" onclick="switchFormTab('upload')">上傳新客戶</button>
+              <button class="form-tab" onclick="switchFormTab('edit')">編輯客戶</button>
+            </div>
+          </div>
+
+          <!-- 上傳新客戶表單 -->
+          <div id="uploadForm" class="form-section active">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>姓名</label>
+                <input type="text" placeholder="請輸入姓名">
+              </div>
+              <div class="form-group">
+                <label>身分證字號</label>
+                <input type="text" placeholder="請輸入身分證字號">
+              </div>
+              <div class="form-group">
+                <label>手機號碼</label>
+                <input type="tel" placeholder="請輸入手機號碼">
+              </div>
+              <div class="form-group">
+                <label>地址</label>
+                <input type="text" placeholder="請輸入完整地址">
+              </div>
+              <div class="form-group">
+                <label>銀行分行</label>
+                <input type="text" placeholder="請輸入銀行分行">
+              </div>
+              <div class="form-group">
+                <label>戶名</label>
+                <input type="text" placeholder="請輸入戶名">
+              </div>
+              <div class="form-group">
+                <label>帳號</label>
+                <input type="text" placeholder="請輸入帳號">
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="button button-primary">儲存</button>
+              <button class="button button-danger">取消</button>
+            </div>
+          </div>
+
+          <!-- 編輯客戶表單 -->
+          <div id="editForm" class="form-section">
+            <div class="form-group">
+              <label>搜尋客戶</label>
+              <input type="text" placeholder="請輸入姓名或身分證字號">
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>姓名</label>
+                <input type="text" placeholder="請輸入姓名">
+              </div>
+              <div class="form-group">
+                <label>身分證字號</label>
+                <input type="text" placeholder="請輸入身分證字號">
+              </div>
+              <div class="form-group">
+                <label>手機號碼</label>
+                <input type="tel" placeholder="請輸入手機號碼">
+              </div>
+              <div class="form-group">
+                <label>地址</label>
+                <input type="text" placeholder="請輸入完整地址">
+              </div>
+              <div class="form-group">
+                <label>銀行分行</label>
+                <input type="text" placeholder="請輸入銀行分行">
+              </div>
+              <div class="form-group">
+                <label>戶名</label>
+                <input type="text" placeholder="請輸入戶名">
+              </div>
+              <div class="form-group">
+                <label>帳號</label>
+                <input type="text" placeholder="請輸入帳號">
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="button button-primary">更新</button>
+              <button class="button button-danger">刪除</button>
+              <button class="button">取消</button>
+            </div>
+          </div>
+        </div>
+
         <div class="filter-tabs">
           <button class="filter-tab active">全部</button>
           <button class="filter-tab">租約中</button>
@@ -774,6 +983,289 @@
   </div>
 
   <script>
+    // API 基礎 URL
+    const API_BASE_URL = '/api';
+
+    // 客戶資料管理相關函數
+    async function fetchCustomers() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/customers`);
+        if (!response.ok) throw new Error('獲取客戶列表失敗');
+        const customers = await response.json();
+        renderCustomerList(customers);
+      } catch (error) {
+        console.error('Error:', error);
+        alert('獲取客戶列表失敗，請稍後再試');
+      }
+    }
+
+    async function createCustomer(customerData) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/customers`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(customerData)
+        });
+        if (!response.ok) throw new Error('創建客戶失敗');
+        const result = await response.json();
+        alert('客戶創建成功');
+        fetchCustomers(); // 刷新列表
+        return result;
+      } catch (error) {
+        console.error('Error:', error);
+        alert('創建客戶失敗，請稍後再試');
+      }
+    }
+
+    async function updateCustomer(customerId, customerData) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/customers/${customerId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(customerData)
+        });
+        if (!response.ok) throw new Error('更新客戶失敗');
+        const result = await response.json();
+        alert('客戶更新成功');
+        fetchCustomers(); // 刷新列表
+        return result;
+      } catch (error) {
+        console.error('Error:', error);
+        alert('更新客戶失敗，請稍後再試');
+      }
+    }
+
+    async function deleteCustomer(customerId) {
+      if (!confirm('確定要刪除這個客戶嗎？')) return;
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/customers/${customerId}`, {
+          method: 'DELETE'
+        });
+        if (!response.ok) throw new Error('刪除客戶失敗');
+        alert('客戶刪除成功');
+        fetchCustomers(); // 刷新列表
+      } catch (error) {
+        console.error('Error:', error);
+        alert('刪除客戶失敗，請稍後再試');
+      }
+    }
+
+    async function searchCustomer(query) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/customers/search?q=${encodeURIComponent(query)}`);
+        if (!response.ok) throw new Error('搜尋客戶失敗');
+        const customers = await response.json();
+        renderCustomerList(customers);
+      } catch (error) {
+        console.error('Error:', error);
+        alert('搜尋客戶失敗，請稍後再試');
+      }
+    }
+
+    // 渲染客戶列表
+    function renderCustomerList(customers) {
+      const container = document.querySelector('.customer-cards');
+      container.innerHTML = '';
+
+      customers.forEach(customer => {
+        const card = document.createElement('div');
+        card.className = 'customer-card';
+        card.innerHTML = `
+          <div class="card-header" onclick="toggleCustomerDetails(this)">
+            <h3>${customer.name} <span class="status-badge status-${customer.status}">${getStatusText(customer.status)}</span></h3>
+            <div class="customer-info">
+              <div class="info-row">
+                <span class="label">合約期間</span>
+                <span>${formatDate(customer.startDate)} - ${formatDate(customer.endDate)}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">手機型號</span>
+                <span>${customer.phoneModel}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">價金</span>
+                <span>$${formatNumber(customer.price)}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">每週租金</span>
+                <span>$${formatNumber(customer.weeklyRent)}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">剩餘期數</span>
+                <span>${customer.remainingWeeks} 週</span>
+              </div>
+            </div>
+            <i class="expand-icon">▼</i>
+          </div>
+          <div class="card-content">
+            <div class="customer-details">
+              <div class="detail-group">
+                <h4>基本資料</h4>
+                <div class="detail-item">
+                  <span class="detail-label">身分證字號</span>
+                  <span class="detail-value">${customer.idNumber}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">手機號碼</span>
+                  <span class="detail-value">${customer.phone}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">戶籍地址</span>
+                  <span class="detail-value">${customer.address}</span>
+                </div>
+              </div>
+              <div class="detail-group">
+                <h4>合約資訊</h4>
+                <div class="detail-item">
+                  <span class="detail-label">IMEI</span>
+                  <span class="detail-value">${customer.imei}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">容量</span>
+                  <span class="detail-value">${customer.capacity}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">已繳期數</span>
+                  <span class="detail-value">${customer.paidWeeks} 週</span>
+                </div>
+              </div>
+              <div class="detail-group">
+                <h4>銀行資訊</h4>
+                <div class="detail-item">
+                  <span class="detail-label">銀行分行</span>
+                  <span class="detail-value">${customer.bankBranch}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">戶名</span>
+                  <span class="detail-value">${customer.accountName}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">帳號</span>
+                  <span class="detail-value">${customer.accountNumber}</span>
+                </div>
+              </div>
+            </div>
+            <div class="action-buttons">
+              <button class="button button-success" onclick="markAsPaid('${customer._id}')">已繳款並續約</button>
+              <button class="button button-primary" onclick="markAsBuyback('${customer._id}')">已繳款買回</button>
+              <button class="button button-danger" onclick="markAsUnpaid('${customer._id}')">未繳款</button>
+              <button class="button button-warning" onclick="markAsPartial('${customer._id}')">未繳足款</button>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // 處理表單提交
+    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const customerData = {
+        name: formData.get('name'),
+        idNumber: formData.get('idNumber'),
+        phone: formData.get('phone'),
+        address: formData.get('address'),
+        bankBranch: formData.get('bankBranch'),
+        accountName: formData.get('accountName'),
+        accountNumber: formData.get('accountNumber')
+      };
+      await createCustomer(customerData);
+      e.target.reset();
+    });
+
+    document.getElementById('editForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const customerId = formData.get('customerId');
+      const customerData = {
+        name: formData.get('name'),
+        idNumber: formData.get('idNumber'),
+        phone: formData.get('phone'),
+        address: formData.get('address'),
+        bankBranch: formData.get('bankBranch'),
+        accountName: formData.get('accountName'),
+        accountNumber: formData.get('accountNumber')
+      };
+      await updateCustomer(customerId, customerData);
+      e.target.reset();
+    });
+
+    // 搜尋功能
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const query = e.target.value.trim();
+      if (query.length >= 2) {
+        searchCustomer(query);
+      } else if (query.length === 0) {
+        fetchCustomers();
+      }
+    });
+
+    // 狀態更新函數
+    async function updateCustomerStatus(customerId, status) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/customers/${customerId}/status`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ status })
+        });
+        if (!response.ok) throw new Error('更新狀態失敗');
+        fetchCustomers(); // 刷新列表
+      } catch (error) {
+        console.error('Error:', error);
+        alert('更新狀態失敗，請稍後再試');
+      }
+    }
+
+    // 狀態更新快捷函數
+    function markAsPaid(customerId) {
+      updateCustomerStatus(customerId, 'paid');
+    }
+
+    function markAsBuyback(customerId) {
+      updateCustomerStatus(customerId, 'buyback');
+    }
+
+    function markAsUnpaid(customerId) {
+      updateCustomerStatus(customerId, 'unpaid');
+    }
+
+    function markAsPartial(customerId) {
+      updateCustomerStatus(customerId, 'partial');
+    }
+
+    // 輔助函數
+    function getStatusText(status) {
+      const statusMap = {
+        active: '租約中',
+        paid: '已繳款',
+        unpaid: '未繳款',
+        partial: '未繳足款',
+        buyback: '已買回'
+      };
+      return statusMap[status] || status;
+    }
+
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      const year = date.getFullYear() - 1911;
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}/${month}/${day}`;
+    }
+
+    // 頁面載入時獲取客戶列表
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchCustomers();
+    });
+
     // 頁面切換功能
     document.querySelectorAll('.nav-link').forEach(link => {
       link.addEventListener('click', (e) => {
@@ -1021,6 +1513,18 @@
         hideLoading();
       }
     }
+
+    // 切換客戶資訊表單
+    function switchFormTab(tab) {
+      const tabs = document.querySelectorAll('.form-tab');
+      const sections = document.querySelectorAll('.form-section');
+      
+      tabs.forEach(t => t.classList.remove('active'));
+      sections.forEach(s => s.classList.remove('active'));
+      
+      document.querySelector(`.form-tab[onclick*="${tab}"]`).classList.add('active');
+      document.getElementById(`${tab}Form`).classList.add('active');
+    }
   </script>
 </body>
-</html>
+</html> 
