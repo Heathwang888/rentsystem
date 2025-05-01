@@ -1322,6 +1322,17 @@
       alert(message);
     }
 
+    // 切換通訊地址顯示
+    function toggleMailingAddress(checkbox) {
+      const mailingAddressInput = checkbox.closest('.address-options').querySelector('input[name="mailingAddress"]');
+      if (checkbox.checked) {
+        mailingAddressInput.value = document.querySelector('input[name="address"]').value;
+        mailingAddressInput.disabled = true;
+      } else {
+        mailingAddressInput.disabled = false;
+      }
+    }
+
     // 事件處理
     document.addEventListener('DOMContentLoaded', async () => {
       // 頁面切換功能
@@ -1384,15 +1395,47 @@
         newCustomerForm.addEventListener('submit', async (e) => {
           e.preventDefault();
           const formData = new FormData(newCustomerForm);
+          
+          // 檢查必填欄位
+          const requiredFields = ['name', 'idNumber', 'phone', 'address', 'phoneModel', 'imei', 'price', 'rent', 'contractDate'];
+          for (const field of requiredFields) {
+            if (!formData.get(field)) {
+              showError(`請填寫 ${field} 欄位`);
+              return;
+            }
+          }
+
           try {
-            await createCustomer(formData);
+            // 顯示載入中
+            document.querySelector('.loading-overlay').style.display = 'flex';
+            
+            // 發送請求
+            const response = await fetch(`${API_BASE_URL}/customers`, {
+              method: 'POST',
+              body: formData
+            });
+
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.message || '創建客戶失敗');
+            }
+
+            const customer = await response.json();
+            showSuccess('客戶創建成功');
             newCustomerForm.reset();
+            
+            // 切換到客戶列表頁面
+            switchPage('customers');
+            
+            // 重新載入客戶列表
             const { customers } = await fetchCustomers();
             renderCustomerList(customers);
-            // 切換到客戶列表頁面
-            switchPage('customer-management');
           } catch (error) {
             console.error('Error submitting form:', error);
+            showError(error.message || '創建客戶失敗');
+          } finally {
+            // 隱藏載入中
+            document.querySelector('.loading-overlay').style.display = 'none';
           }
         });
       }
