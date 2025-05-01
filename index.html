@@ -589,73 +589,119 @@
     .customer-form {
       background: white;
       border-radius: 12px;
-      box-shadow: var(--card-shadow);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin: 2rem auto;
+      max-width: 1200px;
       padding: 2rem;
-      margin-bottom: 2rem;
     }
 
     .form-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
-      cursor: pointer;
+      border-bottom: 2px solid #1976d2;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
     }
 
     .form-header h3 {
-      color: var(--text-color);
-      font-size: 1.25rem;
-    }
-
-    .form-section {
-      display: none;
-      transition: all 0.3s ease;
-    }
-
-    .form-section.active {
-      display: block;
-    }
-
-    .form-header .toggle-icon {
-      transition: transform 0.3s ease;
-    }
-
-    .form-header.active .toggle-icon {
-      transform: rotate(180deg);
-    }
-
-    .form-tabs {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .form-tab {
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 6px;
-      background: var(--background-color);
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .form-tab.active {
-      background: var(--primary-color);
-      color: white;
+      color: #1976d2;
+      font-size: 1.5rem;
+      margin: 0;
     }
 
     .form-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 1.5rem;
+    }
+
+    .form-section {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-section h4 {
+      color: #1976d2;
+      font-size: 1.1rem;
+      margin: 0 0 1rem 0;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      color: #666;
+      display: block;
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-group input,
+    .form-group select {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 1rem;
+      padding: 0.75rem;
+      width: 100%;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: #1976d2;
+      outline: none;
+    }
+
+    .form-group input[type="file"] {
+      background: #f8f9fa;
+      border: 2px dashed #ddd;
+      cursor: pointer;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .form-group input[type="file"]:hover {
+      border-color: #1976d2;
+    }
+
+    .address-options {
+      align-items: center;
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .checkbox-label {
+      align-items: center;
+      color: #666;
+      cursor: pointer;
+      display: flex;
+      font-size: 0.875rem;
+      gap: 0.5rem;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+      width: auto;
     }
 
     .form-actions {
       display: flex;
-      justify-content: flex-end;
       gap: 1rem;
+      justify-content: flex-end;
       margin-top: 2rem;
+    }
+
+    .form-actions button {
+      min-width: 120px;
+      padding: 0.75rem 1.5rem;
+    }
+
+    .due-date-display {
+      color: #1976d2;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
     }
 
     /* 分頁樣式 */
@@ -751,19 +797,111 @@
       top: 0;
       bottom: 0;
       width: 250px;
-      background: #fff;
-      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+      background: #1976d2;
+      color: white;
       z-index: 1000;
+      transition: transform 0.3s;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .sidebar-header h1 {
+      font-size: 1.25rem;
+      margin: 0;
+      font-weight: 500;
     }
 
     .nav-menu {
       list-style: none;
-      padding: 0;
+      padding: 1rem 0;
       margin: 0;
     }
 
     .nav-item {
-      margin: 0.5rem 0;
+      margin: 0.25rem 0;
+    }
+
+    .nav-link {
+      color: rgba(255,255,255,0.8);
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1.5rem;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .nav-link:hover {
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+
+    .nav-link.active {
+      background: white;
+      color: #1976d2;
+    }
+
+    .nav-link i {
+      margin-right: 0.75rem;
+      font-size: 1.25rem;
+    }
+
+    /* 主內容區域調整 */
+    .main-content {
+      margin-left: 250px;
+      padding: 2rem;
+      min-height: 100vh;
+      transition: margin-left 0.3s;
+    }
+
+    /* 響應式設計 */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .toggle-sidebar {
+        display: block;
+      }
+    }
+
+    /* 漢堡選單按鈕 */
+    .toggle-sidebar {
+      display: none;
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 1001;
+      background: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.5rem;
+      cursor: pointer;
+    }
+
+    .toggle-sidebar:hover {
+      background: #1565c0;
+    }
+
+    .unpaid-amount {
+      color: #d32f2f;
+      font-weight: 500;
+      background: #ffebee;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      margin-right: 0.5rem;
     }
   </style>
 </head>
@@ -819,15 +957,15 @@
           <div class="card-content">
             <div class="info-row">
               <span class="label">應收租金</span>
-              <span class="value">$50,000</span>
+              <span class="value" id="dueTodayRent">$0</span>
             </div>
             <div class="info-row">
               <span class="label">應收本金</span>
-              <span class="value">$200,000</span>
+              <span class="value" id="dueTodayPrice">$0</span>
             </div>
             <div class="info-row">
               <span class="label">客戶數</span>
-              <span class="value">5</span>
+              <span class="value" id="dueTodayCount">0</span>
             </div>
           </div>
         </div>
@@ -836,15 +974,15 @@
           <div class="card-content">
             <div class="info-row">
               <span class="label">總數</span>
-              <span class="value">25</span>
+              <span class="value" id="activeCount">0</span>
             </div>
             <div class="info-row">
               <span class="label">月收租金</span>
-              <span class="value">$200,000</span>
+              <span class="value" id="monthlyRent">$0</span>
             </div>
             <div class="info-row">
               <span class="label">平均租金</span>
-              <span class="value">$8,000</span>
+              <span class="value" id="avgRent">$0</span>
             </div>
           </div>
         </div>
@@ -853,15 +991,15 @@
           <div class="card-content">
             <div class="info-row">
               <span class="label">本月</span>
-              <span class="value">$1,500,000</span>
+              <span class="value">$0</span>
             </div>
             <div class="info-row">
               <span class="label">累計</span>
-              <span class="value">$5,000,000</span>
+              <span class="value">$0</span>
             </div>
             <div class="info-row">
               <span class="label">平均支出</span>
-              <span class="value">$200,000</span>
+              <span class="value">$0</span>
             </div>
           </div>
         </div>
@@ -870,15 +1008,15 @@
           <div class="card-content">
             <div class="info-row">
               <span class="label">筆數</span>
-              <span class="value">3</span>
+              <span class="value" id="overdueCount">0</span>
             </div>
             <div class="info-row">
               <span class="label">金額</span>
-              <span class="value">$75,000</span>
+              <span class="value" id="overdueAmount">$0</span>
             </div>
             <div class="info-row">
               <span class="label">逾期率</span>
-              <span class="value">12%</span>
+              <span class="value" id="overdueRate">0%</span>
             </div>
           </div>
         </div>
@@ -901,12 +1039,18 @@
             <!-- 客戶卡片範例 -->
             <div class="customer-card">
               <div class="card-header" onclick="toggleCustomerDetails(this)">
-                <h3>
-                  張三 
-                  <span class="status-badge status-active">租約中</span>
-                  <span class="due-date">下次繳款剩餘 3 天</span>
-                </h3>
-                <button class="edit-button" onclick="editCustomer('customer1')">✏️</button>
+                <div>
+                  <h3>${customer.name}</h3>
+                  <div class="payment-info">
+                    <span class="label">售價：</span>
+                    <span class="value">${formatAmount(customer.salePrice)}</span>
+                    <span class="label">租金：</span>
+                    <span class="value">${formatAmount(customer.rent)}/週</span>
+                    ${customer.unpaidAmount ? `<span class="unpaid-amount">未繳：${formatAmount(customer.unpaidAmount)}</span>` : ''}
+                    <span class="due-date ${daysLeft === 0 ? 'today' : ''}">${dueDateText}</span>
+                  </div>
+                </div>
+                <span class="status-badge status-${customer.status}">${getStatusBadgeText(customer.status)}</span>
               </div>
               <div class="card-content">
                 <div class="customer-details">
@@ -914,54 +1058,42 @@
                     <h4>基本資料</h4>
                     <div class="detail-item">
                       <span class="detail-label">身分證字號</span>
-                      <span class="detail-value">A123456789</span>
+                      <span class="detail-value">${customer.idNumber}</span>
                     </div>
                     <div class="detail-item">
                       <span class="detail-label">手機號碼</span>
-                      <span class="detail-value">0912-345-678</span>
+                      <span class="detail-value">${customer.phone}</span>
                     </div>
                     <div class="detail-item">
                       <span class="detail-label">戶籍地址</span>
-                      <span class="detail-value">台北市信義區信義路五段7號</span>
+                      <span class="detail-value">${customer.address}</span>
                     </div>
                     <div class="detail-item">
                       <span class="detail-label">通訊地址</span>
-                      <span class="detail-value">台北市信義區信義路五段7號</span>
+                      <span class="detail-value">${customer.contactAddress || customer.address}</span>
                     </div>
                   </div>
                   <div class="detail-group">
-                    <h4>合約資訊</h4>
+                    <h4>手機資訊</h4>
                     <div class="detail-item">
                       <span class="detail-label">手機型號</span>
-                      <span class="detail-value">iPhone 15 Pro Max</span>
+                      <span class="detail-value">${customer.model}</span>
                     </div>
                     <div class="detail-item">
                       <span class="detail-label">IMEI</span>
-                      <span class="detail-value">123456789012345</span>
+                      <span class="detail-value">${customer.imei}</span>
                     </div>
                     <div class="detail-item">
                       <span class="detail-label">螢幕密碼</span>
-                      <span class="detail-value">1234</span>
-                    </div>
-                    <div class="detail-item">
-                      <span class="detail-label">買賣價金</span>
-                      <span class="detail-value">$45,000</span>
-                    </div>
-                    <div class="detail-item">
-                      <span class="detail-label">租金</span>
-                      <span class="detail-value">$2,000/週</span>
-                    </div>
-                    <div class="detail-item">
-                      <span class="detail-label">合約日期</span>
-                      <span class="detail-value">2024/03/01</span>
+                      <span class="detail-value">${customer.screenPassword || '未設定'}</span>
                     </div>
                   </div>
                 </div>
                 <div class="action-buttons">
-                  <button class="button button-success" onclick="markAsPaid('customer1')">已繳款並續約</button>
-                  <button class="button button-primary" onclick="markAsBuyback('customer1')">已繳款買回</button>
-                  <button class="button button-danger" onclick="markAsUnpaid('customer1')">未繳款</button>
-                  <button class="button button-warning" onclick="showPartialPaymentForm('customer1')">未繳足款</button>
+                  <button class="button button-success" onclick="updateStatus('${customer._id}', 'paid')">${getStatusButtonText('paid')}</button>
+                  <button class="button button-primary" onclick="updateStatus('${customer._id}', 'buyback')">${getStatusButtonText('buyback')}</button>
+                  <button class="button button-warning" onclick="showPartialPaymentForm('${customer._id}')">${getStatusButtonText('partial')}</button>
+                  <button class="button button-danger" onclick="updateStatus('${customer._id}', 'locked')">${getStatusButtonText('locked')}</button>
                 </div>
               </div>
             </div>
@@ -1192,15 +1324,15 @@
             <div class="summary-content">
               <div class="summary-item">
                 <span class="label">收入</span>
-                <span class="value">$500,000</span>
+                <span class="value">$0</span>
               </div>
               <div class="summary-item">
                 <span class="label">支出</span>
-                <span class="value">$300,000</span>
+                <span class="value">$0</span>
               </div>
               <div class="summary-item">
                 <span class="label">淨利</span>
-                <span class="value">$200,000</span>
+                <span class="value">$0</span>
               </div>
             </div>
           </div>
@@ -1209,15 +1341,15 @@
             <div class="summary-content">
               <div class="summary-item">
                 <span class="label">收入</span>
-                <span class="value">$2,000,000</span>
+                <span class="value">$0</span>
               </div>
               <div class="summary-item">
                 <span class="label">支出</span>
-                <span class="value">$1,500,000</span>
+                <span class="value">$0</span>
               </div>
               <div class="summary-item">
                 <span class="label">淨利</span>
-                <span class="value">$500,000</span>
+                <span class="value">$0</span>
               </div>
             </div>
           </div>
@@ -1429,11 +1561,21 @@
         const card = document.createElement('div');
         card.className = 'customer-card';
         
-        // 計算剩餘天數
+        // 計算到期日（合約日+7天）
+        function calculateDueDate(contractDate) {
+          const date = new Date(contractDate);
+          date.setDate(date.getDate() + 7);
+          return date;
+        }
+
+        // 在渲染客戶列表時使用新的到期日計算
         const contractDate = new Date(customer.contractDate);
+        const dueDate = calculateDueDate(contractDate);
         const today = new Date();
-        const daysLeft = Math.ceil((contractDate - today) / (1000 * 60 * 60 * 24));
-        const dueDateText = daysLeft === 0 ? '今日須繳款' : `剩餘 ${daysLeft} 天`;
+        const daysLeft = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+        const dueDateText = daysLeft === 0 ? '今日須繳款' : 
+                           daysLeft < 0 ? '已逾期' :
+                           `剩餘 ${daysLeft} 天`;
         
         // 格式化金額
         const formatAmount = (amount) => {
@@ -1449,10 +1591,11 @@
                 <span class="value">${formatAmount(customer.salePrice)}</span>
                 <span class="label">租金：</span>
                 <span class="value">${formatAmount(customer.rent)}/週</span>
+                ${customer.unpaidAmount ? `<span class="unpaid-amount">未繳：${formatAmount(customer.unpaidAmount)}</span>` : ''}
                 <span class="due-date ${daysLeft === 0 ? 'today' : ''}">${dueDateText}</span>
               </div>
             </div>
-            <span class="status-badge status-${customer.status}">${getStatusText(customer.status)}</span>
+            <span class="status-badge status-${customer.status}">${getStatusBadgeText(customer.status)}</span>
           </div>
           <div class="card-content">
             <div class="customer-details">
@@ -1492,27 +1635,10 @@
               </div>
             </div>
             <div class="action-buttons">
-              <button class="button button-success" onclick="updateStatus('${customer._id}', 'paid')">已繳款續約</button>
-              <button class="button button-primary" onclick="updateStatus('${customer._id}', 'buyback')">已繳款買回</button>
-              <button class="button button-warning" onclick="showPartialPaymentForm('${customer._id}')">未繳足額</button>
-              <button class="button button-danger" onclick="updateStatus('${customer._id}', 'locked')">呆帳鎖機</button>
-            </div>
-            <div class="partial-payment-form" id="partial-payment-${customer._id}">
-              <input type="number" placeholder="已繳金額" id="paid-amount-${customer._id}">
-              <input type="number" placeholder="未繳金額" id="unpaid-amount-${customer._id}">
-              <button class="button button-warning" onclick="submitPartialPayment('${customer._id}')">確認</button>
-            </div>
-            <div class="notes">
-              <textarea placeholder="備註" id="notes-${customer._id}">${customer.notes || ''}</textarea>
-              <button class="button button-info" onclick="saveNotes('${customer._id}')">儲存備註</button>
-            </div>
-            <div class="file-downloads">
-              <button class="file-download-button" onclick="downloadFile('${customer._id}', 'contract')">
-                <i>📄</i> 下載合約
-              </button>
-              <button class="file-download-button" onclick="downloadFile('${customer._id}', 'id')">
-                <i>🪪</i> 下載身分證
-              </button>
+              <button class="button button-success" onclick="updateStatus('${customer._id}', 'paid')">${getStatusButtonText('paid')}</button>
+              <button class="button button-primary" onclick="updateStatus('${customer._id}', 'buyback')">${getStatusButtonText('buyback')}</button>
+              <button class="button button-warning" onclick="showPartialPaymentForm('${customer._id}')">${getStatusButtonText('partial')}</button>
+              <button class="button button-danger" onclick="updateStatus('${customer._id}', 'locked')">${getStatusButtonText('locked')}</button>
             </div>
           </div>
         `;
@@ -1554,10 +1680,40 @@
       const notes = document.getElementById(`notes-${customerId}`).value;
       
       try {
-        await updateCustomerNotes(customerId, notes);
+        const response = await fetch(`${API_BASE_URL}/customers/${customerId}/notes`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ notes })
+        });
+
+        if (!response.ok) throw new Error('儲存備註失敗');
+        
+        await response.json();
         showSuccess('備註已儲存');
       } catch (error) {
+        console.error('Error saving notes:', error);
         showError('儲存備註失敗');
+      }
+    }
+
+    // 更新客戶備註
+    async function updateCustomerNotes(customerId, notes) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/customers/${customerId}/notes`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ notes })
+        });
+
+        if (!response.ok) throw new Error('更新備註失敗');
+        return await response.json();
+      } catch (error) {
+        console.error('Error:', error);
+        throw error;
       }
     }
 
@@ -1590,14 +1746,26 @@
       return new Date(dateString).toLocaleDateString('zh-TW');
     }
 
-    function getStatusText(status) {
+    function getStatusBadgeText(status) {
       const statusMap = {
-        active: '進行中',
-        paid: '已付款',
-        unpaid: '未付款',
-        completed: '已完成'
+        active: '租約中',
+        paid: '已繳款續約',
+        unpaid: '未繳款',
+        partial: '未繳足額',
+        buyback: '已繳款買回',
+        locked: '呆帳鎖機'
       };
       return statusMap[status] || status;
+    }
+
+    function getStatusButtonText(status) {
+      const buttonTextMap = {
+        paid: '已繳款續約',
+        buyback: '已繳款買回',
+        partial: '未繳足額',
+        locked: '呆帳鎖機'
+      };
+      return buttonTextMap[status] || status;
     }
 
     function showError(message) {
@@ -1747,6 +1915,73 @@
           }
         });
       }
+
+      // 在新增客戶表單中添加到期日顯示
+      const contractDateInput = newCustomerForm.querySelector('[name="contractDate"]');
+      if (contractDateInput) {
+        contractDateInput.addEventListener('change', function(e) {
+          const dueDate = calculateDueDate(e.target.value);
+          const dueDateDisplay = document.getElementById('dueDateDisplay');
+          if (dueDateDisplay) {
+            dueDateDisplay.textContent = `到期日：${dueDate.toLocaleDateString('zh-TW')}`;
+          }
+        });
+      }
+
+      // 計算總覽數據
+      async function calculateOverviewData() {
+        try {
+          const { customers } = await fetchCustomers(1, 1000); // 獲取所有客戶
+          const today = new Date();
+          
+          // 今日到期數據
+          const dueTodayCustomers = customers.filter(customer => {
+            const dueDate = calculateDueDate(customer.contractDate);
+            return dueDate.toDateString() === today.toDateString();
+          });
+          
+          const dueTodayRent = dueTodayCustomers.reduce((sum, customer) => sum + customer.rent, 0);
+          const dueTodayPrice = dueTodayCustomers.reduce((sum, customer) => sum + customer.salePrice, 0);
+          
+          // 進行中合約
+          const activeCustomers = customers.filter(c => c.status === 'active');
+          const totalRent = activeCustomers.reduce((sum, customer) => sum + customer.rent, 0);
+          const avgRent = activeCustomers.length ? Math.round(totalRent / activeCustomers.length) : 0;
+          
+          // 逾期帳款
+          const overdueCustomers = customers.filter(customer => {
+            const dueDate = calculateDueDate(customer.contractDate);
+            return dueDate < today && customer.status !== 'paid' && customer.status !== 'buyback';
+          });
+          
+          const overdueAmount = overdueCustomers.reduce((sum, customer) => {
+            return sum + (customer.unpaidAmount || customer.rent);
+          }, 0);
+          
+          const overdueRate = customers.length ? 
+            Math.round((overdueCustomers.length / customers.length) * 100) : 0;
+          
+          // 更新總覽卡片
+          document.querySelector('#dueTodayRent').textContent = formatAmount(dueTodayRent);
+          document.querySelector('#dueTodayPrice').textContent = formatAmount(dueTodayPrice);
+          document.querySelector('#dueTodayCount').textContent = dueTodayCustomers.length;
+          
+          document.querySelector('#activeCount').textContent = activeCustomers.length;
+          document.querySelector('#monthlyRent').textContent = formatAmount(totalRent * 4);
+          document.querySelector('#avgRent').textContent = formatAmount(avgRent);
+          
+          document.querySelector('#overdueCount').textContent = overdueCustomers.length;
+          document.querySelector('#overdueAmount').textContent = formatAmount(overdueAmount);
+          document.querySelector('#overdueRate').textContent = `${overdueRate}%`;
+          
+        } catch (error) {
+          console.error('Error calculating overview data:', error);
+        }
+      }
+
+      // 在頁面載入和切換到總覽頁時更新數據
+      calculateOverviewData();
+      document.querySelector('[data-section="overview"]').addEventListener('click', calculateOverviewData);
     });
 
     // 客戶卡片展開/收起
@@ -1784,6 +2019,162 @@
       // 2. 填充編輯表單
       // 3. 顯示編輯表單
       alert('編輯功能開發中');
+    }
+
+    // 合約生成功能
+    async function fillContract() {
+      const data = {
+        name: document.getElementById('name').value,
+        id: document.getElementById('id').value,
+        address: document.getElementById('address').value,
+        model: document.getElementById('model').value,
+        capacity: document.getElementById('capacity').value,
+        hasCreditor: document.getElementById('hasCreditor').value,
+        defect: document.getElementById('defect').value,
+        imei: document.getElementById('imei').value,
+        price: document.getElementById('price').value,
+        rent: document.getElementById('rent').value,
+        bank: document.getElementById('bank').value,
+        accountName: document.getElementById('accountName').value,
+        account: document.getElementById('account').value
+      };
+
+      // 驗證必填欄位
+      const requiredFields = ['name', 'id', 'address', 'model', 'imei', 'price', 'rent'];
+      for (const field of requiredFields) {
+        if (!data[field]) {
+          showError(`請填寫${getFieldLabel(field)}`);
+          return;
+        }
+      }
+
+      // 填充合約欄位
+      fillContractFields(data);
+      
+      // 啟用下載按鈕
+      document.getElementById('downloadBtn').disabled = false;
+    }
+
+    function getFieldLabel(field) {
+      const labelMap = {
+        name: '姓名',
+        id: '身分證字號',
+        address: '地址',
+        model: '手機型號',
+        imei: 'IMEI碼',
+        price: '總價',
+        rent: '租金'
+      };
+      return labelMap[field] || field;
+    }
+
+    function fillContractFields(data) {
+      // 第一頁
+      setField('sellerNameField', data.name);
+      setField('sellerIdField', data.id);
+      setField('sellerAddressField', data.address);
+      setField('phoneModelField', `${data.model} ${data.capacity || ''}`);
+      setField('imeiField', data.imei);
+      setField('totalPriceField', formatAmount(data.price));
+      setField('bankBranchField', data.bank);
+      setField('accountNameField', data.accountName);
+      setField('accountNumberField', data.account);
+      setField('signerIdField', data.id);
+
+      // 設置日期
+      const now = new Date();
+      setField('yearField', now.getFullYear() - 1911);
+      setField('monthField', now.getMonth() + 1);
+      setField('dayField', now.getDate());
+
+      // 設置債權人選項
+      setField('creditorNoneField', data.hasCreditor === '無' ? 'V' : '');
+      setField('creditorYesField', data.hasCreditor === '有' ? 'V' : '');
+
+      // 設置瑕疵項目
+      const defectFields = {
+        '螢幕觸控異常': 'defectTouch',
+        '螢幕破裂': 'defectCrack',
+        '螢幕顯示功能異常': 'defectDisplay',
+        '充電功能異常': 'defectCharge',
+        '實體部件異常': 'defectHardware'
+      };
+
+      Object.entries(defectFields).forEach(([defectType, fieldId]) => {
+        setField(fieldId, data.defect === defectType ? 'V' : '');
+      });
+
+      // 第二頁
+      setField('contractorNameField', data.name);
+      setField('model2Field', `${data.model} ${data.capacity || ''}`);
+      setField('imei2Field', data.imei);
+      setField('price2Field', formatAmount(data.price));
+      setField('rent2Field', formatAmount(data.rent));
+      setField('address2Field', data.address);
+      setField('id2Field', data.id);
+
+      // 設置租賃期間
+      const startDate = new Date();
+      const endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 7);
+
+      setField('startYearField', startDate.getFullYear() - 1911);
+      setField('startMonthField', startDate.getMonth() + 1);
+      setField('startDayField', startDate.getDate());
+      setField('endYearField', endDate.getFullYear() - 1911);
+      setField('endMonthField', endDate.getMonth() + 1);
+      setField('endDayField', endDate.getDate());
+
+      // 第三頁
+      setField('signerId3Field', data.id);
+      setField('year3Field', now.getFullYear() - 1911);
+      setField('month3Field', now.getMonth() + 1);
+      setField('day3Field', now.getDate());
+    }
+
+    function setField(id, value) {
+      const field = document.getElementById(id);
+      if (field) {
+        field.textContent = value;
+        field.style.visibility = 'visible';
+      }
+    }
+
+    async function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('p', 'px', [1448, 2048]);
+      
+      // 顯示載入中
+      document.querySelector('.loading-overlay').style.display = 'flex';
+      
+      try {
+        // 轉換每一頁
+        for (let i = 1; i <= 3; i++) {
+          const page = document.getElementById(`contractPage${i}`);
+          const canvas = await html2canvas(page, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true
+          });
+          
+          const imgData = canvas.toDataURL('image/jpeg', 1.0);
+          
+          if (i > 1) {
+            pdf.addPage([1448, 2048], 'p');
+          }
+          
+          pdf.addImage(imgData, 'JPEG', 0, 0, 1448, 2048);
+        }
+        
+        // 下載 PDF
+        pdf.save('contract.pdf');
+      } catch (error) {
+        console.error('Error generating PDF:', error);
+        showError('生成 PDF 失敗');
+      } finally {
+        // 隱藏載入中
+        document.querySelector('.loading-overlay').style.display = 'none';
+      }
     }
   </script>
 </body>
