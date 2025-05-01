@@ -1157,10 +1157,13 @@
                   </div>
                 </div>
                 <div class="action-buttons">
-                  <button class="button button-primary" onclick="updateStatus('${customer._id}', 'buyback')">${getStatusButtonText('buyback')}</button>
-                  ${daysLeft === 0 ? `<button class="button button-success" onclick="recordPayment('${customer._id}', ${customer.rent})">已繳款</button>` : ''}
+                  <button class="button button-primary" onclick="updateStatus('${customer._id}', 'buyback')">${getStatusText('buyback')}</button>
+                  ${daysLeft === 0 ? 
+                    `<button class="button button-success" onclick="recordPayment('${customer._id}', ${customer.rent})">已繳款</button>` 
+                    : ''
+                  }
                   <button class="button button-warning" onclick="showPartialPaymentForm('${customer._id}')">未繳足額</button>
-                  <button class="button button-danger" onclick="updateStatus('${customer._id}', 'locked')">${getStatusButtonText('locked')}</button>
+                  <button class="button button-danger" onclick="updateStatus('${customer._id}', 'locked')">${getStatusText('locked')}</button>
                 </div>
                 <div class="partial-payment-form" id="partial-payment-${customer._id}">
                   <input type="number" placeholder="已繳金額" id="paid-amount-${customer._id}">
@@ -1631,38 +1634,71 @@
 
     // 渲染客戶列表
     function renderCustomerList(customers) {
-      const customerList = document.querySelector('.customer-cards');
-      if (!customerList) return;
+  const customerList = document.querySelector('.customer-cards');
+  customerList.innerHTML = '';
 
-      customerList.innerHTML = '';
-      
-      if (customers.length === 0) {
-        customerList.innerHTML = '<p class="no-data">暫無客戶資料</p>';
-        return;
-      }
+  if (!customers || customers.length === 0) {
+    customerList.innerHTML = '<p class="no-data">暫無客戶資料</p>';
+    return;
+  }
 
-      customers.forEach(customer => {
+  customers.forEach(customer => {
+    const card = document.createElement('div');
+    card.className = 'customer-card';
+
+    const header = document.createElement('div');
+    header.className = 'card-header';
+    header.onclick = function () {
+      card.classList.toggle('expanded');
+    };
+
+    const name = document.createElement('h3');
+    name.textContent = customer.name;
+    header.appendChild(name);
+
+    const statusBadge = document.createElement('span');
+    statusBadge.className = 'status-badge';
+    statusBadge.textContent = customer.status || '租賃中';
+    header.appendChild(statusBadge);
+
+    const content = document.createElement('div');
+    content.className = 'card-content';
+
+    const details = document.createElement('div');
+    details.className = 'customer-details';
+    details.innerHTML = `
+      <div class="detail-group">
+        <div class="detail-item"><span class="detail-label">身分證字號</span><span class="detail-value">${customer.idNumber || ''}</span></div>
+        <div class="detail-item"><span class="detail-label">手機號碼</span><span class="detail-value">${customer.phone || ''}</span></div>
+        <div class="detail-item"><span class="detail-label">戶籍地址</span><span class="detail-value">${customer.address || ''}</span></div>
+        <div class="detail-item"><span class="detail-label">通訊地址</span><span class="detail-value">${customer.contactAddress || customer.address || ''}</span></div>
+      </div>
+    `;
+
+    content.appendChild(details);
+    card.appendChild(header);
+    card.appendChild(content);
+    customerList.appendChild(card);
+  });
+}
+
+
+      customers.forEach(function(customer) {
         const card = document.createElement('div');
         card.className = 'customer-card';
         
         // 計算下次繳款日
-        function calculateNextPaymentDate(lastPaymentDate) {
-          const date = new Date(lastPaymentDate);
-          date.setDate(date.getDate() + 7);
-          return date;
-        }
-
-        // 在渲染客戶列表時使用新的到期日計算
         const contractDate = new Date(customer.contractDate);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
         // 獲取最後一次繳款日期
         const lastPayment = customer.paymentHistory ? 
-          customer.paymentHistory.sort((a, b) => new Date(b.date) - new Date(a.date))[0] : null;
+          customer.paymentHistory.sort(function(a, b) { return new Date(b.date) - new Date(a.date); })[0] : null;
 
         // 計算下次繳款日
-        const nextPaymentDate = lastPayment ? calculateNextPaymentDate(lastPayment.date) : calculateDueDate(contractDate);
+        const nextPaymentDate = lastPayment ? new Date(lastPayment.date) : new Date(contractDate);
+        nextPaymentDate.setDate(nextPaymentDate.getDate() + 7);
         nextPaymentDate.setHours(0, 0, 0, 0);
 
         const daysLeft = Math.ceil((nextPaymentDate - today) / (1000 * 60 * 60 * 24));
@@ -1670,121 +1706,282 @@
         // 如果狀態是已繳款買回或呆帳鎖機，不顯示繳款資訊
         const dueDateText = customer.status === 'buyback' || customer.status === 'locked' ? '' :
           daysLeft === 0 ? '今日須繳款' : 
-          daysLeft < 0 ? `已遲繳 ${Math.abs(daysLeft)} 日` :
-          `剩餘 ${daysLeft} 天`;
+          daysLeft < 0 ? '已遲繳 ' + Math.abs(daysLeft) + ' 日' :
+          '剩餘 ' + daysLeft + ' 天';
 
         // 計算未繳餘額
         const unpaidAmount = customer.status === 'partial' ? customer.unpaidAmount : 0;
 
-        // 格式化金額
-        const formatAmount = (amount) => {
-          if (!amount) return '0';
-          return new Intl.NumberFormat('zh-TW').format(Math.round(amount));
-        };
+        // 建立卡片標題
+        const cardHeader = document.createElement('div');
+        cardHeader.className = 'card-header';
+        cardHeader.onclick = function() { toggleCustomerDetails(cardHeader); };
 
-        card.innerHTML = `
-          <div class="card-header" onclick="toggleCustomerDetails(this)">
-            <div>
-              <h3>${customer.name}</h3>
-              ${customer.notes ? `
-              <div class="notes-section">
-                <span class="detail-label">備註</span>
-                <span class="detail-value">${customer.notes}</span>
-              </div>
-              ` : ''}
-              <div class="payment-info">
-                <span class="label">售價：</span>
-                <span class="value">${formatAmount(customer.salePrice)}</span>
-                <span class="label">租金：</span>
-                <span class="value">${formatAmount(customer.rent)}/週</span>
-                ${unpaidAmount > 0 ? `<span class="unpaid-amount">尚餘：${formatAmount(unpaidAmount)}</span>` : ''}
-                ${dueDateText ? `<span class="due-date ${daysLeft === 0 ? 'today' : ''}">${dueDateText}</span>` : ''}
-              </div>
-            </div>
-            <span class="status-badge status-${getStatusBadgeText(customer.status)}">${getStatusBadgeText(customer.status)}</span>
-          </div>
-          <div class="card-content">
-            <div class="customer-details">
-              <div class="detail-group">
-                <h4>基本資料</h4>
-                <div class="detail-item">
-                  <span class="detail-label">身分證字號</span>
-                  <span class="detail-value">${customer.idNumber}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">手機號碼</span>
-                  <span class="detail-value">${customer.phone}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">戶籍地址</span>
-                  <span class="detail-value">${customer.address}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">通訊地址</span>
-                  <span class="detail-value">${customer.contactAddress || customer.address}</span>
-                </div>
-                ${customer.notes ? `
-                <div class="detail-item notes-section">
-                  <span class="detail-label">備註</span>
-                  <span class="detail-value">${customer.notes}</span>
-                </div>
-                ` : ''}
-                <div class="detail-item payment-history">
-                  <span class="detail-label">繳款紀錄</span>
-                  <div class="payment-history-content">
-                    ${customer.paymentHistory ? customer.paymentHistory.map(payment => `
-                      <div class="payment-record">
-                        <span class="payment-date">${formatDate(payment.date)}</span>
-                        <span class="payment-amount">${formatAmount(payment.amount)}</span>
-                        <span class="payment-status">${payment.status}</span>
-                      </div>
-                    `).join('') : '無繳款紀錄'}
-                  </div>
-                </div>
-              </div>
-              <div class="detail-group">
-                <h4>手機資訊</h4>
-                <div class="detail-item">
-                  <span class="detail-label">手機型號</span>
-                  <span class="detail-value">${customer.model}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">IMEI</span>
-                  <span class="detail-value">${customer.imei}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="detail-label">螢幕密碼</span>
-                  <span class="detail-value">${customer.screenPassword || '未設定'}</span>
-                </div>
-              </div>
-            </div>
-            <div class="action-buttons">
-              <button class="button button-primary" onclick="updateStatus('${customer._id}', 'buyback')">${getStatusButtonText('buyback')}</button>
-              ${daysLeft === 0 ? `<button class="button button-success" onclick="recordPayment('${customer._id}', ${customer.rent})">已繳款</button>` : ''}
-              <button class="button button-warning" onclick="showPartialPaymentForm('${customer._id}')">未繳足額</button>
-              <button class="button button-danger" onclick="updateStatus('${customer._id}', 'locked')">${getStatusButtonText('locked')}</button>
-            </div>
-            <div class="partial-payment-form" id="partial-payment-${customer._id}">
-              <input type="number" placeholder="已繳金額" id="paid-amount-${customer._id}">
-              <input type="number" placeholder="未繳金額" id="unpaid-amount-${customer._id}">
-              <button class="button button-warning" onclick="submitPartialPayment('${customer._id}')">確認</button>
-            </div>
-            <div class="notes">
-              <textarea placeholder="備註" id="notes-${customer._id}">${customer.notes || ''}</textarea>
-              <button class="button button-info" onclick="saveNotes('${customer._id}')">儲存備註</button>
-            </div>
-            <div class="file-downloads">
-              <button class="file-download-button" onclick="downloadFile('${customer._id}', 'contract')">
-                <i>📄</i> 下載合約
-              </button>
-              <button class="file-download-button" onclick="downloadFile('${customer._id}', 'id')">
-                <i>🪪</i> 下載身分證
-              </button>
-            </div>
-          </div>
-        `;
+        const headerContent = document.createElement('div');
+        const name = document.createElement('h3');
+        name.textContent = customer.name;
+        headerContent.appendChild(name);
+
+        if (customer.notes) {
+          const notesSection = document.createElement('div');
+          notesSection.className = 'notes-section';
+          const notesLabel = document.createElement('span');
+          notesLabel.className = 'detail-label';
+          notesLabel.textContent = '備註';
+          const notesValue = document.createElement('span');
+          notesValue.className = 'detail-value';
+          notesValue.textContent = customer.notes;
+          notesSection.appendChild(notesLabel);
+          notesSection.appendChild(notesValue);
+          headerContent.appendChild(notesSection);
+        }
+
+        const paymentInfo = document.createElement('div');
+        paymentInfo.className = 'payment-info';
+        
+        const salePriceLabel = document.createElement('span');
+        salePriceLabel.className = 'label';
+        salePriceLabel.textContent = '售價：';
+        const salePriceValue = document.createElement('span');
+        salePriceValue.className = 'value';
+        salePriceValue.textContent = customer.salePrice ? new Intl.NumberFormat('zh-TW').format(Math.round(customer.salePrice)) : '0';
+        
+        salePriceValue.textContent = formatAmount(customer.salePrice);
+        
+        const rentLabel = document.createElement('span');
+        rentLabel.className = 'label';
+        rentLabel.textContent = '租金：';
+        const rentValue = document.createElement('span');
+        rentValue.className = 'value';
+        rentValue.textContent = formatAmount(customer.rent) + '/週';
+
+        paymentInfo.appendChild(salePriceLabel);
+        paymentInfo.appendChild(salePriceValue);
+        paymentInfo.appendChild(rentLabel);
+        paymentInfo.appendChild(rentValue);
+
+        if (unpaidAmount > 0) {
+          const unpaidAmountSpan = document.createElement('span');
+          unpaidAmountSpan.className = 'unpaid-amount';
+          unpaidAmountSpan.textContent = '尚餘：' + formatAmount(unpaidAmount);
+          paymentInfo.appendChild(unpaidAmountSpan);
+        }
+
+        if (dueDateText) {
+          const dueDateSpan = document.createElement('span');
+          dueDateSpan.className = 'due-date' + (daysLeft === 0 ? ' today' : '');
+          dueDateSpan.textContent = dueDateText;
+          paymentInfo.appendChild(dueDateSpan);
+        }
+
+        headerContent.appendChild(paymentInfo);
+        cardHeader.appendChild(headerContent);
+
+        const statusBadge = document.createElement('span');
+        statusBadge.className = 'status-badge status-' + customer.status;
+        statusBadge.textContent = getStatusText(customer.status);
+        cardHeader.appendChild(statusBadge);
+
+        // 建立卡片內容
+        const cardContent = document.createElement('div');
+        cardContent.className = 'card-content';
+
+        // 建立客戶詳細資訊
+        const customerDetails = document.createElement('div');
+        customerDetails.className = 'customer-details';
+
+        // 基本資料區塊
+        const basicInfoGroup = document.createElement('div');
+        basicInfoGroup.className = 'detail-group';
+        const basicInfoTitle = document.createElement('h4');
+        basicInfoTitle.textContent = '基本資料';
+        basicInfoGroup.appendChild(basicInfoTitle);
+
+        const idNumberItem = createDetailItem('身分證字號', customer.idNumber);
+        const phoneItem = createDetailItem('手機號碼', customer.phone);
+        const addressItem = createDetailItem('戶籍地址', customer.address);
+        const contactAddressItem = createDetailItem('通訊地址', customer.contactAddress || customer.address);
+
+        basicInfoGroup.appendChild(idNumberItem);
+        basicInfoGroup.appendChild(phoneItem);
+        basicInfoGroup.appendChild(addressItem);
+        basicInfoGroup.appendChild(contactAddressItem);
+
+        // 繳款紀錄
+        const paymentHistoryItem = document.createElement('div');
+        paymentHistoryItem.className = 'detail-item payment-history';
+        const paymentHistoryLabel = document.createElement('span');
+        paymentHistoryLabel.className = 'detail-label';
+        paymentHistoryLabel.textContent = '繳款紀錄';
+        const paymentHistoryContent = document.createElement('div');
+        paymentHistoryContent.className = 'payment-history-content';
+
+        if (customer.paymentHistory && customer.paymentHistory.length > 0) {
+          customer.paymentHistory.forEach(function(payment) {
+            const paymentRecord = document.createElement('div');
+            paymentRecord.className = 'payment-record';
+            
+            const paymentDate = document.createElement('span');
+            paymentDate.className = 'payment-date';
+            paymentDate.textContent = formatDate(payment.date);
+            
+            const paymentAmount = document.createElement('span');
+            paymentAmount.className = 'payment-amount';
+            paymentAmount.textContent = formatAmount(payment.amount);
+            
+            const paymentStatus = document.createElement('span');
+            paymentStatus.className = 'payment-status';
+            paymentStatus.textContent = payment.status;
+
+            paymentRecord.appendChild(paymentDate);
+            paymentRecord.appendChild(paymentAmount);
+            paymentRecord.appendChild(paymentStatus);
+            paymentHistoryContent.appendChild(paymentRecord);
+          });
+        } else {
+          paymentHistoryContent.textContent = '無繳款紀錄';
+        }
+
+        paymentHistoryItem.appendChild(paymentHistoryLabel);
+        paymentHistoryItem.appendChild(paymentHistoryContent);
+        basicInfoGroup.appendChild(paymentHistoryItem);
+
+        // 手機資訊區塊
+        const phoneInfoGroup = document.createElement('div');
+        phoneInfoGroup.className = 'detail-group';
+        const phoneInfoTitle = document.createElement('h4');
+        phoneInfoTitle.textContent = '手機資訊';
+        phoneInfoGroup.appendChild(phoneInfoTitle);
+
+        const modelItem = createDetailItem('手機型號', customer.model);
+        const imeiItem = createDetailItem('IMEI', customer.imei);
+        const screenPasswordItem = createDetailItem('螢幕密碼', customer.screenPassword || '未設定');
+
+        phoneInfoGroup.appendChild(modelItem);
+        phoneInfoGroup.appendChild(imeiItem);
+        phoneInfoGroup.appendChild(screenPasswordItem);
+
+        customerDetails.appendChild(basicInfoGroup);
+        customerDetails.appendChild(phoneInfoGroup);
+        cardContent.appendChild(customerDetails);
+
+        // 動作按鈕區塊
+        const actionButtons = document.createElement('div');
+        actionButtons.className = 'action-buttons';
+
+        const buybackButton = createButton('button-primary', '已繳款買回', function() { updateStatus(customer._id, 'buyback'); });
+        actionButtons.appendChild(buybackButton);
+
+        if (daysLeft === 0) {
+          const paidButton = createButton('button-success', '已繳款', function() { recordPayment(customer._id, customer.rent); });
+          actionButtons.appendChild(paidButton);
+        }
+
+        const partialButton = createButton('button-warning', '未繳足額', function() { showPartialPaymentForm(customer._id); });
+        const lockedButton = createButton('button-danger', '呆帳鎖機', function() { updateStatus(customer._id, 'locked'); });
+
+        actionButtons.appendChild(partialButton);
+        actionButtons.appendChild(lockedButton);
+        cardContent.appendChild(actionButtons);
+
+        // 部分繳款表單
+        const partialPaymentForm = document.createElement('div');
+        partialPaymentForm.className = 'partial-payment-form';
+        partialPaymentForm.id = 'partial-payment-' + customer._id;
+
+        const paidAmountInput = document.createElement('input');
+        paidAmountInput.type = 'number';
+        paidAmountInput.placeholder = '已繳金額';
+        paidAmountInput.id = 'paid-amount-' + customer._id;
+
+        const unpaidAmountInput = document.createElement('input');
+        unpaidAmountInput.type = 'number';
+        unpaidAmountInput.placeholder = '未繳金額';
+        unpaidAmountInput.id = 'unpaid-amount-' + customer._id;
+
+        const confirmButton = createButton('button-warning', '確認', function() { submitPartialPayment(customer._id); });
+
+        partialPaymentForm.appendChild(paidAmountInput);
+        partialPaymentForm.appendChild(unpaidAmountInput);
+        partialPaymentForm.appendChild(confirmButton);
+        cardContent.appendChild(partialPaymentForm);
+
+        // 檔案下載區塊
+        const fileDownloads = document.createElement('div');
+        fileDownloads.className = 'file-downloads';
+
+        const contractButton = createFileDownloadButton('📄', '下載合約', function() { downloadFile(customer._id, 'contract'); });
+        const idButton = createFileDownloadButton('🪪', '下載身分證', function() { downloadFile(customer._id, 'id'); });
+
+        fileDownloads.appendChild(contractButton);
+        fileDownloads.appendChild(idButton);
+        cardContent.appendChild(fileDownloads);
+
+        // 組合卡片
+        card.appendChild(cardHeader);
+        card.appendChild(cardContent);
         customerList.appendChild(card);
       });
+    }
+
+    // 輔助函數
+    function createDetailItem(label, value) {
+      const item = document.createElement('div');
+      item.className = 'detail-item';
+      
+      const labelSpan = document.createElement('span');
+      labelSpan.className = 'detail-label';
+      labelSpan.textContent = label;
+      
+      const valueSpan = document.createElement('span');
+      valueSpan.className = 'detail-value';
+      valueSpan.textContent = value;
+      
+      item.appendChild(labelSpan);
+      item.appendChild(valueSpan);
+      return item;
+    }
+
+    function formatAmount(amount) {
+      if (!amount) return '0';
+      return new Intl.NumberFormat('zh-TW').format(Math.round(amount));
+    }
+
+    function formatDate(date) {
+      return new Date(date).toLocaleDateString('zh-TW');
+    }
+
+    function getStatusText(status) {
+      const statusMap = {
+        active: '租賃中',
+        paid: '已繳款續約',
+        unpaid: '未繳款',
+        partial: '未繳足額',
+        buyback: '已繳款買回',
+        locked: '呆帳鎖機'
+      };
+      return statusMap[status] || '租賃中';
+    }
+
+    function createButton(className, text, onClick) {
+      const button = document.createElement('button');
+      button.className = `button ${className}`;
+      button.textContent = text;
+      button.onclick = onClick;
+      return button;
+    }
+
+    function createFileDownloadButton(icon, text, onClick) {
+      const button = document.createElement('button');
+      button.className = 'file-download-button';
+      button.onclick = onClick;
+      
+      const iconSpan = document.createElement('i');
+      iconSpan.textContent = icon;
+      
+      button.appendChild(iconSpan);
+      button.appendChild(document.createTextNode(` ${text}`));
+      return button;
     }
 
     // 顯示部分付款表單
