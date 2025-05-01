@@ -528,25 +528,25 @@
     <nav>
       <ul class="nav-menu">
         <li class="nav-item">
-          <a href="#overview" class="nav-link active">
+          <a href="#overview" class="nav-link active" data-section="overview">
             <i>📊</i>
             <span>總覽</span>
           </a>
         </li>
         <li class="nav-item">
-          <a href="#customers" class="nav-link">
+          <a href="#customers" class="nav-link" data-section="customers">
             <i>👥</i>
             <span>客戶管理</span>
           </a>
         </li>
         <li class="nav-item">
-          <a href="#contract" class="nav-link">
+          <a href="#contract" class="nav-link" data-section="contract">
             <i>📝</i>
             <span>合約管理</span>
           </a>
         </li>
         <li class="nav-item">
-          <a href="#accounting" class="nav-link">
+          <a href="#accounting" class="nav-link" data-section="accounting">
             <i>💰</i>
             <span>帳務管理</span>
           </a>
@@ -1268,22 +1268,28 @@
       updatePaginationButtons();
       // 獲取客戶列表
       fetchCustomers();
-    });
 
-    // 頁面切換功能
-    document.querySelectorAll('.nav-link').forEach(link => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        
-        // 移除所有活動狀態
-        document.querySelectorAll('.nav-link').forEach(nav => nav.classList.remove('active'));
-        document.querySelectorAll('.page-section').forEach(section => section.classList.remove('active'));
-        
-        // 添加當前活動狀態
-        link.classList.add('active');
-        const sectionId = link.getAttribute('href').substring(1);
-        document.getElementById(sectionId).classList.add('active');
+      // 設置導航欄事件監聽器
+      const navLinks = document.querySelectorAll('.nav-link');
+      const sections = document.querySelectorAll('.page-section');
+
+      navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          
+          // 移除所有活動狀態
+          navLinks.forEach(nav => nav.classList.remove('active'));
+          sections.forEach(section => section.classList.remove('active'));
+          
+          // 添加當前活動狀態
+          link.classList.add('active');
+          const sectionId = link.getAttribute('data-section');
+          document.getElementById(sectionId).classList.add('active');
+        });
       });
+
+      // 初始化第一個頁面
+      document.querySelector('.nav-link.active').click();
     });
 
     // 客戶卡片展開/收起功能
