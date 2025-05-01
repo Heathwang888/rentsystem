@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <title>手機租賃管理後台</title>
-  // ... existing code ...
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     :root {
       --primary-color: #1976d2;
@@ -18,227 +20,227 @@
       --background-color: #f5f5f5;
       --card-shadow: 0 2px 8px rgba(0,0,0,0.1);
       --card-hover-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      --sidebar-width: 240px;
     }
 
-    // ... existing code ...
-
-    /* 總覽卡片樣式 */
-    .overview-cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 2rem;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-    .overview-card {
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      line-height: 1.6;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* 側邊欄樣式 */
+    .sidebar {
+      width: var(--sidebar-width);
       background: white;
-      padding: 1.5rem;
-      border-radius: 12px;
+      padding: 1rem;
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
       box-shadow: var(--card-shadow);
-      transition: transform 0.2s, box-shadow 0.2s;
+      z-index: 1000;
     }
 
-    .overview-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--card-hover-shadow);
-    }
-
-    .overview-card h3 {
-      color: var(--text-secondary);
-      font-size: 1rem;
+    .sidebar-header {
+      padding: 1rem;
+      text-align: center;
+      border-bottom: 1px solid var(--border-color);
       margin-bottom: 1rem;
+    }
+
+    .sidebar-header h1 {
+      font-size: 1.25rem;
+      color: var(--text-color);
+    }
+
+    .nav-menu {
+      list-style: none;
+    }
+
+    .nav-item {
+      margin-bottom: 0.5rem;
+    }
+
+    .nav-link {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-    }
-
-    .overview-card .amount {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: var(--text-color);
-      margin-bottom: 0.5rem;
-    }
-
-    .overview-card .count {
-      font-size: 1.25rem;
+      padding: 0.75rem 1rem;
       color: var(--text-secondary);
-      margin-bottom: 0.5rem;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: all 0.2s;
     }
 
-    .overview-card .details {
+    .nav-link:hover {
+      background: var(--background-color);
+      color: var(--text-color);
+    }
+
+    .nav-link.active {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .nav-link i {
+      margin-right: 0.75rem;
+      font-size: 1.25rem;
+    }
+
+    /* 主內容區樣式 */
+    .main-content {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      padding: 2rem;
+    }
+
+    /* 頁面切換動畫 */
+    .page-section {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .page-section.active {
+      display: block;
+      opacity: 1;
+    }
+
+    /* 客戶卡片展開樣式 */
+    .customer-card {
+      position: relative;
+      overflow: hidden;
+      background: white;
+      border-radius: 8px;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 1rem;
+    }
+
+    .customer-card .card-header {
+      cursor: pointer;
+      padding: 1.5rem;
+    }
+
+    .customer-card .card-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+      background: var(--background-color);
+    }
+
+    .customer-card.expanded .card-content {
+      max-height: 1000px;
+      padding: 1.5rem;
+    }
+
+    .customer-details {
       display: grid;
-      gap: 0.75rem;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
       margin-top: 1rem;
-      padding-top: 1rem;
-      border-top: 1px solid var(--border-color);
     }
 
-    .detail-row {
+    .detail-group {
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: var(--card-shadow);
+    }
+
+    .detail-group h4 {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .detail-item {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    .detail-item:last-child {
+      margin-bottom: 0;
     }
 
     .detail-label {
       color: var(--text-secondary);
-      font-size: 0.875rem;
     }
 
     .detail-value {
       font-weight: 500;
-      color: var(--text-color);
     }
 
-    .overview-card.today {
-      border-left: 4px solid var(--warning-color);
+    .expand-icon {
+      position: absolute;
+      right: 1.5rem;
+      top: 1.5rem;
+      transition: transform 0.3s;
     }
 
-    .overview-card.active {
-      border-left: 4px solid var(--primary-color);
+    .customer-card.expanded .expand-icon {
+      transform: rotate(180deg);
     }
 
-    .overview-card.completed {
-      border-left: 4px solid var(--success-color);
-    }
-
-    .overview-card.overdue {
-      border-left: 4px solid var(--error-color);
-    }
-
-    .overview-card.total {
-      border-left: 4px solid #9c27b0;
-    }
-
-    /* 客戶列表過濾器 */
-    .filter-tabs {
-      display: flex;
-      gap: 0.75rem;
-      margin-bottom: 2rem;
-      overflow-x: auto;
-      padding-bottom: 0.75rem;
-      scrollbar-width: none;
-    }
-
-    .filter-tabs::-webkit-scrollbar {
-      display: none;
-    }
-
-    .filter-tab {
-      padding: 0.75rem 1.25rem;
-      border-radius: 24px;
+    /* 合約生成表單樣式 */
+    .contract-form {
       background: white;
-      color: var(--text-secondary);
-      border: 1px solid var(--border-color);
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.2s;
-      font-weight: 500;
-    }
-
-    .filter-tab:hover {
-      background: var(--background-color);
-    }
-
-    .filter-tab.active {
-      background: var(--primary-color);
-      color: white;
-      border-color: var(--primary-color);
-    }
-
-    /* 客戶卡片樣式 */
-    .customer-cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .customer-card {
-      background: white;
-      border-radius: 12px;
-      padding: 1.5rem;
+      padding: 2rem;
+      border-radius: 8px;
       box-shadow: var(--card-shadow);
-      transition: transform 0.2s, box-shadow 0.2s;
     }
 
-    .customer-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--card-hover-shadow);
-    }
-
-    .customer-card h3 {
-      margin-bottom: 1rem;
-      color: var(--text-color);
-      font-size: 1.25rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .customer-info {
-      display: grid;
-      gap: 0.75rem;
+    .form-group {
       margin-bottom: 1.5rem;
     }
 
-    .info-row {
-      display: flex;
-      justify-content: space-between;
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
       color: var(--text-secondary);
-      font-size: 0.875rem;
     }
 
-    .info-row .label {
-      font-weight: 500;
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 1rem;
     }
 
-    .status-badge {
-      display: inline-block;
-      padding: 0.25rem 0.75rem;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 500;
-    }
-
-    .status-active {
-      background: #e3f2fd;
-      color: #1976d2;
-    }
-
-    .status-completed {
-      background: #e8f5e9;
-      color: #2e7d32;
-    }
-
-    .status-overdue {
-      background: #ffebee;
-      color: #d32f2f;
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--primary-color);
     }
 
     .action-buttons {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 0.75rem;
-      margin-top: 1rem;
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
     }
 
-    .action-button {
-      padding: 0.75rem;
+    .button {
+      padding: 0.75rem 1.5rem;
       border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.875rem;
+      border-radius: 4px;
+      font-size: 1rem;
       font-weight: 500;
-      text-align: center;
-      transition: opacity 0.2s;
-    }
-
-    .action-button:hover {
-      opacity: 0.9;
-    }
-
-    .button-success {
-      background: var(--success-color);
-      color: white;
+      cursor: pointer;
+      transition: background-color 0.2s;
     }
 
     .button-primary {
@@ -246,9 +248,26 @@
       color: white;
     }
 
+    .button-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .button-success {
+      background: var(--success-color);
+      color: white;
+    }
+
+    .button-success:hover {
+      background: #1b5e20;
+    }
+
     .button-danger {
       background: var(--error-color);
       color: white;
+    }
+
+    .button-danger:hover {
+      background: #b71c1c;
     }
 
     .button-warning {
@@ -256,183 +275,752 @@
       color: white;
     }
 
-    /* 分頁控制 */
-    .pagination {
-      display: flex;
+    .button-warning:hover {
+      background: #e65100;
+    }
+
+    /* 合約預覽容器 */
+    .page-container {
+      visibility: hidden;
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .page {
+      position: relative;
+      width: 1448px;
+      height: 2048px;
+      background-size: cover;
+      background-position: center;
+      margin: 40px auto;
+      background-repeat: no-repeat;
+    }
+
+    .field {
+      position: absolute;
+      font-size: 22px;
+      color: #000;
+      font-weight: bold;
+      letter-spacing: 1px;
+      white-space: nowrap;
+      pointer-events: none;
+      visibility: hidden;
+    }
+
+    /* Loading 動畫 */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255,255,255,0.9);
+      display: none;
       justify-content: center;
-      gap: 0.5rem;
-      margin-top: 2rem;
+      align-items: center;
+      z-index: 2000;
     }
 
-    .page-button {
-      padding: 0.5rem 1rem;
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      background: white;
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: all 0.2s;
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
     }
 
-    .page-button:hover {
-      background: var(--background-color);
-    }
-
-    .page-button.active {
-      background: var(--primary-color);
-      color: white;
-      border-color: var(--primary-color);
-    }
-
-    .page-button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
 <body>
-  <div class="app-header">手機租賃管理後台</div>
-  
-  <div class="content">
+  <!-- 側邊導航欄 -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h1>手機租賃管理後台</h1>
+    </div>
+    <nav>
+      <ul class="nav-menu">
+        <li class="nav-item">
+          <a href="#overview" class="nav-link active">
+            <i>📊</i>
+            <span>總覽</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#customers" class="nav-link">
+            <i>👥</i>
+            <span>客戶管理</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#contract" class="nav-link">
+            <i>📝</i>
+            <span>合約管理</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#accounting" class="nav-link">
+            <i>💰</i>
+            <span>帳務管理</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- 主內容區 -->
+  <main class="main-content">
     <!-- 總覽頁面 -->
-    <div id="overviewPage" class="page-section active">
-      <div class="container">
-        <div class="overview-cards">
-          <div class="overview-card today">
-            <h3>📅 今日到期</h3>
-            <div class="count">3 件</div>
-            <div class="details">
-              <div class="detail-row">
-                <span class="detail-label">應收租金</span>
-                <span class="detail-value">$12,000</span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">應收本金</span>
-                <span class="detail-value">$120,000</span>
-              </div>
+    <section id="overview" class="page-section active">
+      <div class="overview-cards">
+        <div class="overview-card">
+          <h3>今日到期</h3>
+          <div class="card-content">
+            <div class="info-row">
+              <span class="label">應收租金</span>
+              <span class="value">$50,000</span>
+            </div>
+            <div class="info-row">
+              <span class="label">應收本金</span>
+              <span class="value">$200,000</span>
             </div>
           </div>
-          <div class="overview-card active">
-            <h3>📱 合約中</h3>
-            <div class="count">12 件</div>
-            <div class="amount">$480,000</div>
-            <div class="details">
-              <div class="detail-row">
-                <span class="detail-label">本週應收</span>
-                <span class="detail-value">$12,000</span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">本月應收</span>
-                <span class="detail-value">$48,000</span>
-              </div>
+        </div>
+        <div class="overview-card">
+          <h3>進行中合約</h3>
+          <div class="card-content">
+            <div class="info-row">
+              <span class="label">總數</span>
+              <span class="value">25</span>
+            </div>
+            <div class="info-row">
+              <span class="label">月收租金</span>
+              <span class="value">$200,000</span>
             </div>
           </div>
-          <div class="overview-card completed">
-            <h3>✅ 本月結清</h3>
-            <div class="count">6 件</div>
-            <div class="amount">$240,000</div>
-            <div class="details">
-              <div class="detail-row">
-                <span class="detail-label">實收租金</span>
-                <span class="detail-value">$24,000</span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">實收本金</span>
-                <span class="detail-value">$216,000</span>
-              </div>
+        </div>
+        <div class="overview-card">
+          <h3>總支出</h3>
+          <div class="card-content">
+            <div class="info-row">
+              <span class="label">本月</span>
+              <span class="value">$1,500,000</span>
+            </div>
+            <div class="info-row">
+              <span class="label">累計</span>
+              <span class="value">$5,000,000</span>
             </div>
           </div>
-          <div class="overview-card total">
-            <h3>💰 總出款</h3>
-            <div class="count">30 件</div>
-            <div class="amount">$1,200,000</div>
-            <div class="details">
-              <div class="detail-row">
-                <span class="detail-label">總租金</span>
-                <span class="detail-value">$120,000</span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">總本金</span>
-                <span class="detail-value">$1,080,000</span>
-              </div>
+        </div>
+        <div class="overview-card">
+          <h3>逾期帳款</h3>
+          <div class="card-content">
+            <div class="info-row">
+              <span class="label">筆數</span>
+              <span class="value">3</span>
             </div>
-          </div>
-          <div class="overview-card overdue">
-            <h3>⚠️ 呆帳</h3>
-            <div class="count">1 件</div>
-            <div class="amount">$40,000</div>
-            <div class="details">
-              <div class="detail-row">
-                <span class="detail-label">逾期天數</span>
-                <span class="detail-value">15 天</span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">應收金額</span>
-                <span class="detail-value">$2,000</span>
-              </div>
+            <div class="info-row">
+              <span class="label">金額</span>
+              <span class="value">$75,000</span>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- 客戶列表頁面 -->
-    <div id="customerListPage" class="page-section">
+    <!-- 客戶管理頁面 -->
+    <section id="customers" class="page-section">
       <div class="container">
         <div class="filter-tabs">
-          <div class="filter-tab active" data-filter="today">今日到期</div>
-          <div class="filter-tab" data-filter="active">合約中</div>
-          <div class="filter-tab" data-filter="completed">已結清</div>
-          <div class="filter-tab" data-filter="overdue">呆帳</div>
+          <button class="filter-tab active">全部</button>
+          <button class="filter-tab">租約中</button>
+          <button class="filter-tab">已結清</button>
+          <button class="filter-tab">逾期</button>
         </div>
 
         <div class="customer-cards">
           <!-- 客戶卡片範例 -->
           <div class="customer-card">
-            <h3>張三 <span class="status-badge status-active">租約中</span></h3>
-            <div class="customer-info">
-              <div class="info-row">
-                <span class="label">合約期間</span>
-                <span>112/10/01 - 112/10/08</span>
+            <div class="card-header" onclick="toggleCustomerDetails(this)">
+              <h3>張三 <span class="status-badge status-active">租約中</span></h3>
+              <div class="customer-info">
+                <div class="info-row">
+                  <span class="label">合約期間</span>
+                  <span>112/10/01 - 112/10/08</span>
+                </div>
+                <div class="info-row">
+                  <span class="label">手機型號</span>
+                  <span>iPhone 15 Pro Max</span>
+                </div>
+                <div class="info-row">
+                  <span class="label">價金</span>
+                  <span>$40,000</span>
+                </div>
+                <div class="info-row">
+                  <span class="label">每週租金</span>
+                  <span>$1,000</span>
+                </div>
+                <div class="info-row">
+                  <span class="label">剩餘期數</span>
+                  <span>4 週</span>
+                </div>
               </div>
-              <div class="info-row">
-                <span class="label">手機型號</span>
-                <span>iPhone 15 Pro Max</span>
-              </div>
-              <div class="info-row">
-                <span class="label">價金</span>
-                <span>$40,000</span>
-              </div>
-              <div class="info-row">
-                <span class="label">每週租金</span>
-                <span>$1,000</span>
-              </div>
-              <div class="info-row">
-                <span class="label">剩餘期數</span>
-                <span>4 週</span>
-              </div>
+              <i class="expand-icon">▼</i>
             </div>
-            <div class="action-buttons">
-              <button class="action-button button-success" onclick="markAsPaid('customer1')">已繳款並續約</button>
-              <button class="action-button button-primary" onclick="markAsBuyback('customer1')">已繳款買回</button>
-              <button class="action-button button-danger" onclick="markAsUnpaid('customer1')">未繳款</button>
-              <button class="action-button button-warning" onclick="markAsPartial('customer1')">未繳足款</button>
+            <div class="card-content">
+              <div class="customer-details">
+                <div class="detail-group">
+                  <h4>基本資料</h4>
+                  <div class="detail-item">
+                    <span class="detail-label">身分證字號</span>
+                    <span class="detail-value">A123456789</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">手機號碼</span>
+                    <span class="detail-value">0912-345-678</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">戶籍地址</span>
+                    <span class="detail-value">台北市信義區信義路五段7號</span>
+                  </div>
+                </div>
+                <div class="detail-group">
+                  <h4>合約資訊</h4>
+                  <div class="detail-item">
+                    <span class="detail-label">IMEI</span>
+                    <span class="detail-value">123456789012345</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">容量</span>
+                    <span class="detail-value">256GB</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">已繳期數</span>
+                    <span class="detail-value">8 週</span>
+                  </div>
+                </div>
+                <div class="detail-group">
+                  <h4>銀行資訊</h4>
+                  <div class="detail-item">
+                    <span class="detail-label">銀行分行</span>
+                    <span class="detail-value">台北富邦銀行信義分行</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">戶名</span>
+                    <span class="detail-value">張三</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">帳號</span>
+                    <span class="detail-value">1234-5678-9012</span>
+                  </div>
+                </div>
+              </div>
+              <div class="action-buttons">
+                <button class="button button-success" onclick="markAsPaid('customer1')">已繳款並續約</button>
+                <button class="button button-primary" onclick="markAsBuyback('customer1')">已繳款買回</button>
+                <button class="button button-danger" onclick="markAsUnpaid('customer1')">未繳款</button>
+                <button class="button button-warning" onclick="markAsPartial('customer1')">未繳足款</button>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- 分頁控制 -->
         <div class="pagination">
-          <button class="page-button" disabled>上一頁</button>
-          <button class="page-button active">1</button>
+          <button class="page-button">1</button>
           <button class="page-button">2</button>
           <button class="page-button">3</button>
-          <button class="page-button">下一頁</button>
         </div>
       </div>
+    </section>
+
+    <!-- 合約管理頁面 -->
+    <section id="contract" class="page-section">
+      <div class="container">
+        <div class="contract-form">
+          <div class="form-group">
+            <label>姓名</label>
+            <input id="name" type="text" placeholder="請輸入姓名">
+          </div>
+          <div class="form-group">
+            <label>身分證字號</label>
+            <input id="id" type="text" placeholder="請輸入身分證字號">
+          </div>
+          <div class="form-group">
+            <label>地址</label>
+            <input id="address" type="text" placeholder="請輸入完整地址">
+          </div>
+          <div class="form-group">
+            <label>手機型號</label>
+            <select id="model">
+              <option value="">請選擇型號</option>
+              <option>iPhone 12</option>
+              <option>iPhone 12 mini</option>
+              <option>iPhone 12 Pro</option>
+              <option>iPhone 12 Pro Max</option>
+              <option>iPhone 13</option>
+              <option>iPhone 13 mini</option>
+              <option>iPhone 13 Pro</option>
+              <option>iPhone 13 Pro Max</option>
+              <option>iPhone 14</option>
+              <option>iPhone 14 Plus</option>
+              <option>iPhone 14 Pro</option>
+              <option>iPhone 14 Pro Max</option>
+              <option>iPhone 15</option>
+              <option>iPhone 15 Plus</option>
+              <option>iPhone 15 Pro</option>
+              <option>iPhone 15 Pro Max</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>容量</label>
+            <select id="capacity">
+              <option value="">請選擇容量</option>
+              <option>128G</option>
+              <option>256G</option>
+              <option>512G</option>
+              <option>1TB</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>是否有債權人</label>
+            <select id="hasCreditor">
+              <option value="無">無</option>
+              <option value="有">有</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>設備瑕疵情況</label>
+            <select id="defect">
+              <option value="無">無</option>
+              <option value="螢幕觸控異常">螢幕觸控異常</option>
+              <option value="螢幕破裂">螢幕破裂</option>
+              <option value="螢幕顯示功能異常">螢幕顯示功能異常</option>
+              <option value="充電功能異常">充電功能異常</option>
+              <option value="實體部件異常">實體部件異常（音量鍵、電源鍵、靜音切換鍵等）</option>
+              <option value="訊號接收異常">訊號接收異常</option>
+              <option value="生物辨識功能異常">生物辨識功能異常</option>
+              <option value="相機功能異常">相機功能異常（鏡頭）</option>
+              <option value="聽筒與麥克風異常">聽筒與麥克風異常</option>
+              <option value="SIM 卡讀取異常">SIM 卡讀取異常</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>IMEI碼</label>
+            <input id="imei" type="text" placeholder="請輸入IMEI碼">
+          </div>
+          <div class="form-group">
+            <label>總價</label>
+            <input id="price" type="number" placeholder="請輸入總價">
+          </div>
+          <div class="form-group">
+            <label>每週租金</label>
+            <input id="rent" type="number" placeholder="請輸入每週租金">
+          </div>
+          <div class="form-group">
+            <label>銀行分行</label>
+            <input id="bank" type="text" placeholder="請輸入銀行分行">
+          </div>
+          <div class="form-group">
+            <label>戶名</label>
+            <input id="accountName" type="text" placeholder="請輸入戶名">
+          </div>
+          <div class="form-group">
+            <label>帳號</label>
+            <input id="account" type="text" placeholder="請輸入帳號">
+          </div>
+          <div class="action-buttons">
+            <button class="button button-primary" onclick="fillContract()">套入合約資料</button>
+            <button class="button button-success" onclick="downloadPDF()" id="downloadBtn" disabled>下載 PDF</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 帳務管理頁面 -->
+    <section id="accounting" class="page-section">
+      <div class="container">
+        <div class="accounting-summary">
+          <div class="summary-card">
+            <h3>本月收支</h3>
+            <div class="summary-content">
+              <div class="summary-item">
+                <span class="label">收入</span>
+                <span class="value">$500,000</span>
+              </div>
+              <div class="summary-item">
+                <span class="label">支出</span>
+                <span class="value">$300,000</span>
+              </div>
+              <div class="summary-item">
+                <span class="label">淨利</span>
+                <span class="value">$200,000</span>
+              </div>
+            </div>
+          </div>
+          <div class="summary-card">
+            <h3>累計收支</h3>
+            <div class="summary-content">
+              <div class="summary-item">
+                <span class="label">收入</span>
+                <span class="value">$2,000,000</span>
+              </div>
+              <div class="summary-item">
+                <span class="label">支出</span>
+                <span class="value">$1,500,000</span>
+              </div>
+              <div class="summary-item">
+                <span class="label">淨利</span>
+                <span class="value">$500,000</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 合約預覽容器 -->
+  <div class="page-container">
+    <!-- PAGE 1 -->
+    <div class="page" id="contractPage1" style="background-image: url('images/page1.jpg');">
+      <!-- 出賣人 -->
+      <div class="field" id="sellerNameField" style="top:310px; left:350px;"></div>
+      <div class="field" id="sellerIdField" style="top:310px; left:750px;"></div>
+      <div class="field" id="sellerAddressField" style="top:390px; left:350px;"></div>
+      <!-- 標的物 -->
+      <div class="field" id="phoneModelField" style="top:660px; left:500px;"></div>
+      <div class="field" id="brandField" style="top:660px; left:300px;">APPLE</div>
+      <div class="field" id="imeiField" style="top:660px; left:830px;"></div>
+      <!-- 交易總價 -->
+      <div class="field" id="totalPriceField" style="top:920px; left:500px;"></div>
+      <!-- 行庫分行、戶名、帳號 -->
+      <div class="field" id="bankBranchField" style="top:1090px; left:400px;"></div>
+      <div class="field" id="accountNameField" style="top:1090px; left:750px;"></div>
+      <div class="field" id="accountNumberField" style="top:1090px; left:1020px;"></div>
+      <!-- 最下方身分證字號 -->
+      <div class="field" id="signerIdField" style="top:1800px; left:400px;"></div>
+      <!-- 年月日 -->
+      <div class="field" id="yearField" style="top:1885px; left:450px;"></div>
+      <div class="field" id="monthField" style="top:1885px; left:820px;"></div>
+      <div class="field" id="dayField" style="top:1885px; left:1150px;"></div>
+      <!-- 有無債權人勾選 -->
+      <div class="field" id="creditorNoneField" style="top:720px; left:605px;">V</div>
+      <div class="field" id="creditorYesField" style="top:720px; left:695px;">V</div>
+
+      <!-- 瑕疵項目：會根據選擇決定哪一項出現 V -->
+      <div class="field" id="defectTouch" style="top:805px; left:255px;">V</div>
+      <div class="field" id="defectCrack" style="top:805px; left:475px;">V</div>
+      <div class="field" id="defectDisplay" style="top:805px; left:635px;">V</div>
+      <div class="field" id="defectCharge" style="top:805px; left:915px;">V</div>
+      <div class="field" id="defectHardware" style="top:805px; left:1130px;">V</div>
     </div>
 
-    // ... rest of the existing code ...
+    <!-- PAGE 2 -->
+    <div class="page" id="contractPage2" style="background-image: url('images/page2.jpg');">
+      <!-- 立契約書人 -->
+      <div class="field" id="contractorNameField" style="top:198px; left:380px;"></div>
+      <!-- 手機廠牌 -->
+      <div class="field" id="brandField" style="top:410px; left:280px;">APPLE</div>
+      <!-- 手機型號 -->
+      <div class="field" id="model2Field" style="top:410px; left:530px; letter-spacing:0px;"></div>
+      <!-- IMEI -->
+      <div class="field" id="imei2Field" style="top:410px; left:800px; letter-spacing:0px;"></div>
+      <!-- 無瑕疵自動勾選 -->
+      <div class="field" id="normalFunctionField" style="top:440px; left:485px;">V</div>
+      <div class="field" id="noDamageField" style="top:485px; left:485px;">V</div>
+      <!-- 總價值 -->
+      <div class="field" id="price2Field" style="top:410px; left:1100px;"></div>
+      <!-- 租賃期間 -->
+      <div class="field" id="startYearField" style="top:555px; left:535px;"></div>
+      <div class="field" id="startMonthField" style="top:555px; left:625px;"></div>
+      <div class="field" id="startDayField" style="top:555px; left:700px;"></div>
+      <div class="field" id="endYearField" style="top:555px; left:830px;"></div>
+      <div class="field" id="endMonthField" style="top:555px; left:915px;"></div>
+      <div class="field" id="endDayField" style="top:555px; left:995px;"></div>
+      <!-- 租金 -->
+      <div class="field" id="rent2Field" style="top:625px; left:500px;"></div>
+      <!-- 最下方地址、身分證字號 -->
+      <div class="field" id="address2Field" style="top:1825px; left:300px; letter-spacing:0px;"></div>
+      <div class="field" id="id2Field" style="top:1780px; left:360px;"></div>
+      <!-- 年月日（簽約日） -->
+      <div class="field" id="year2Field" style="top:1890px; left:450px;"></div>
+      <div class="field" id="month2Field" style="top:1890px; left:810px;"></div>
+      <div class="field" id="day2Field" style="top:1890px; left:1160px;"></div>
+    </div>
+
+    <!-- PAGE 3 -->
+    <div class="page" id="contractPage3" style="background-image: url('images/page3.jpg');">
+      <!-- 最下方身分證字號 -->
+      <div class="field" id="signerId3Field" style="top:1360px; left:345px;"></div>
+      <!-- 年月日 -->
+      <div class="field" id="year3Field" style="top:1880px; left:450px;"></div>
+      <div class="field" id="month3Field" style="top:1880px; left:750px;"></div>
+      <div class="field" id="day3Field" style="top:1880px; left:1050px;"></div>
+    </div>
   </div>
+
+  <!-- Loading 動畫 -->
+  <div class="loading-overlay">
+    <div class="loading-spinner"></div>
+  </div>
+
+  <script>
+    // 頁面切換功能
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        // 移除所有活動狀態
+        document.querySelectorAll('.nav-link').forEach(nav => nav.classList.remove('active'));
+        document.querySelectorAll('.page-section').forEach(section => section.classList.remove('active'));
+        
+        // 添加當前活動狀態
+        link.classList.add('active');
+        const sectionId = link.getAttribute('href').substring(1);
+        document.getElementById(sectionId).classList.add('active');
+      });
+    });
+
+    // 客戶卡片展開/收起功能
+    function toggleCustomerDetails(header) {
+      const card = header.parentElement;
+      card.classList.toggle('expanded');
+    }
+
+    // 格式化數字（加上千分位）
+    function formatNumber(num) {
+      if (!num || isNaN(num)) return num;
+      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    // 轉換為民國年日期
+    function toTaiwanDateParts(date) {
+      const y = date.getFullYear() - 1911;
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return { year: y, month: m, day: d };
+    }
+
+    // 增加天數
+    function addDays(date, days) {
+      const result = new Date(date);
+      result.setDate(result.getDate() + days);
+      return result;
+    }
+
+    // 填入合約資料
+    function fillContract() {
+      // PAGE 1
+      document.getElementById('sellerNameField').innerText = document.getElementById('name').value;
+      document.getElementById('sellerIdField').innerText = document.getElementById('id').value;
+      document.getElementById('sellerAddressField').innerText = document.getElementById('address').value;
+      document.getElementById('phoneModelField').innerText = document.getElementById('model').value;
+      document.getElementById('imeiField').innerText = document.getElementById('imei').value;
+      document.getElementById('totalPriceField').innerText = formatNumber(document.getElementById('price').value);
+      document.getElementById('bankBranchField').innerText = document.getElementById('bank').value;
+      document.getElementById('accountNameField').innerText = document.getElementById('accountName').value;
+      document.getElementById('accountNumberField').innerText = document.getElementById('account').value;
+      document.getElementById('signerIdField').innerText = document.getElementById('id').value;
+
+      const today = new Date();
+      const taiwan = toTaiwanDateParts(today);
+      document.getElementById('yearField').innerText = taiwan.year;
+      document.getElementById('monthField').innerText = taiwan.month;
+      document.getElementById('dayField').innerText = taiwan.day;
+
+      // 處理債權人選項
+      const hasCreditor = document.getElementById('hasCreditor').value;
+      document.getElementById('creditorNoneField').style.visibility = hasCreditor === '無' ? 'visible' : 'hidden';
+      document.getElementById('creditorYesField').style.visibility = hasCreditor === '有' ? 'visible' : 'hidden';
+
+      // 處理瑕疵選項
+      const defect = document.getElementById('defect').value;
+      if (defect === '無') {
+        // 顯示正常功能選項
+        document.getElementById('normalFunctionField').style.visibility = 'visible';
+        document.getElementById('noDamageField').style.visibility = 'visible';
+        // 隱藏所有瑕疵選項
+        document.getElementById('defectTouch').style.visibility = 'hidden';
+        document.getElementById('defectCrack').style.visibility = 'hidden';
+        document.getElementById('defectDisplay').style.visibility = 'hidden';
+        document.getElementById('defectCharge').style.visibility = 'hidden';
+        document.getElementById('defectHardware').style.visibility = 'hidden';
+      } else {
+        // 隱藏正常功能選項
+        document.getElementById('normalFunctionField').style.visibility = 'hidden';
+        document.getElementById('noDamageField').style.visibility = 'hidden';
+        // 根據選擇的瑕疵顯示對應的 V
+        document.getElementById('defectTouch').style.visibility = defect === '螢幕觸控異常' ? 'visible' : 'hidden';
+        document.getElementById('defectCrack').style.visibility = defect === '螢幕破裂' ? 'visible' : 'hidden';
+        document.getElementById('defectDisplay').style.visibility = defect === '螢幕顯示功能異常' ? 'visible' : 'hidden';
+        document.getElementById('defectCharge').style.visibility = defect === '充電功能異常' ? 'visible' : 'hidden';
+        document.getElementById('defectHardware').style.visibility = defect === '實體部件異常' ? 'visible' : 'hidden';
+      }
+
+      // PAGE 2
+      document.getElementById('contractorNameField').innerText = document.getElementById('name').value;
+      document.getElementById('model2Field').innerText = document.getElementById('model').value;
+      document.getElementById('imei2Field').innerText = document.getElementById('imei').value;
+      document.getElementById('price2Field').innerText = formatNumber(document.getElementById('price').value);
+      document.getElementById('startYearField').innerText = taiwan.year;
+      document.getElementById('startMonthField').innerText = taiwan.month;
+      document.getElementById('startDayField').innerText = taiwan.day;
+
+      const endDate = addDays(today, 7);
+      const endTaiwan = toTaiwanDateParts(endDate);
+      document.getElementById('endYearField').innerText = endTaiwan.year;
+      document.getElementById('endMonthField').innerText = endTaiwan.month;
+      document.getElementById('endDayField').innerText = endTaiwan.day;
+
+      document.getElementById('rent2Field').innerText = formatNumber(document.getElementById('rent').value);
+      document.getElementById('address2Field').innerText = document.getElementById('address').value;
+      document.getElementById('id2Field').innerText = document.getElementById('id').value;
+      document.getElementById('year2Field').innerText = taiwan.year;
+      document.getElementById('month2Field').innerText = taiwan.month;
+      document.getElementById('day2Field').innerText = taiwan.day;
+
+      // PAGE 3
+      document.getElementById('signerId3Field').innerText = document.getElementById('id').value;
+      document.getElementById('year3Field').innerText = taiwan.year;
+      document.getElementById('month3Field').innerText = taiwan.month;
+      document.getElementById('day3Field').innerText = taiwan.day;
+
+      // 啟用下載按鈕
+      document.getElementById('downloadBtn').disabled = false;
+    }
+
+    // 顯示載入動畫
+    function showLoading() {
+      document.querySelector('.loading-overlay').style.display = 'flex';
+    }
+
+    // 隱藏載入動畫
+    function hideLoading() {
+      document.querySelector('.loading-overlay').style.display = 'none';
+    }
+
+    // 下載 PDF
+    async function downloadPDF() {
+      showLoading();
+      const jsPDF = window.jspdf.jsPDF;
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pages = [
+        document.getElementById('contractPage1'),
+        document.getElementById('contractPage2'),
+        document.getElementById('contractPage3')
+      ];
+
+      try {
+        for (let i = 0; i < pages.length; i++) {
+          await new Promise((resolve) => {
+            const bg = pages[i].style.backgroundImage;
+            if (!bg) return resolve();
+            
+            const url = bg.slice(5, -2);
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = resolve;
+            img.onerror = () => {
+              console.error('Image failed to load:', url);
+              resolve();
+            };
+            img.src = url;
+          });
+
+          const canvas = await html2canvas(pages[i], {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: null,
+            logging: true,
+            onclone: function(clonedDoc) {
+              const clonedElement = clonedDoc.getElementById(`contractPage${i+1}`);
+              if (clonedElement) {
+                // 確保頁面容器可見
+                clonedElement.style.visibility = 'visible';
+                clonedElement.style.display = 'block';
+                clonedElement.style.position = 'relative';
+                clonedElement.style.left = '0';
+                
+                // 獲取當前選擇的值
+                const hasCreditor = document.getElementById('hasCreditor').value;
+                const defect = document.getElementById('defect').value;
+
+                // 處理債權人選項
+                const creditorNoneField = clonedElement.querySelector('#creditorNoneField');
+                const creditorYesField = clonedElement.querySelector('#creditorYesField');
+                if (creditorNoneField) creditorNoneField.style.visibility = hasCreditor === '無' ? 'visible' : 'hidden';
+                if (creditorYesField) creditorYesField.style.visibility = hasCreditor === '有' ? 'visible' : 'hidden';
+
+                // 處理瑕疵選項
+                const normalFunctionField = clonedElement.querySelector('#normalFunctionField');
+                const noDamageField = clonedElement.querySelector('#noDamageField');
+                const defectTouch = clonedElement.querySelector('#defectTouch');
+                const defectCrack = clonedElement.querySelector('#defectCrack');
+                const defectDisplay = clonedElement.querySelector('#defectDisplay');
+                const defectCharge = clonedElement.querySelector('#defectCharge');
+                const defectHardware = clonedElement.querySelector('#defectHardware');
+
+                if (defect === '無') {
+                  if (normalFunctionField) normalFunctionField.style.visibility = 'visible';
+                  if (noDamageField) noDamageField.style.visibility = 'visible';
+                  if (defectTouch) defectTouch.style.visibility = 'hidden';
+                  if (defectCrack) defectCrack.style.visibility = 'hidden';
+                  if (defectDisplay) defectDisplay.style.visibility = 'hidden';
+                  if (defectCharge) defectCharge.style.visibility = 'hidden';
+                  if (defectHardware) defectHardware.style.visibility = 'hidden';
+                } else {
+                  if (normalFunctionField) normalFunctionField.style.visibility = 'hidden';
+                  if (noDamageField) noDamageField.style.visibility = 'hidden';
+                  if (defectTouch) defectTouch.style.visibility = defect === '螢幕觸控異常' ? 'visible' : 'hidden';
+                  if (defectCrack) defectCrack.style.visibility = defect === '螢幕破裂' ? 'visible' : 'hidden';
+                  if (defectDisplay) defectDisplay.style.visibility = defect === '螢幕顯示功能異常' ? 'visible' : 'hidden';
+                  if (defectCharge) defectCharge.style.visibility = defect === '充電功能異常' ? 'visible' : 'hidden';
+                  if (defectHardware) defectHardware.style.visibility = defect === '實體部件異常' ? 'visible' : 'hidden';
+                }
+
+                // 確保其他欄位可見
+                const fields = clonedElement.querySelectorAll('.field');
+                fields.forEach(field => {
+                  if (!field.id.includes('creditor') && 
+                      !field.id.includes('defect') && 
+                      !field.id.includes('normalFunction') && 
+                      !field.id.includes('noDamage')) {
+                    field.style.visibility = 'visible';
+                    field.style.display = 'block';
+                  }
+                });
+              }
+            }
+          });
+
+          const imgData = canvas.toDataURL('image/jpeg', 1.0);
+          const imgProps = pdf.getImageProperties(imgData);
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+          if (i > 0) pdf.addPage();
+          pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+        }
+
+        const name = document.getElementById('name').value || '合約';
+        pdf.save(`${name}-手機對保合約.pdf`);
+      } catch (error) {
+        console.error('PDF generation failed:', error);
+        alert('PDF 生成失敗，請稍後再試');
+      } finally {
+        hideLoading();
+      }
+    }
+  </script>
 </body>
 </html>
