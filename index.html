@@ -33,24 +33,218 @@
       margin-bottom: 0.25rem;
     }
 
-    /* 內容區域樣式 */
-    .content {
-      padding-bottom: 4rem; /* 為底部導航留出空間 */
+    /* 總覽卡片樣式 */
+    .overview-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
     }
 
-    /* 頁面切換動畫 */
-    .page-section {
-      display: none;
+    .overview-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
-    .page-section.active {
-      display: block;
-      animation: fadeIn 0.3s ease-in-out;
+    .overview-card h3 {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+    .overview-card .amount {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-color);
+    }
+
+    .overview-card .count {
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+    }
+
+    /* 客戶列表過濾器 */
+    .filter-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+
+    .filter-tab {
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      background: white;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .filter-tab.active {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    /* 客戶名片樣式 */
+    .customer-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .customer-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+
+    .customer-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .customer-card h3 {
+      margin-bottom: 1rem;
+      color: var(--text-color);
+    }
+
+    .customer-info {
+      display: grid;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-secondary);
+    }
+
+    .info-row .label {
+      font-weight: 500;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .status-active {
+      background: #e3f2fd;
+      color: #1976d2;
+    }
+
+    .status-completed {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .status-overdue {
+      background: #ffebee;
+      color: #d32f2f;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .action-button {
+      flex: 1;
+      padding: 0.5rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    .button-primary {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .button-success {
+      background: var(--success-color);
+      color: white;
+    }
+
+    .button-danger {
+      background: var(--error-color);
+      color: white;
+    }
+
+    .button-warning {
+      background: #ff9800;
+      color: white;
+    }
+
+    /* 帳務區樣式 */
+    .accounting-section {
+      display: grid;
+      gap: 2rem;
+    }
+
+    .expense-form {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .expense-form h3 {
+      margin-bottom: 1rem;
+    }
+
+    .expense-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .accounting-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .summary-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .summary-card h3 {
+      margin-bottom: 1rem;
+      color: var(--text-secondary);
+    }
+
+    .summary-list {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .summary-item:last-child {
+      border-bottom: none;
     }
   </style>
 </head>
@@ -58,13 +252,35 @@
   <div class="app-header">手機對保合約</div>
   
   <div class="content">
-    <!-- 新增客戶頁面 -->
-    <div id="addCustomerPage" class="page-section active">
+    <!-- 總覽頁面 -->
+    <div id="overviewPage" class="page-section active">
       <div class="container">
-        <div class="form-container">
-          <h2>新增客戶資料</h2>
-          <!-- 原有的表單內容 -->
-          // ... existing form content ...
+        <div class="overview-cards">
+          <div class="overview-card">
+            <h3>今日到期</h3>
+            <div class="amount">$120,000</div>
+            <div class="count">3 件</div>
+          </div>
+          <div class="overview-card">
+            <h3>合約中</h3>
+            <div class="amount">$480,000</div>
+            <div class="count">12 件</div>
+          </div>
+          <div class="overview-card">
+            <h3>本月出款</h3>
+            <div class="amount">$240,000</div>
+            <div class="count">6 件</div>
+          </div>
+          <div class="overview-card">
+            <h3>總出款</h3>
+            <div class="amount">$1,200,000</div>
+            <div class="count">30 件</div>
+          </div>
+          <div class="overview-card">
+            <h3>呆帳</h3>
+            <div class="amount">$40,000</div>
+            <div class="count">1 件</div>
+          </div>
         </div>
       </div>
     </div>
@@ -72,45 +288,123 @@
     <!-- 客戶列表頁面 -->
     <div id="customerListPage" class="page-section">
       <div class="container">
-        <div class="header">
-          <h1>客戶資料列表</h1>
+        <div class="filter-tabs">
+          <div class="filter-tab active" data-filter="today">今日到期</div>
+          <div class="filter-tab" data-filter="active">合約中</div>
+          <div class="filter-tab" data-filter="completed">已結清</div>
+          <div class="filter-tab" data-filter="overdue">呆帳</div>
         </div>
 
-        <div class="search-container">
-          <input type="text" id="searchInput" placeholder="搜尋客戶姓名、手機號碼或身分證字號...">
-          <button id="searchButton">搜尋</button>
+        <div class="customer-cards">
+          <!-- 客戶卡片範例 -->
+          <div class="customer-card">
+            <h3>張三</h3>
+            <div class="customer-info">
+              <div class="info-row">
+                <span class="label">合約期間</span>
+                <span>112/10/01 - 112/10/08</span>
+              </div>
+              <div class="info-row">
+                <span class="label">手機型號</span>
+                <span>iPhone 15 Pro Max</span>
+              </div>
+              <div class="info-row">
+                <span class="label">價金</span>
+                <span>$40,000</span>
+              </div>
+              <div class="info-row">
+                <span class="label">每週租金</span>
+                <span>$1,000</span>
+              </div>
+              <div class="info-row">
+                <span class="label">狀態</span>
+                <span class="status-badge status-active">租約中</span>
+              </div>
+            </div>
+            <div class="action-buttons">
+              <button class="action-button button-success" onclick="markAsPaid('customer1')">已繳款並續約</button>
+              <button class="action-button button-primary" onclick="markAsBuyback('customer1')">已繳款買回</button>
+              <button class="action-button button-danger" onclick="markAsUnpaid('customer1')">未繳款</button>
+              <button class="action-button button-warning" onclick="markAsPartial('customer1')">未繳足款</button>
+            </div>
+          </div>
         </div>
-
-        <table class="customer-table">
-          <thead>
-            <tr>
-              <th>姓名</th>
-              <th>身分證字號</th>
-              <th>手機號碼</th>
-              <th>手機型號</th>
-              <th>容量</th>
-              <th>總價</th>
-              <th>每週租金</th>
-              <th>起始日</th>
-              <th>到期日</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody id="customerTableBody">
-            <tr>
-              <td colspan="10" class="loading">載入中...</td>
-            </tr>
-          </tbody>
-        </table>
       </div>
     </div>
 
-    <!-- 查看客戶詳情頁面 -->
-    <div id="viewCustomerPage" class="page-section">
+    <!-- 合約生成頁面 -->
+    <div id="contractPage" class="page-section">
+      <!-- 原有的合約生成頁面內容 -->
+    </div>
+
+    <!-- 帳務區頁面 -->
+    <div id="accountingPage" class="page-section">
       <div class="container">
-        <div class="form-container">
-          <h2>客戶資料詳情</h2>
-          <div id="customerDetails"></div>
+        <div class="accounting-section">
+          <div class="expense-form">
+            <h3>新增支出</h3>
+            <div class="expense-grid">
+              <div class="form-group">
+                <label for="expenseType">支出類型</label>
+                <select id="expenseType">
+                  <option value="ad">廣告成本</option>
+                  <option value="equipment">設備成本</option>
+                  <option value="other">其他支出</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="expenseAmount">金額</label>
+                <input type="number" id="expenseAmount" min="0">
+              </div>
+              <div class="form-group">
+                <label for="expenseDate">日期</label>
+                <input type="date" id="expenseDate">
+              </div>
+              <div class="form-group">
+                <label for="expenseNote">備註</label>
+                <input type="text" id="expenseNote">
+              </div>
+            </div>
+            <button class="action-button button-primary" style="margin-top: 1rem;">新增支出</button>
+          </div>
+
+          <div class="accounting-summary">
+            <div class="summary-card">
+              <h3>本月帳務</h3>
+              <div class="summary-list">
+                <div class="summary-item">
+                  <span>收入</span>
+                  <span>$240,000</span>
+                </div>
+                <div class="summary-item">
+                  <span>支出</span>
+                  <span>$50,000</span>
+                </div>
+                <div class="summary-item">
+                  <span>淨利</span>
+                  <span>$190,000</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="summary-card">
+              <h3>總帳</h3>
+              <div class="summary-list">
+                <div class="summary-item">
+                  <span>總收入</span>
+                  <span>$1,200,000</span>
+                </div>
+                <div class="summary-item">
+                  <span>總支出</span>
+                  <span>$250,000</span>
+                </div>
+                <div class="summary-item">
+                  <span>總淨利</span>
+                  <span>$950,000</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -118,17 +412,21 @@
 
   <!-- 底部導航欄 -->
   <div class="bottom-nav">
-    <a href="#" class="nav-item active" data-page="addCustomerPage">
-      <i>📝</i>
-      <span>新增客戶</span>
+    <a href="#" class="nav-item active" data-page="overviewPage">
+      <i>📊</i>
+      <span>總覽</span>
     </a>
     <a href="#" class="nav-item" data-page="customerListPage">
       <i>👥</i>
-      <span>客戶列表</span>
+      <span>客戶</span>
     </a>
-    <a href="#" class="nav-item" data-page="viewCustomerPage">
-      <i>🔍</i>
-      <span>查看詳情</span>
+    <a href="#" class="nav-item" data-page="contractPage">
+      <i>📝</i>
+      <span>合約</span>
+    </a>
+    <a href="#" class="nav-item" data-page="accountingPage">
+      <i>💰</i>
+      <span>帳務</span>
     </a>
   </div>
 
@@ -154,121 +452,60 @@
       });
     });
 
-    // 查看客戶詳情
-    async function viewCustomer(id) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/customers/${id}`);
-        if (!response.ok) {
-          throw new Error('獲取客戶資料失敗');
-        }
-        const customer = await response.json();
-        
-        // 顯示客戶詳情
-        document.getElementById('customerDetails').innerHTML = `
-          <div class="form-group">
-            <label>姓名</label>
-            <div>${customer.name}</div>
-          </div>
-          <div class="form-group">
-            <label>身分證字號</label>
-            <div>${customer.id}</div>
-          </div>
-          <div class="form-group">
-            <label>手機號碼</label>
-            <div>${customer.mobile}</div>
-          </div>
-          <div class="form-group">
-            <label>戶籍地址</label>
-            <div>${customer.address}</div>
-          </div>
-          <div class="form-group">
-            <label>通訊地址</label>
-            <div>${customer.contactAddress}</div>
-          </div>
-          <div class="form-group">
-            <label>手機型號</label>
-            <div>${customer.model}</div>
-          </div>
-          <div class="form-group">
-            <label>容量</label>
-            <div>${customer.capacity}</div>
-          </div>
-          <div class="form-group">
-            <label>IMEI</label>
-            <div>${customer.imei}</div>
-          </div>
-          <div class="form-group">
-            <label>總價</label>
-            <div>${customer.price}</div>
-          </div>
-          <div class="form-group">
-            <label>每週租金</label>
-            <div>${customer.rent}</div>
-          </div>
-          <div class="form-group">
-            <label>起始日</label>
-            <div>${formatDate(customer.startDate)}</div>
-          </div>
-          <div class="form-group">
-            <label>到期日</label>
-            <div>${formatDate(customer.endDate)}</div>
-          </div>
-          <div class="form-group">
-            <label>銀行分行</label>
-            <div>${customer.bank}</div>
-          </div>
-          <div class="form-group">
-            <label>戶名</label>
-            <div>${customer.accountName}</div>
-          </div>
-          <div class="form-group">
-            <label>帳號</label>
-            <div>${customer.account}</div>
-          </div>
-          <div class="form-group">
-            <label>備註</label>
-            <div>${customer.note}</div>
-          </div>
-        `;
+    // 客戶列表過濾功能
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const filter = tab.getAttribute('data-filter');
+        filterCustomers(filter);
+      });
+    });
 
-        // 切換到詳情頁面
-        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-        document.querySelectorAll('.page-section').forEach(section => section.classList.remove('active'));
-        document.querySelector('.nav-item[data-page="viewCustomerPage"]').classList.add('active');
-        document.getElementById('viewCustomerPage').classList.add('active');
-      } catch (error) {
-        console.error('Error:', error);
-        alert('獲取客戶資料失敗，請稍後再試');
+    // 客戶狀態更新功能
+    function markAsPaid(customerId) {
+      if (confirm('確定要將此客戶標記為已繳款並續約嗎？')) {
+        // 更新合約到期日（+7天）
+        updateContractEndDate(customerId, 7);
+        // 更新客戶狀態
+        updateCustomerStatus(customerId, 'active');
       }
     }
 
-    // 編輯客戶資料
-    function editCustomer(id) {
-      // 這裡可以實現編輯功能
-      alert('編輯功能開發中...');
+    function markAsBuyback(customerId) {
+      if (confirm('確定要將此客戶標記為已繳款買回嗎？')) {
+        updateCustomerStatus(customerId, 'completed');
+      }
     }
 
-    // 刪除客戶資料
-    async function deleteCustomer(id) {
-      if (!confirm('確定要刪除這個客戶的資料嗎？')) {
-        return;
+    function markAsUnpaid(customerId) {
+      if (confirm('確定要將此客戶標記為未繳款嗎？')) {
+        updateCustomerStatus(customerId, 'overdue');
       }
+    }
 
-      try {
-        const response = await fetch(`${API_BASE_URL}/customers/${id}`, {
-          method: 'DELETE'
-        });
-
-        if (!response.ok) {
-          throw new Error('刪除客戶資料失敗');
-        }
-
-        alert('客戶資料已成功刪除');
-        loadCustomers();
-      } catch (error) {
-        console.error('Error:', error);
-        alert('刪除失敗，請稍後再試');
+    function markAsPartial(customerId) {
+      if (confirm('確定要將此客戶標記為未繳足款嗎？')) {
+        updateCustomerStatus(customerId, 'partial');
       }
+    }
+
+    // 更新合約到期日
+    function updateContractEndDate(customerId, days) {
+      // 這裡實現更新合約到期日的邏輯
+      console.log(`更新客戶 ${customerId} 的合約到期日，延長 ${days} 天`);
+    }
+
+    // 更新客戶狀態
+    function updateCustomerStatus(customerId, status) {
+      // 這裡實現更新客戶狀態的邏輯
+      console.log(`更新客戶 ${customerId} 的狀態為 ${status}`);
+    }
+
+    // 過濾客戶列表
+    function filterCustomers(filter) {
+      // 這裡實現根據過濾條件顯示相應的客戶卡片
+      console.log(`過濾客戶列表，條件：${filter}`);
     }
   </script>
 // ... existing code ...
