@@ -1084,16 +1084,22 @@
               <div class="card-header" onclick="toggleCustomerDetails(this)">
                 <div>
                   <h3>${customer.name}</h3>
+                  ${customer.notes ? `
+                  <div class="notes-section">
+                    <span class="detail-label">備註</span>
+                    <span class="detail-value">${customer.notes}</span>
+                  </div>
+                  ` : ''}
                   <div class="payment-info">
                     <span class="label">售價：</span>
                     <span class="value">${formatAmount(customer.salePrice)}</span>
                     <span class="label">租金：</span>
                     <span class="value">${formatAmount(customer.rent)}/週</span>
-                    ${customer.status === 'partial' ? `<span class="unpaid-amount">尚餘：${formatAmount(customer.unpaidAmount)}</span>` : ''}
-                    <span class="due-date ${daysLeft === 0 ? 'today' : ''}">${dueDateText}</span>
+                    ${unpaidAmount > 0 ? `<span class="unpaid-amount">尚餘：${formatAmount(unpaidAmount)}</span>` : ''}
+                    ${dueDateText ? `<span class="due-date ${daysLeft === 0 ? 'today' : ''}">${dueDateText}</span>` : ''}
                   </div>
                 </div>
-                <span class="status-badge status-${customer.status}">${customer.status === 'active' ? '租賃中' : getStatusBadgeText(customer.status)}</span>
+                <span class="status-badge status-${getStatusBadgeText(customer.status)}">${getStatusBadgeText(customer.status)}</span>
               </div>
               <div class="card-content">
                 <div class="customer-details">
@@ -1152,7 +1158,8 @@
                 </div>
                 <div class="action-buttons">
                   <button class="button button-primary" onclick="updateStatus('${customer._id}', 'buyback')">${getStatusButtonText('buyback')}</button>
-                  <button class="button button-warning" onclick="showPartialPaymentForm('${customer._id}')">${getStatusButtonText('partial')}</button>
+                  ${daysLeft === 0 ? `<button class="button button-success" onclick="recordPayment('${customer._id}', ${customer.rent})">已繳款</button>` : ''}
+                  <button class="button button-warning" onclick="showPartialPaymentForm('${customer._id}')">未繳足額</button>
                   <button class="button button-danger" onclick="updateStatus('${customer._id}', 'locked')">${getStatusButtonText('locked')}</button>
                 </div>
                 <div class="partial-payment-form" id="partial-payment-${customer._id}">
@@ -1638,26 +1645,37 @@
         const card = document.createElement('div');
         card.className = 'customer-card';
         
-        // 計算到期日（合約日+7天）
-        function calculateDueDate(contractDate) {
-          const date = new Date(contractDate);
+        // 計算下次繳款日
+        function calculateNextPaymentDate(lastPaymentDate) {
+          const date = new Date(lastPaymentDate);
           date.setDate(date.getDate() + 7);
           return date;
         }
 
         // 在渲染客戶列表時使用新的到期日計算
         const contractDate = new Date(customer.contractDate);
-        const dueDate = calculateDueDate(contractDate);
         const today = new Date();
-        // 將日期設為當天開始時間（00:00:00）進行比較
         today.setHours(0, 0, 0, 0);
-        dueDate.setHours(0, 0, 0, 0);
 
-        const daysLeft = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
-        const dueDateText = daysLeft === 0 ? '今日須繳款' : 
-                           daysLeft < 0 ? `已遲繳 ${Math.abs(daysLeft)} 日` :
-                           `剩餘 ${daysLeft} 天`;
-        
+        // 獲取最後一次繳款日期
+        const lastPayment = customer.paymentHistory ? 
+          customer.paymentHistory.sort((a, b) => new Date(b.date) - new Date(a.date))[0] : null;
+
+        // 計算下次繳款日
+        const nextPaymentDate = lastPayment ? calculateNextPaymentDate(lastPayment.date) : calculateDueDate(contractDate);
+        nextPaymentDate.setHours(0, 0, 0, 0);
+
+        const daysLeft = Math.ceil((nextPaymentDate - today) / (1000 * 60 * 60 * 24));
+
+        // 如果狀態是已繳款買回或呆帳鎖機，不顯示繳款資訊
+        const dueDateText = customer.status === 'buyback' || customer.status === 'locked' ? '' :
+          daysLeft === 0 ? '今日須繳款' : 
+          daysLeft < 0 ? `已遲繳 ${Math.abs(daysLeft)} 日` :
+          `剩餘 ${daysLeft} 天`;
+
+        // 計算未繳餘額
+        const unpaidAmount = customer.status === 'partial' ? customer.unpaidAmount : 0;
+
         // 格式化金額
         const formatAmount = (amount) => {
           if (!amount) return '0';
@@ -1668,16 +1686,22 @@
           <div class="card-header" onclick="toggleCustomerDetails(this)">
             <div>
               <h3>${customer.name}</h3>
+              ${customer.notes ? `
+              <div class="notes-section">
+                <span class="detail-label">備註</span>
+                <span class="detail-value">${customer.notes}</span>
+              </div>
+              ` : ''}
               <div class="payment-info">
                 <span class="label">售價：</span>
                 <span class="value">${formatAmount(customer.salePrice)}</span>
                 <span class="label">租金：</span>
                 <span class="value">${formatAmount(customer.rent)}/週</span>
-                ${customer.status === 'partial' ? `<span class="unpaid-amount">尚餘：${formatAmount(customer.unpaidAmount)}</span>` : ''}
-                <span class="due-date ${daysLeft === 0 ? 'today' : ''}">${dueDateText}</span>
+                ${unpaidAmount > 0 ? `<span class="unpaid-amount">尚餘：${formatAmount(unpaidAmount)}</span>` : ''}
+                ${dueDateText ? `<span class="due-date ${daysLeft === 0 ? 'today' : ''}">${dueDateText}</span>` : ''}
               </div>
             </div>
-            <span class="status-badge status-${customer.status}">${customer.status === 'active' ? '租賃中' : getStatusBadgeText(customer.status)}</span>
+            <span class="status-badge status-${getStatusBadgeText(customer.status)}">${getStatusBadgeText(customer.status)}</span>
           </div>
           <div class="card-content">
             <div class="customer-details">
@@ -1736,7 +1760,8 @@
             </div>
             <div class="action-buttons">
               <button class="button button-primary" onclick="updateStatus('${customer._id}', 'buyback')">${getStatusButtonText('buyback')}</button>
-              <button class="button button-warning" onclick="showPartialPaymentForm('${customer._id}')">${getStatusButtonText('partial')}</button>
+              ${daysLeft === 0 ? `<button class="button button-success" onclick="recordPayment('${customer._id}', ${customer.rent})">已繳款</button>` : ''}
+              <button class="button button-warning" onclick="showPartialPaymentForm('${customer._id}')">未繳足額</button>
               <button class="button button-danger" onclick="updateStatus('${customer._id}', 'locked')">${getStatusButtonText('locked')}</button>
             </div>
             <div class="partial-payment-form" id="partial-payment-${customer._id}">
@@ -1842,12 +1867,20 @@
     async function downloadFile(customerId, type) {
       try {
         const response = await fetch(`${API_BASE_URL}/customers/${customerId}/files/${type}`);
-        if (!response.ok) throw new Error('下載失敗');
+        if (!response.ok) {
+          if (response.status === 404) {
+            showError('找不到檔案');
+          } else {
+            throw new Error('下載失敗');
+          }
+          return;
+        }
         
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
+        
         // 獲取客戶姓名
         const customer = await fetch(`${API_BASE_URL}/customers/${customerId}`).then(res => res.json());
         
@@ -1860,6 +1893,7 @@
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
       } catch (error) {
+        console.error('Error downloading file:', error);
         showError('下載文件失敗');
       }
     }
@@ -1875,14 +1909,10 @@
 
     function getStatusBadgeText(status) {
       const statusMap = {
-        active: '租賃中',
-        paid: '已繳款續約',
-        unpaid: '未繳款',
-        partial: '未繳足額',
         buyback: '已繳款買回',
         locked: '呆帳鎖機'
       };
-      return statusMap[status] || status;
+      return statusMap[status] || '租賃中';
     }
 
     function getStatusButtonText(status) {
@@ -2309,6 +2339,32 @@
       } finally {
         // 隱藏載入中
         document.querySelector('.loading-overlay').style.display = 'none';
+      }
+    }
+
+    // 新增記錄繳款函數
+    async function recordPayment(customerId, amount) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/customers/${customerId}/payment`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            amount,
+            date: new Date().toISOString().split('T')[0],
+            status: '已繳款'
+          })
+        });
+
+        if (!response.ok) throw new Error('記錄繳款失敗');
+        
+        showSuccess('繳款記錄成功');
+        const { customers } = await fetchCustomers();
+        renderCustomerList(customers);
+      } catch (error) {
+        console.error('Error recording payment:', error);
+        showError('記錄繳款失敗');
       }
     }
   </script>
