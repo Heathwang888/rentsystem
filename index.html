@@ -1336,6 +1336,8 @@
     // 創建客戶卡片
     function createCustomerCard(customer) {
       console.log('建立卡片，客戶資料:', customer);
+      console.log('客戶狀態:', customer.status);
+      console.log('isRenting 值:', customer.status === 'renting' || customer.status === 'active' || !customer.status);
 
       const isRenting = customer.status === 'renting' || customer.status === 'active' || !customer.status;
 
@@ -1472,9 +1474,12 @@
         paymentForm.style.display = 'none';
         paymentForm.innerHTML = `
           <div class="form-group">
-            <input type="number" placeholder="輸入繳款金額" id="payment-amount-${customer._id}">
-            <button class="button button-success" onclick="handlePayment('${customer._id}')">確認繳款</button>
-            <button class="button button-danger" onclick="showPaymentForm('${customer._id}')">取消</button>
+            <h4>繳款</h4>
+            <input type="number" placeholder="輸入繳款金額" id="payment-amount-${customer._id}" value="${customer.rent || ''}">
+            <div class="form-actions">
+              <button class="button button-success" onclick="handlePayment('${customer._id}')">確認繳款</button>
+              <button class="button button-danger" onclick="hidePaymentForm('${customer._id}')">取消</button>
+            </div>
           </div>
         `;
         content.appendChild(paymentForm);
@@ -1508,7 +1513,8 @@
       const form = document.getElementById(`payment-form-${customerId}`);
       if (form) {
         console.log('Found payment form:', form.id);
-        form.style.display = 'block';
+        form.style.display = form.style.display === 'block' ? 'none' : 'block';
+        console.log('Form display style:', form.style.display);
       } else {
         console.error('Payment form not found for customer:', customerId);
       }
@@ -1529,6 +1535,7 @@
       const amountInput = document.getElementById(`payment-amount-${customerId}`);
       if (!amountInput) {
         console.error('Payment amount input not found');
+        alert('找不到繳款金額輸入框');
         return;
       }
 
@@ -1549,7 +1556,10 @@
           body: JSON.stringify({ amount })
         });
 
-        if (!response.ok) throw new Error('繳款失敗');
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || '繳款失敗');
+        }
 
         // 重新載入客戶列表
         await loadCustomers();
@@ -1559,7 +1569,7 @@
         alert('繳款成功');
       } catch (error) {
         console.error('Payment failed:', error);
-        alert('繳款失敗');
+        alert(`繳款失敗: ${error.message}`);
       } finally {
         hideLoading();
       }
