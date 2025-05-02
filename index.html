@@ -245,9 +245,25 @@
 
     .header-content {
       display: grid;
-      grid-template-columns: 2fr 2fr 1fr 1fr 1fr auto;
+      grid-template-columns: auto 2fr 2fr 1fr 1fr 1fr auto;
       gap: 1rem;
       align-items: center;
+    }
+
+    .payment-button {
+      padding: 0.5rem 1rem;
+      background: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      white-space: nowrap;
+      font-size: 0.9rem;
+      transition: background-color 0.2s;
+    }
+
+    .payment-button:hover {
+      background: #1565c0;
     }
 
     .customer-info {
@@ -1335,6 +1351,18 @@
       const headerContent = document.createElement('div');
       headerContent.className = 'header-content';
       
+      // 繳款按鈕（放在最前面）
+      if (customer.status === 'renting') {
+        const paymentButton = document.createElement('button');
+        paymentButton.className = 'payment-button';
+        paymentButton.textContent = '繳款';
+        paymentButton.onclick = (e) => {
+          e.stopPropagation(); // 防止觸發卡片展開
+          showPaymentForm(customer._id);
+        };
+        headerContent.appendChild(paymentButton);
+      }
+      
       // 客戶姓名和備註
       const customerInfo = document.createElement('div');
       customerInfo.className = 'customer-info';
@@ -1376,18 +1404,6 @@
       const status = document.createElement('div');
       status.className = `status-badge status-${customer.status || 'renting'}`;
       status.textContent = getStatusText(customer.status);
-      
-      // 繳款按鈕（放在標題欄）
-      if (customer.status === 'renting') {
-        const paymentButton = document.createElement('button');
-        paymentButton.className = 'button button-primary';
-        paymentButton.textContent = '繳款';
-        paymentButton.onclick = (e) => {
-          e.stopPropagation(); // 防止觸發卡片展開
-          showPaymentForm(customer._id);
-        };
-        headerContent.appendChild(paymentButton);
-      }
       
       headerContent.appendChild(customerInfo);
       headerContent.appendChild(modelInfo);
@@ -1872,4 +1888,3 @@
   </script>
 </body>
 </html>
-
