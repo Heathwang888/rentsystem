@@ -1546,7 +1546,7 @@
             <input type="number" placeholder="輸入繳款金額" id="payment-amount-${customer._id}" value="${customer.rent || ''}">
             <div id="payment-type-${customer._id}" class="payment-type-info"></div>
             <div class="form-actions">
-              <button class="button button-success" onclick="handlePayment('${customer._id}')">確認繳款</button>
+              <button class="button button-success" onclick="handlePayment(${JSON.stringify(customer)})">確認繳款</button>
               <button class="button button-danger" onclick="hidePaymentForm('${customer._id}')">取消</button>
             </div>
           </div>
@@ -1627,9 +1627,9 @@
     }
 
     // 處理付款
-    async function handlePayment(customerId) {
-      console.log('Processing payment for customer:', customerId);
-      const amountInput = document.getElementById(`payment-amount-${customerId}`);
+    async function handlePayment(customer) {
+      console.log('Processing payment for customer:', customer._id);
+      const amountInput = document.getElementById(`payment-amount-${customer._id}`);
       if (!amountInput) {
         console.error('Payment amount input not found');
         alert('找不到繳款金額輸入框');
@@ -1644,14 +1644,8 @@
 
       try {
         showLoading();
-        console.log('Sending payment request:', { customerId, amount });
-        
-        // 獲取客戶當前信息
-        const customerResponse = await fetch(`${API_BASE_URL}/customers/${customerId}`);
-        if (!customerResponse.ok) throw new Error('獲取客戶信息失敗');
-        const customer = await customerResponse.json();
-        
-        // 判斷繳款類型
+        console.log('Sending payment request:', { customerId: customer._id, amount });
+        // 直接用 customer 物件，不再 fetch 單筆
         let paymentType = '';
         if (amount < customer.rent) {
           paymentType = 'partial';
@@ -1663,7 +1657,7 @@
           paymentType = 'rent';
         }
 
-        const response = await fetch(`${API_BASE_URL}/customers/${customerId}/payment`, {
+        const response = await fetch(`${API_BASE_URL}/customers/${customer._id}/payment`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -1681,13 +1675,9 @@
           throw new Error(errorData.message || '繳款失敗');
         }
 
-        // 重新載入客戶列表
         await loadCustomers();
-        // 隱藏繳款表單
-        hidePaymentForm(customerId);
+        hidePaymentForm(customer._id);
         amountInput.value = '';
-        
-        // 根據繳款類型顯示不同提示
         switch(paymentType) {
           case 'partial':
             alert(`部分繳款成功，尚欠 ${formatAmount(customer.rent - amount)}`);
