@@ -111,6 +111,111 @@
       position: relative;
     }
 
+    /* 側邊導航欄 */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 250px;
+      background: #1976d2;
+      color: white;
+      z-index: 1000;
+      transition: transform 0.3s;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .sidebar-header h1 {
+      font-size: 1.25rem;
+      margin: 0;
+      font-weight: 500;
+    }
+
+    .nav-menu {
+      list-style: none;
+      padding: 1rem 0;
+      margin: 0;
+    }
+
+    .nav-item {
+      margin: 0.25rem 0;
+    }
+
+    .nav-link {
+      color: rgba(255,255,255,0.8);
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1.5rem;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .nav-link:hover {
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+
+    .nav-link.active {
+      background: white;
+      color: #1976d2;
+    }
+
+    .nav-link i {
+      margin-right: 0.75rem;
+      font-size: 1.25rem;
+    }
+
+    /* 主內容區域調整 */
+    .main-content {
+      margin-left: 250px;
+      padding: 2rem;
+      min-height: 100vh;
+      transition: margin-left 0.3s;
+    }
+
+    /* 響應式設計 */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .toggle-sidebar {
+        display: block;
+      }
+    }
+
+    /* 漢堡選單按鈕 */
+    .toggle-sidebar {
+      display: none;
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 1001;
+      background: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.5rem;
+      cursor: pointer;
+    }
+
+    .toggle-sidebar:hover {
+      background: #1565c0;
+    }
+
     /* 客戶卡片樣式 */
     .customer-card {
       background: white;
@@ -270,133 +375,6 @@
       font-size: 1.25rem;
     }
 
-    /* 客戶卡片展開樣式 */
-    .customer-card {
-      position: relative;
-      overflow: hidden;
-      background: white;
-      border-radius: 8px;
-      box-shadow: var(--card-shadow);
-      margin-bottom: 1rem;
-    }
-
-    .customer-card .card-header {
-      cursor: pointer;
-      padding: 1.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .customer-card .card-header h3 {
-      margin: 0;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .customer-card .card-content {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease;
-    }
-
-    .customer-card.expanded .card-content {
-      max-height: 1000px;
-      padding: 1.5rem;
-    }
-
-    .status-badge {
-      padding: 0.25rem 0.75rem;
-      border-radius: 4px;
-      font-size: 0.875rem;
-      font-weight: 500;
-    }
-
-    .status-active { background: #e3f2fd; color: #1976d2; }
-    .status-paid { background: #e8f5e9; color: #2e7d32; }
-    .status-unpaid { background: #ffebee; color: #d32f2f; }
-    .status-partial { background: #fff3e0; color: #f57c00; }
-    .status-buyback { background: #f3e5f5; color: #7b1fa2; }
-
-    .edit-button {
-      background: none;
-      border: none;
-      color: #1976d2;
-      cursor: pointer;
-      padding: 0.5rem;
-      font-size: 1rem;
-    }
-
-    .edit-button:hover {
-      opacity: 0.8;
-    }
-
-    .payment-remaining {
-      color: #d32f2f;
-      font-weight: 500;
-      margin-top: 0.5rem;
-    }
-
-    select {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23666' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right center;
-      padding-right: 24px;
-    }
-
-    .customer-details {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1.5rem;
-      margin-top: 1rem;
-    }
-
-    .detail-group {
-      background: white;
-      padding: 1rem;
-      border-radius: 8px;
-      box-shadow: var(--card-shadow);
-    }
-
-    .detail-group h4 {
-      color: var(--text-secondary);
-      font-size: 0.875rem;
-      margin-bottom: 0.75rem;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .detail-item {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 0.5rem;
-      font-size: 0.875rem;
-    }
-
-    .detail-item:last-child {
-      margin-bottom: 0;
-    }
-
-    .detail-label {
-      color: var(--text-secondary);
-    }
-
-    .detail-value {
-      font-weight: 500;
-    }
-
-    .expand-icon {
-      position: absolute;
-      right: 1.5rem;
-      top: 1.5rem;
-      transition: transform 0.3s;
-    }
-
-    .customer-card.expanded .expand-icon {
-      transform: rotate(180deg);
-    }
-
     /* 合約生成表單樣式 */
     .contract-form {
       background: white;
@@ -430,266 +408,9 @@
       border-color: var(--primary-color);
     }
 
-    .action-buttons {
-      display: flex;
-      gap: 1rem;
-      margin-top: 2rem;
-    }
-
-    /* 按鈕樣式 */
-    .button {
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: 4px;
-      font-size: 1rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      color: white;
-      background: #1976d2;
-    }
-
-    .button:hover {
-      opacity: 0.9;
-    }
-
-    .button-primary {
-      background: #1976d2;
-    }
-
-    .button-success {
-      background: #2e7d32;
-    }
-
-    .button-danger {
-      background: #d32f2f;
-    }
-
-    .button-warning {
-      background: #ff9800;
-    }
-
-    .button:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-    }
-
-    /* 合約預覽容器 */
-    .page-container {
-      visibility: hidden;
-      position: fixed;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: -1;
-    }
-
-    .page {
-      position: relative;
-      width: 1448px;
-      height: 2048px;
-      background-size: cover;
-      background-position: center;
-      margin: 40px auto;
-      background-repeat: no-repeat;
-    }
-
-    .field {
-      position: absolute;
-      font-size: 22px;
-      color: #000;
-      font-weight: bold;
-      letter-spacing: 1px;
-      white-space: nowrap;
-      pointer-events: none;
-      visibility: hidden;
-    }
-
-    /* Loading 動畫 */
-    .loading-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(255,255,255,0.9);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 2000;
-    }
-
-    .loading-spinner {
-      width: 40px;
-      height: 40px;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid var(--primary-color);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    /* 總覽頁面樣式 */
-    .overview-cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
-      margin-top: 1rem;
-    }
-
-    .overview-card {
-      background: white;
-      border-radius: 12px;
-      box-shadow: var(--card-shadow);
-      padding: 1.5rem;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .overview-card:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--card-hover-shadow);
-    }
-
-    .overview-card h3 {
-      color: var(--text-color);
-      font-size: 1.25rem;
-      margin-bottom: 1rem;
-      padding-bottom: 0.75rem;
-      border-bottom: 2px solid var(--primary-color);
-    }
-
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.75rem;
-    }
-
-    .info-row:last-child {
-      margin-bottom: 0;
-    }
-
-    .info-row .label {
-      color: var(--text-secondary);
-      font-size: 0.875rem;
-    }
-
-    .info-row .value {
-      font-weight: 500;
-      font-size: 1.125rem;
-    }
-
-    /* 客戶資訊上傳/編輯表單樣式 */
-    .customer-form {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      margin: 2rem auto;
-      max-width: 1200px;
-      padding: 2rem;
-    }
-
-    .form-header {
-      border-bottom: 2px solid #1976d2;
-      margin-bottom: 2rem;
-      padding-bottom: 1rem;
-    }
-
-    .form-header h3 {
-      color: #1976d2;
-      font-size: 1.5rem;
-      margin: 0;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .form-section {
-      background: #f8f9fa;
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .form-section h4 {
-      color: #1976d2;
-      font-size: 1.1rem;
-      margin: 0 0 1rem 0;
-    }
-
-    .form-group {
-      margin-bottom: 1rem;
-    }
-
-    .form-group label {
-      color: #666;
-      display: block;
-      font-size: 0.875rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .form-group input,
-    .form-group select {
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 1rem;
-      padding: 0.75rem;
-      width: 100%;
-      transition: border-color 0.2s;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus {
-      border-color: #1976d2;
-      outline: none;
-    }
-
-    .form-group input[type="file"] {
-      background: #f8f9fa;
-      border: 2px dashed #ddd;
-      cursor: pointer;
-      padding: 1rem;
-      text-align: center;
-    }
-
-    .form-group input[type="file"]:hover {
-      border-color: #1976d2;
-    }
-
-    .address-options {
-      align-items: center;
-      display: flex;
-      gap: 1rem;
-      margin-top: 0.5rem;
-    }
-
-    .checkbox-label {
-      align-items: center;
-      color: #666;
-      cursor: pointer;
-      display: flex;
-      font-size: 0.875rem;
-      gap: 0.5rem;
-    }
-
-    .checkbox-label input[type="checkbox"] {
-      width: auto;
-    }
-
     .form-actions {
       display: flex;
       gap: 1rem;
-      justify-content: flex-end;
       margin-top: 2rem;
     }
 
@@ -790,161 +511,63 @@
       border-radius: 4px;
     }
 
-    /* 側邊導航欄 */
-    .sidebar {
-      position: fixed;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 250px;
-      background: #1976d2;
-      color: white;
-      z-index: 1000;
-      transition: transform 0.3s;
-    }
-
-    .sidebar-header {
-      padding: 1.5rem;
-      text-align: center;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .sidebar-header h1 {
-      font-size: 1.25rem;
-      margin: 0;
-      font-weight: 500;
-    }
-
-    .nav-menu {
-      list-style: none;
-      padding: 1rem 0;
-      margin: 0;
-    }
-
-    .nav-item {
-      margin: 0.25rem 0;
-    }
-
-    .nav-link {
-      color: rgba(255,255,255,0.8);
-      display: flex;
-      align-items: center;
-      padding: 0.75rem 1.5rem;
-      text-decoration: none;
-      transition: all 0.2s;
-    }
-
-    .nav-link:hover {
-      background: rgba(255,255,255,0.1);
-      color: white;
-    }
-
-    .nav-link.active {
-      background: white;
-      color: #1976d2;
-    }
-
-    .nav-link i {
-      margin-right: 0.75rem;
-      font-size: 1.25rem;
-    }
-
-    /* 主內容區域調整 */
-    .main-content {
-      margin-left: 250px;
-      padding: 2rem;
-      min-height: 100vh;
-      transition: margin-left 0.3s;
-    }
-
-    /* 響應式設計 */
-    @media (max-width: 768px) {
-      .sidebar {
-        transform: translateX(-100%);
-      }
-
-      .sidebar.active {
-        transform: translateX(0);
-      }
-
-      .main-content {
-        margin-left: 0;
-      }
-
-      .toggle-sidebar {
-        display: block;
-      }
-    }
-
-    /* 漢堡選單按鈕 */
-    .toggle-sidebar {
+    /* 合約預覽容器 */
+    .page-container {
       display: none;
       position: fixed;
-      top: 1rem;
-      left: 1rem;
-      z-index: 1001;
-      background: #1976d2;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      padding: 0.5rem;
-      cursor: pointer;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
     }
 
-    .toggle-sidebar:hover {
-      background: #1565c0;
+    .page {
+      position: relative;
+      width: 210mm;
+      height: 297mm;
+      margin: 0 auto;
+      background: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      overflow: hidden;
     }
 
-    .unpaid-amount {
-      color: #d32f2f;
-      font-weight: 500;
-      background: #ffebee;
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
-      margin-right: 0.5rem;
+    .field {
+      position: absolute;
+      font-size: 12px;
+      color: #000;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    /* 新增備註欄樣式 */
-    .notes-section {
-      background: rgba(0, 0, 0, 0.07);
-      padding: 0.5rem;
-      border-radius: 4px;
-      margin-top: 0.5rem;
-    }
-
-    /* 新增繳款紀錄樣式 */
-    .payment-history {
-      margin-top: 1rem;
-    }
-    
-    .payment-history-content {
-      margin-top: 0.5rem;
-    }
-    
-    .payment-record {
-      display: flex;
-      justify-content: space-between;
+    /* Loading 動畫 */
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      justify-content: center;
       align-items: center;
-      padding: 0.25rem 0;
-      border-bottom: 1px solid rgba(0,0,0,0.1);
     }
-    
-    .payment-record:last-child {
-      border-bottom: none;
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #1976d2;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
     }
-    
-    .payment-date {
-      color: #666;
-      font-size: 0.875rem;
-    }
-    
-    .payment-amount {
-      font-weight: 500;
-    }
-    
-    .payment-status {
-      color: #1976d2;
-      font-size: 0.875rem;
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
@@ -1079,111 +702,7 @@
           </div>
 
           <div class="customer-cards">
-            <!-- 客戶卡片範例 -->
-            <div class="customer-card">
-              <div class="card-header" onclick="toggleCustomerDetails(this)">
-                <div>
-                  <h3>${customer.name}</h3>
-                  ${customer.notes ? `
-                  <div class="notes-section">
-                    <span class="detail-label">備註</span>
-                    <span class="detail-value">${customer.notes}</span>
-                  </div>
-                  ` : ''}
-                  <div class="payment-info">
-                    <span class="label">售價：</span>
-                    <span class="value">${formatAmount(customer.salePrice)}</span>
-                    <span class="label">租金：</span>
-                    <span class="value">${formatAmount(customer.rent)}/週</span>
-                    ${unpaidAmount > 0 ? `<span class="unpaid-amount">尚餘：${formatAmount(unpaidAmount)}</span>` : ''}
-                    ${dueDateText ? `<span class="due-date ${daysLeft === 0 ? 'today' : ''}">${dueDateText}</span>` : ''}
-                  </div>
-                </div>
-                <span class="status-badge status-${getStatusBadgeText(customer.status)}">${getStatusBadgeText(customer.status)}</span>
-              </div>
-              <div class="card-content">
-                <div class="customer-details">
-                  <div class="detail-group">
-                    <h4>基本資料</h4>
-                    <div class="detail-item">
-                      <span class="detail-label">身分證字號</span>
-                      <span class="detail-value">${customer.idNumber}</span>
-                    </div>
-                    <div class="detail-item">
-                      <span class="detail-label">手機號碼</span>
-                      <span class="detail-value">${customer.phone}</span>
-                    </div>
-                    <div class="detail-item">
-                      <span class="detail-label">戶籍地址</span>
-                      <span class="detail-value">${customer.address}</span>
-                    </div>
-                    <div class="detail-item">
-                      <span class="detail-label">通訊地址</span>
-                      <span class="detail-value">${customer.contactAddress || customer.address}</span>
-                    </div>
-                    ${customer.notes ? `
-                    <div class="detail-item notes-section">
-                      <span class="detail-label">備註</span>
-                      <span class="detail-value">${customer.notes}</span>
-                    </div>
-                    ` : ''}
-                    <div class="detail-item payment-history">
-                      <span class="detail-label">繳款紀錄</span>
-                      <div class="payment-history-content">
-                        ${customer.paymentHistory ? customer.paymentHistory.map(payment => `
-                          <div class="payment-record">
-                            <span class="payment-date">${formatDate(payment.date)}</span>
-                            <span class="payment-amount">${formatAmount(payment.amount)}</span>
-                            <span class="payment-status">${payment.status}</span>
-                          </div>
-                        `).join('') : '無繳款紀錄'}
-                      </div>
-                    </div>
-                  </div>
-                  <div class="detail-group">
-                    <h4>手機資訊</h4>
-                    <div class="detail-item">
-                      <span class="detail-label">手機型號</span>
-                      <span class="detail-value">${customer.model}</span>
-                    </div>
-                    <div class="detail-item">
-                      <span class="detail-label">IMEI</span>
-                      <span class="detail-value">${customer.imei}</span>
-                    </div>
-                    <div class="detail-item">
-                      <span class="detail-label">螢幕密碼</span>
-                      <span class="detail-value">${customer.screenPassword || '未設定'}</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="action-buttons">
-                  <button class="button button-primary" onclick="updateStatus('${customer._id}', 'buyback')">${getStatusText('buyback')}</button>
-                  ${daysLeft === 0 ? 
-                    `<button class="button button-success" onclick="recordPayment('${customer._id}', ${customer.rent})">已繳款</button>` 
-                    : ''
-                  }
-                  <button class="button button-warning" onclick="showPartialPaymentForm('${customer._id}')">未繳足額</button>
-                  <button class="button button-danger" onclick="updateStatus('${customer._id}', 'locked')">${getStatusText('locked')}</button>
-                </div>
-                <div class="partial-payment-form" id="partial-payment-${customer._id}">
-                  <input type="number" placeholder="已繳金額" id="paid-amount-${customer._id}">
-                  <input type="number" placeholder="未繳金額" id="unpaid-amount-${customer._id}">
-                  <button class="button button-warning" onclick="submitPartialPayment('${customer._id}')">確認</button>
-                </div>
-                <div class="notes">
-                  <textarea placeholder="備註" id="notes-${customer._id}">${customer.notes || ''}</textarea>
-                  <button class="button button-info" onclick="saveNotes('${customer._id}')">儲存備註</button>
-                </div>
-                <div class="file-downloads">
-                  <button class="file-download-button" onclick="downloadFile('${customer._id}', 'contract')">
-                    <i>📄</i> 下載合約
-                  </button>
-                  <button class="file-download-button" onclick="downloadFile('${customer._id}', 'id')">
-                    <i>🪪</i> 下載身分證
-                  </button>
-                </div>
-              </div>
-            </div>
+            <!-- 客戶卡片將由 JavaScript 動態生成 -->
           </div>
 
           <div class="pagination"></div>
@@ -1531,1000 +1050,382 @@
   </div>
 
   <script>
-    // API 基礎 URL
+    // API 配置
     const API_BASE_URL = 'https://five-iridescent-flyaway.glitch.me/api';
-
-    // API 函數
-    async function fetchCustomers(page = 1, limit = 5) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/customers?page=${page}&limit=${limit}`);
-        if (!response.ok) throw new Error('獲取客戶列表失敗');
-        const data = await response.json();
-        return data;
-      } catch (error) {
-        console.error('Error:', error);
-        showError('獲取客戶列表失敗');
-        return { customers: [], total: 0 };
-      }
-    }
-
-    async function searchCustomers(query, page = 1, limit = 5) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/customers/search?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}`);
-        if (!response.ok) throw new Error('搜尋客戶失敗');
-        const data = await response.json();
-        return data;
-      } catch (error) {
-        console.error('Error:', error);
-        showError('搜尋客戶失敗');
-        return { customers: [], total: 0 };
-      }
-    }
-
-    async function createCustomer(formData) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/customers`, {
-          method: 'POST',
-          body: formData
-        });
-        if (!response.ok) throw new Error('創建客戶失敗');
-        const customer = await response.json();
-        showSuccess('客戶創建成功');
-        return customer;
-      } catch (error) {
-        console.error('Error:', error);
-        showError('創建客戶失敗');
-        throw error;
-      }
-    }
-
-    async function updateCustomer(id, formData) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/customers/${id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData)
-        });
-        if (!response.ok) throw new Error('更新客戶失敗');
-        const customer = await response.json();
-        showSuccess('客戶資料更新成功');
-        return customer;
-      } catch (error) {
-        console.error('Error:', error);
-        showError('更新客戶失敗');
-        throw error;
-      }
-    }
-
-    async function updateCustomerStatus(id, status) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/customers/${id}/status`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ status })
-        });
-        if (!response.ok) throw new Error('更新客戶狀態失敗');
-        const customer = await response.json();
-        showSuccess('客戶狀態更新成功');
-        return customer;
-      } catch (error) {
-        console.error('Error:', error);
-        showError('更新客戶狀態失敗');
-        throw error;
-      }
-    }
-
-    async function deleteCustomer(id) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/customers/${id}`, {
-          method: 'DELETE'
-        });
-        if (!response.ok) throw new Error('刪除客戶失敗');
-        showSuccess('客戶刪除成功');
-      } catch (error) {
-        console.error('Error:', error);
-        showError('刪除客戶失敗');
-        throw error;
-      }
-    }
-
-    // 渲染客戶列表
-    function renderCustomerList(customers) {
-      const customerList = document.querySelector('.customer-cards');
-      if (!customerList) return;
-
-      customerList.innerHTML = '';
-      
-      if (customers.length === 0) {
-        customerList.innerHTML = '<p class="no-data">暫無客戶資料</p>';
-        return;
-      }
-console.log('Fetched customers:', customers);
-      customers.forEach(function(customer) {
-        const card = document.createElement('div');
-        card.className = 'customer-card';
-        
-        // 計算下次繳款日
-        const contractDate = new Date(customer.contractDate);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        // 獲取最後一次繳款日期
-        const lastPayment = customer.paymentHistory ? 
-          customer.paymentHistory.sort(function(a, b) { return new Date(b.date) - new Date(a.date); })[0] : null;
-
-        // 計算下次繳款日
-        const nextPaymentDate = lastPayment ? new Date(lastPayment.date) : new Date(contractDate);
-        nextPaymentDate.setDate(nextPaymentDate.getDate() + 7);
-        nextPaymentDate.setHours(0, 0, 0, 0);
-
-        const daysLeft = Math.ceil((nextPaymentDate - today) / (1000 * 60 * 60 * 24));
-
-        // 如果狀態是已繳款買回或呆帳鎖機，不顯示繳款資訊
-        const dueDateText = customer.status === 'buyback' || customer.status === 'locked' ? '' :
-          daysLeft === 0 ? '今日須繳款' : 
-          daysLeft < 0 ? '已遲繳 ' + Math.abs(daysLeft) + ' 日' :
-          '剩餘 ' + daysLeft + ' 天';
-
-        // 計算未繳餘額
-        const unpaidAmount = customer.status === 'partial' ? customer.unpaidAmount : 0;
-
-        // 建立卡片標題
-        const cardHeader = document.createElement('div');
-        cardHeader.className = 'card-header';
-        cardHeader.onclick = function() { toggleCustomerDetails(cardHeader); };
-
-        const headerContent = document.createElement('div');
-        const name = document.createElement('h3');
-        name.textContent = customer.name;
-        headerContent.appendChild(name);
-
-        if (customer.notes) {
-          const notesSection = document.createElement('div');
-          notesSection.className = 'notes-section';
-          const notesLabel = document.createElement('span');
-          notesLabel.className = 'detail-label';
-          notesLabel.textContent = '備註';
-          const notesValue = document.createElement('span');
-          notesValue.className = 'detail-value';
-          notesValue.textContent = customer.notes;
-          notesSection.appendChild(notesLabel);
-          notesSection.appendChild(notesValue);
-          headerContent.appendChild(notesSection);
-        }
-
-        const paymentInfo = document.createElement('div');
-        paymentInfo.className = 'payment-info';
-        
-        const salePriceLabel = document.createElement('span');
-        salePriceLabel.className = 'label';
-        salePriceLabel.textContent = '售價：';
-        const salePriceValue = document.createElement('span');
-        salePriceValue.className = 'value';
-        salePriceValue.textContent = customer.salePrice ? new Intl.NumberFormat('zh-TW').format(Math.round(customer.salePrice)) : '0';
-        
-        salePriceValue.textContent = formatAmount(customer.salePrice);
-        
-        const rentLabel = document.createElement('span');
-        rentLabel.className = 'label';
-        rentLabel.textContent = '租金：';
-        const rentValue = document.createElement('span');
-        rentValue.className = 'value';
-        rentValue.textContent = formatAmount(customer.rent) + '/週';
-
-        paymentInfo.appendChild(salePriceLabel);
-        paymentInfo.appendChild(salePriceValue);
-        paymentInfo.appendChild(rentLabel);
-        paymentInfo.appendChild(rentValue);
-
-        if (unpaidAmount > 0) {
-          const unpaidAmountSpan = document.createElement('span');
-          unpaidAmountSpan.className = 'unpaid-amount';
-          unpaidAmountSpan.textContent = '尚餘：' + formatAmount(unpaidAmount);
-          paymentInfo.appendChild(unpaidAmountSpan);
-        }
-
-        if (dueDateText) {
-          const dueDateSpan = document.createElement('span');
-          dueDateSpan.className = 'due-date' + (daysLeft === 0 ? ' today' : '');
-          dueDateSpan.textContent = dueDateText;
-          paymentInfo.appendChild(dueDateSpan);
-        }
-
-        headerContent.appendChild(paymentInfo);
-        cardHeader.appendChild(headerContent);
-
-        const statusBadge = document.createElement('span');
-        statusBadge.className = 'status-badge status-' + customer.status;
-        statusBadge.textContent = getStatusText(customer.status);
-        cardHeader.appendChild(statusBadge);
-
-        // 建立卡片內容
-        const cardContent = document.createElement('div');
-        cardContent.className = 'card-content';
-
-        // 建立客戶詳細資訊
-        const customerDetails = document.createElement('div');
-        customerDetails.className = 'customer-details';
-
-        // 基本資料區塊
-        const basicInfoGroup = document.createElement('div');
-        basicInfoGroup.className = 'detail-group';
-        const basicInfoTitle = document.createElement('h4');
-        basicInfoTitle.textContent = '基本資料';
-        basicInfoGroup.appendChild(basicInfoTitle);
-
-        const idNumberItem = createDetailItem('身分證字號', customer.idNumber);
-        const phoneItem = createDetailItem('手機號碼', customer.phone);
-        const addressItem = createDetailItem('戶籍地址', customer.address);
-        const contactAddressItem = createDetailItem('通訊地址', customer.contactAddress || customer.address);
-
-        basicInfoGroup.appendChild(idNumberItem);
-        basicInfoGroup.appendChild(phoneItem);
-        basicInfoGroup.appendChild(addressItem);
-        basicInfoGroup.appendChild(contactAddressItem);
-
-        // 繳款紀錄
-        const paymentHistoryItem = document.createElement('div');
-        paymentHistoryItem.className = 'detail-item payment-history';
-        const paymentHistoryLabel = document.createElement('span');
-        paymentHistoryLabel.className = 'detail-label';
-        paymentHistoryLabel.textContent = '繳款紀錄';
-        const paymentHistoryContent = document.createElement('div');
-        paymentHistoryContent.className = 'payment-history-content';
-
-        if (customer.paymentHistory && customer.paymentHistory.length > 0) {
-          customer.paymentHistory.forEach(function(payment) {
-            const paymentRecord = document.createElement('div');
-            paymentRecord.className = 'payment-record';
-            
-            const paymentDate = document.createElement('span');
-            paymentDate.className = 'payment-date';
-            paymentDate.textContent = formatDate(payment.date);
-            
-            const paymentAmount = document.createElement('span');
-            paymentAmount.className = 'payment-amount';
-            paymentAmount.textContent = formatAmount(payment.amount);
-            
-            const paymentStatus = document.createElement('span');
-            paymentStatus.className = 'payment-status';
-            paymentStatus.textContent = payment.status;
-
-            paymentRecord.appendChild(paymentDate);
-            paymentRecord.appendChild(paymentAmount);
-            paymentRecord.appendChild(paymentStatus);
-            paymentHistoryContent.appendChild(paymentRecord);
-          });
-        } else {
-          paymentHistoryContent.textContent = '無繳款紀錄';
-        }
-
-        paymentHistoryItem.appendChild(paymentHistoryLabel);
-        paymentHistoryItem.appendChild(paymentHistoryContent);
-        basicInfoGroup.appendChild(paymentHistoryItem);
-
-        // 手機資訊區塊
-        const phoneInfoGroup = document.createElement('div');
-        phoneInfoGroup.className = 'detail-group';
-        const phoneInfoTitle = document.createElement('h4');
-        phoneInfoTitle.textContent = '手機資訊';
-        phoneInfoGroup.appendChild(phoneInfoTitle);
-
-        const modelItem = createDetailItem('手機型號', customer.model);
-        const imeiItem = createDetailItem('IMEI', customer.imei);
-        const screenPasswordItem = createDetailItem('螢幕密碼', customer.screenPassword || '未設定');
-
-        phoneInfoGroup.appendChild(modelItem);
-        phoneInfoGroup.appendChild(imeiItem);
-        phoneInfoGroup.appendChild(screenPasswordItem);
-
-        customerDetails.appendChild(basicInfoGroup);
-        customerDetails.appendChild(phoneInfoGroup);
-        cardContent.appendChild(customerDetails);
-
-        // 動作按鈕區塊
-        const actionButtons = document.createElement('div');
-        actionButtons.className = 'action-buttons';
-
-        const buybackButton = createButton('button-primary', '已繳款買回', function() { updateStatus(customer._id, 'buyback'); });
-        actionButtons.appendChild(buybackButton);
-
-        if (daysLeft === 0) {
-          const paidButton = createButton('button-success', '已繳款', function() { recordPayment(customer._id, customer.rent); });
-          actionButtons.appendChild(paidButton);
-        }
-
-        const partialButton = createButton('button-warning', '未繳足額', function() { showPartialPaymentForm(customer._id); });
-        const lockedButton = createButton('button-danger', '呆帳鎖機', function() { updateStatus(customer._id, 'locked'); });
-
-        actionButtons.appendChild(partialButton);
-        actionButtons.appendChild(lockedButton);
-        cardContent.appendChild(actionButtons);
-
-        // 部分繳款表單
-        const partialPaymentForm = document.createElement('div');
-        partialPaymentForm.className = 'partial-payment-form';
-        partialPaymentForm.id = 'partial-payment-' + customer._id;
-
-        const paidAmountInput = document.createElement('input');
-        paidAmountInput.type = 'number';
-        paidAmountInput.placeholder = '已繳金額';
-        paidAmountInput.id = 'paid-amount-' + customer._id;
-
-        const unpaidAmountInput = document.createElement('input');
-        unpaidAmountInput.type = 'number';
-        unpaidAmountInput.placeholder = '未繳金額';
-        unpaidAmountInput.id = 'unpaid-amount-' + customer._id;
-
-        const confirmButton = createButton('button-warning', '確認', function() { submitPartialPayment(customer._id); });
-
-        partialPaymentForm.appendChild(paidAmountInput);
-        partialPaymentForm.appendChild(unpaidAmountInput);
-        partialPaymentForm.appendChild(confirmButton);
-        cardContent.appendChild(partialPaymentForm);
-
-        // 檔案下載區塊
-        const fileDownloads = document.createElement('div');
-        fileDownloads.className = 'file-downloads';
-
-        const contractButton = createFileDownloadButton('📄', '下載合約', function() { downloadFile(customer._id, 'contract'); });
-        const idButton = createFileDownloadButton('🪪', '下載身分證', function() { downloadFile(customer._id, 'id'); });
-
-        fileDownloads.appendChild(contractButton);
-        fileDownloads.appendChild(idButton);
-        cardContent.appendChild(fileDownloads);
-
-        // 組合卡片
-        card.appendChild(cardHeader);
-        card.appendChild(cardContent);
-        customerList.appendChild(card);
-      });
-    }
-
-    // 輔助函數
-    function createDetailItem(label, value) {
-      const item = document.createElement('div');
-      item.className = 'detail-item';
-      
-      const labelSpan = document.createElement('span');
-      labelSpan.className = 'detail-label';
-      labelSpan.textContent = label;
-      
-      const valueSpan = document.createElement('span');
-      valueSpan.className = 'detail-value';
-      valueSpan.textContent = value;
-      
-      item.appendChild(labelSpan);
-      item.appendChild(valueSpan);
-      return item;
-    }
-
+    
+    // 工具函數
     function formatAmount(amount) {
-      if (!amount) return '0';
-      return new Intl.NumberFormat('zh-TW').format(Math.round(amount));
-    }
-
-    function formatDate(date) {
-      return new Date(date).toLocaleDateString('zh-TW');
+      return `$${amount.toLocaleString()}`;
     }
 
     function getStatusText(status) {
       const statusMap = {
-        active: '租賃中',
-        paid: '已繳款續約',
-        unpaid: '未繳款',
-        partial: '未繳足額',
-        buyback: '已繳款買回',
-        locked: '呆帳鎖機'
+        'active': '進行中',
+        'paid': '已付清',
+        'partial': '部分付款',
+        'buyback': '買回',
+        'locked': '呆帳鎖機'
       };
-      return statusMap[status] || '租賃中';
+      return statusMap[status] || status;
     }
 
-    function createButton(className, text, onClick) {
-      const button = document.createElement('button');
-      button.className = `button ${className}`;
-      button.textContent = text;
-      button.onclick = onClick;
-      return button;
+    function showLoading() {
+      document.querySelector('.loading-overlay').style.display = 'flex';
     }
 
-    function createFileDownloadButton(icon, text, onClick) {
-      const button = document.createElement('button');
-      button.className = 'file-download-button';
-      button.onclick = onClick;
-      
-      const iconSpan = document.createElement('i');
-      iconSpan.textContent = icon;
-      
-      button.appendChild(iconSpan);
-      button.appendChild(document.createTextNode(` ${text}`));
-      return button;
+    function hideLoading() {
+      document.querySelector('.loading-overlay').style.display = 'none';
     }
 
-    // 顯示部分付款表單
-    function showPartialPaymentForm(customerId) {
-      const form = document.getElementById(`partial-payment-${customerId}`);
-      form.classList.toggle('active');
-    }
-
-    // 提交部分付款
-    async function submitPartialPayment(customerId) {
-      const paidAmount = document.getElementById(`paid-amount-${customerId}`).value;
-      const unpaidAmount = document.getElementById(`unpaid-amount-${customerId}`).value;
-      
-      if (!paidAmount || !unpaidAmount) {
-        showError('請填寫已繳和未繳金額');
-        return;
-      }
-
+    // API 函數
+    async function fetchCustomers(page = 1, limit = 5) {
+      showLoading();
       try {
-        // 如果未繳金額為0，則更新狀態為active
-        if (parseFloat(unpaidAmount) === 0) {
-          await updateCustomerStatus(customerId, 'active');
-        } else {
-          await updateCustomerStatus(customerId, 'partial', {
-            paidAmount: parseFloat(paidAmount),
-            unpaidAmount: parseFloat(unpaidAmount)
-          });
-        }
-        showSuccess('更新成功');
-        const { customers } = await fetchCustomers();
-        renderCustomerList(customers);
-      } catch (error) {
-        showError('更新失敗');
-      }
-    }
-
-    // 儲存備註
-    async function saveNotes(customerId) {
-      const notes = document.getElementById(`notes-${customerId}`).value;
-      
-      try {
-        const response = await fetch(`${API_BASE_URL}/customers/${customerId}/notes`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ notes })
-        });
-
-        if (!response.ok) throw new Error('儲存備註失敗');
-        
-        await response.json();
-        showSuccess('備註已儲存');
-      } catch (error) {
-        console.error('Error saving notes:', error);
-        showError('儲存備註失敗');
-      }
-    }
-
-    // 更新客戶備註
-    async function updateCustomerNotes(customerId, notes) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/customers/${customerId}/notes`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ notes })
-        });
-
-        if (!response.ok) throw new Error('更新備註失敗');
+        const response = await fetch(`${API_BASE_URL}/customers?page=${page}&limit=${limit}`);
+        if (!response.ok) throw new Error('獲取客戶列表失敗');
         return await response.json();
       } catch (error) {
-        console.error('Error:', error);
+        console.error('載入失敗:', error);
         throw error;
+      } finally {
+        hideLoading();
       }
     }
 
-    // 下載文件
-    async function downloadFile(customerId, type) {
+    async function searchCustomers(query) {
+      showLoading();
       try {
-        const response = await fetch(`${API_BASE_URL}/customers/${customerId}/files/${type}`);
-        if (!response.ok) {
-          if (response.status === 404) {
-            showError('找不到檔案');
-          } else {
-            throw new Error('下載失敗');
-          }
-          return;
-        }
-        
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        
-        // 獲取客戶姓名
-        const customer = await fetch(`${API_BASE_URL}/customers/${customerId}`).then(res => res.json());
-        
-        // 根據檔案類型設定副檔名
-        const fileExtension = type === 'contract' ? '.pdf' : '.jpg';
-        a.download = type === 'contract' ? `${customer.name}-租賃契約${fileExtension}` : `${type}-${customerId}${fileExtension}`;
-        
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
+        const response = await fetch(`${API_BASE_URL}/customers/search?q=${encodeURIComponent(query)}`);
+        if (!response.ok) throw new Error('搜尋失敗');
+        return await response.json();
       } catch (error) {
-        console.error('Error downloading file:', error);
-        showError('下載文件失敗');
+        console.error('搜尋失敗:', error);
+        throw error;
+      } finally {
+        hideLoading();
       }
     }
 
-    // 工具函數
-    function formatCurrency(amount) {
-      return new Intl.NumberFormat('zh-TW', { style: 'currency', currency: 'TWD' }).format(amount);
-    }
+    async function updateCustomerStatus(customerId, status, paidAmount = null, unpaidAmount = null) {
+      showLoading();
+      try {
+        const body = { status };
+        if (paidAmount !== null) body.paidAmount = paidAmount;
+        if (unpaidAmount !== null) body.unpaidAmount = unpaidAmount;
 
-    function formatDate(dateString) {
-      return new Date(dateString).toLocaleDateString('zh-TW');
-    }
-
-    function getStatusBadgeText(status) {
-      const statusMap = {
-        buyback: '已繳款買回',
-        locked: '呆帳鎖機'
-      };
-      return statusMap[status] || '租賃中';
-    }
-
-    function getStatusButtonText(status) {
-      const buttonTextMap = {
-        paid: '已繳款續約',
-        buyback: '已繳款買回',
-        partial: '未繳足額',
-        locked: '呆帳鎖機'
-      };
-      return buttonTextMap[status] || status;
-    }
-
-    function showError(message) {
-      alert(message);
-    }
-
-    function showSuccess(message) {
-      alert(message);
-    }
-
-    // 切換通訊地址顯示
-    function toggleMailingAddress(checkbox) {
-      const mailingAddressInput = checkbox.closest('.address-options').querySelector('input[name="mailingAddress"]');
-      if (checkbox.checked) {
-        mailingAddressInput.value = document.querySelector('input[name="address"]').value;
-        mailingAddressInput.disabled = true;
-      } else {
-        mailingAddressInput.disabled = false;
+        const response = await fetch(`${API_BASE_URL}/customers/${customerId}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        
+        if (!response.ok) throw new Error('更新狀態失敗');
+        return await response.json();
+      } catch (error) {
+        console.error('更新失敗:', error);
+        throw error;
+      } finally {
+        hideLoading();
       }
     }
 
-    // 事件處理
-    document.addEventListener('DOMContentLoaded', async () => {
-      // 頁面切換功能
+    // UI 函數
+    function createCustomerCard(customer) {
+      const card = document.createElement('div');
+      card.className = 'customer-card';
+      
+      const header = document.createElement('div');
+      header.className = 'card-header';
+      
+      const title = document.createElement('h3');
+      title.textContent = customer.name;
+      
+      const status = document.createElement('span');
+      status.className = `status-badge status-${customer.status}`;
+      status.textContent = getStatusText(customer.status);
+      
+      header.appendChild(title);
+      header.appendChild(status);
+      card.appendChild(header);
+      
+      const content = document.createElement('div');
+      content.className = 'card-content';
+      content.innerHTML = `
+        <div class="customer-details">
+          <div class="detail-group">
+            <h4>基本資料</h4>
+            <div class="detail-item">
+              <span class="label">身分證字號：</span>
+              <span class="value">${customer.idNumber}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">電話：</span>
+              <span class="value">${customer.phone}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">地址：</span>
+              <span class="value">${customer.address}</span>
+            </div>
+          </div>
+          <div class="detail-group">
+            <h4>手機資訊</h4>
+            <div class="detail-item">
+              <span class="label">型號：</span>
+              <span class="value">${customer.model}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">IMEI：</span>
+              <span class="value">${customer.imei}</span>
+            </div>
+          </div>
+          <div class="detail-group">
+            <h4>付款資訊</h4>
+            <div class="detail-item">
+              <span class="label">售價：</span>
+              <span class="value">${formatAmount(customer.salePrice)}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">租金：</span>
+              <span class="value">${formatAmount(customer.rent)}/週</span>
+            </div>
+            ${customer.unpaidAmount ? `
+            <div class="detail-item">
+              <span class="label">未付金額：</span>
+              <span class="value">${formatAmount(customer.unpaidAmount)}</span>
+            </div>
+            ` : ''}
+          </div>
+        </div>
+        <div class="action-buttons">
+          <button class="button button-primary" onclick="handleBuyback('${customer._id}')">買回</button>
+          ${customer.status !== 'paid' ? `
+          <button class="button button-success" onclick="handlePayment('${customer._id}', ${customer.rent})">已繳款</button>
+          ` : ''}
+          <button class="button button-warning" onclick="showPartialPaymentForm('${customer._id}')">未繳足額</button>
+          <button class="button button-danger" onclick="handleLock('${customer._id}')">呆帳鎖機</button>
+        </div>
+      `;
+      
+      card.appendChild(content);
+      return card;
+    }
+
+    function renderCustomerList(customers) {
+      const container = document.querySelector('.customer-cards');
+      container.innerHTML = '';
+      customers.forEach(customer => {
+        container.appendChild(createCustomerCard(customer));
+      });
+    }
+
+    // 事件處理函數
+    async function handleSearch(event) {
+      const query = event.target.value.trim();
+      try {
+        const data = query ? await searchCustomers(query) : await fetchCustomers();
+        renderCustomerList(data.customers);
+      } catch (error) {
+        alert('搜尋失敗');
+      }
+    }
+
+    async function handleBuyback(customerId) {
+      try {
+        await updateCustomerStatus(customerId, 'buyback');
+        await loadCustomers();
+      } catch (error) {
+        alert('買回處理失敗');
+      }
+    }
+
+    async function handlePayment(customerId, amount) {
+      try {
+        await updateCustomerStatus(customerId, 'paid', amount, 0);
+        await loadCustomers();
+      } catch (error) {
+        alert('付款處理失敗');
+      }
+    }
+
+    async function handleLock(customerId) {
+      try {
+        await updateCustomerStatus(customerId, 'locked');
+        await loadCustomers();
+      } catch (error) {
+        alert('鎖機處理失敗');
+      }
+    }
+
+    function showPartialPaymentForm(customerId) {
+      const amount = prompt('請輸入部分付款金額：');
+      if (amount) {
+        handlePartialPayment(customerId, parseFloat(amount));
+      }
+    }
+
+    async function handlePartialPayment(customerId, amount) {
+      try {
+        const customers = await fetchCustomers();
+        const customer = customers.customers.find(c => c._id === customerId);
+        if (!customer) throw new Error('找不到客戶');
+        
+        const unpaidAmount = customer.salePrice - amount;
+        await updateCustomerStatus(customerId, 'partial', amount, unpaidAmount);
+        await loadCustomers();
+      } catch (error) {
+        alert('部分付款處理失敗');
+      }
+    }
+
+    // 添加頁面切換功能
+    function initializeNavigation() {
       const navLinks = document.querySelectorAll('.nav-link');
+      const pages = document.querySelectorAll('.page-section');
+      
       navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
           e.preventDefault();
-          const targetSection = link.getAttribute('data-section');
-          switchPage(targetSection);
-        });
-      });
+          
+          // 移除所有活動狀態
+          navLinks.forEach(l => l.classList.remove('active'));
+          pages.forEach(p => p.classList.remove('active'));
+          
+          // 添加新的活動狀態
+          link.classList.add('active');
+          const targetId = link.getAttribute('data-section');
+          const targetPage = document.getElementById(targetId);
+          if (targetPage) {
+            targetPage.classList.add('active');
+          }
 
-      // 切換頁面的函數
-      function switchPage(sectionId) {
-        // 移除所有導航連結的 active 類
-        document.querySelectorAll('.nav-link').forEach(link => {
-          link.classList.remove('active');
-        });
+          // 如果是客戶列表頁面，重新加載客戶數據
+          if (targetId === 'customers') {
+            loadCustomers();
+          }
 
-        // 為目標導航連結添加 active 類
-        const activeLink = document.querySelector(`.nav-link[data-section="${sectionId}"]`);
-        if (activeLink) {
-          activeLink.classList.add('active');
-        }
-
-        // 隱藏所有頁面
-        document.querySelectorAll('.page-section').forEach(section => {
-          section.classList.remove('active');
-        });
-
-        // 顯示目標頁面
-        const targetSection = document.getElementById(sectionId);
-        if (targetSection) {
-          targetSection.classList.add('active');
-        }
-      }
-
-      // 初始化客戶列表
-      const { customers } = await fetchCustomers();
-      renderCustomerList(customers);
-
-      // 搜索功能
-      const searchInput = document.querySelector('#searchInput');
-      if (searchInput) {
-        searchInput.addEventListener('input', async (e) => {
-          const query = e.target.value.trim();
-          if (query) {
-            const { customers } = await searchCustomers(query);
-            renderCustomerList(customers);
-          } else {
-            const { customers } = await fetchCustomers();
-            renderCustomerList(customers);
+          // 如果是總覽頁面，更新統計數據
+          if (targetId === 'overview') {
+            updateOverviewStats();
           }
         });
+      });
+    }
+
+    // 更新總覽頁面的統計數據
+    async function updateOverviewStats() {
+      try {
+        const data = await fetchCustomers();
+        const customers = data.customers;
+        
+        // 計算統計數據
+        const today = new Date();
+        const dueTodayCustomers = customers.filter(c => {
+          const contractDate = new Date(c.contractDate);
+          return contractDate.toDateString() === today.toDateString();
+        });
+        
+        const activeCustomers = customers.filter(c => c.status === 'active');
+        const overdueCustomers = customers.filter(c => {
+          const contractDate = new Date(c.contractDate);
+          return contractDate < today && c.status !== 'paid';
+        });
+
+        // 更新顯示
+        document.getElementById('dueTodayRent').textContent = formatAmount(
+          dueTodayCustomers.reduce((sum, c) => sum + c.rent, 0)
+        );
+        document.getElementById('dueTodayCount').textContent = dueTodayCustomers.length;
+        document.getElementById('activeCount').textContent = activeCustomers.length;
+        document.getElementById('monthlyRent').textContent = formatAmount(
+          activeCustomers.reduce((sum, c) => sum + c.rent, 0)
+        );
+        document.getElementById('overdueCount').textContent = overdueCustomers.length;
+        document.getElementById('overdueAmount').textContent = formatAmount(
+          overdueCustomers.reduce((sum, c) => sum + (c.unpaidAmount || 0), 0)
+        );
+        
+        // 計算平均租金
+        const avgRent = activeCustomers.length > 0
+          ? activeCustomers.reduce((sum, c) => sum + c.rent, 0) / activeCustomers.length
+          : 0;
+        document.getElementById('avgRent').textContent = formatAmount(avgRent);
+        
+      } catch (error) {
+        console.error('更新總覽數據失敗:', error);
+      }
+    }
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      // 初始化導航
+      initializeNavigation();
+      
+      // 註冊搜尋事件
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput) {
+        searchInput.addEventListener('input', debounce(handleSearch, 300));
       }
 
-      // 新增客戶表單提交
-      const newCustomerForm = document.querySelector('#uploadForm');
-      if (newCustomerForm) {
-        newCustomerForm.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          
-          // 顯示載入中
-          document.querySelector('.loading-overlay').style.display = 'flex';
-          
+      // 註冊表單提交事件
+      const uploadForm = document.getElementById('uploadForm');
+      if (uploadForm) {
+        uploadForm.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          showLoading();
           try {
-            // 收集表單數據
-            const formData = new FormData();
-            
-            // 基本資料
-            formData.append('name', newCustomerForm.querySelector('[name="name"]').value);
-            formData.append('idNumber', newCustomerForm.querySelector('[name="idNumber"]').value);
-            formData.append('phone', newCustomerForm.querySelector('[name="phone"]').value);
-            formData.append('address', newCustomerForm.querySelector('[name="address"]').value);
-            formData.append('mailingAddress', newCustomerForm.querySelector('[name="mailingAddress"]').value);
-            
-            // 手機資訊
-            formData.append('phoneModel', newCustomerForm.querySelector('[name="phoneModel"]').value);
-            formData.append('imei', newCustomerForm.querySelector('[name="imei"]').value);
-            formData.append('screenPassword', newCustomerForm.querySelector('[name="screenPassword"]').value);
-            
-            // 合約資訊
-            formData.append('price', newCustomerForm.querySelector('[name="price"]').value);
-            formData.append('rent', newCustomerForm.querySelector('[name="rent"]').value);
-            formData.append('contractDate', newCustomerForm.querySelector('[name="contractDate"]').value);
-            
-            // 添加初始繳款紀錄
-            const initialPayment = {
-              date: newCustomerForm.querySelector('[name="contractDate"]').value,
-              amount: newCustomerForm.querySelector('[name="rent"]').value,
-              status: '第一期租金'
-            };
-            formData.append('paymentHistory', JSON.stringify([initialPayment]));
-            
-            // 文件上傳
-            const contractFile = newCustomerForm.querySelector('[name="contractFile"]').files[0];
-            const idFront = newCustomerForm.querySelector('[name="idFront"]').files[0];
-            const idBack = newCustomerForm.querySelector('[name="idBack"]').files[0];
-            
-            if (contractFile) formData.append('contractFile', contractFile);
-            if (idFront) formData.append('idFront', idFront);
-            if (idBack) formData.append('idBack', idBack);
-            
-            // 發送請求
+            const formData = new FormData(uploadForm);
             const response = await fetch(`${API_BASE_URL}/customers`, {
               method: 'POST',
               body: formData
             });
             
-            if (!response.ok) {
-              const errorData = await response.json();
-              throw new Error(errorData.message || '創建客戶失敗');
-            }
+            if (!response.ok) throw new Error('創建失敗');
             
-            const customer = await response.json();
-            showSuccess('客戶創建成功');
-            
-            // 重置表單
-            newCustomerForm.reset();
-            
-            // 切換到客戶列表頁面
-            switchPage('customers');
-            
-            // 重新載入客戶列表
-            const { customers } = await fetchCustomers();
-            renderCustomerList(customers);
-            
+            uploadForm.reset();
+            alert('客戶創建成功！');
+            await loadCustomers();
           } catch (error) {
-            console.error('Error submitting form:', error);
-            showError(error.message || '創建客戶失敗，請檢查所有必填欄位');
+            alert('創建客戶失敗');
           } finally {
-            // 隱藏載入中
-            document.querySelector('.loading-overlay').style.display = 'none';
+            hideLoading();
           }
         });
       }
 
-      // 在新增客戶表單中添加到期日顯示
-      const contractDateInput = newCustomerForm.querySelector('[name="contractDate"]');
-      if (contractDateInput) {
-        contractDateInput.addEventListener('change', function(e) {
-          const dueDate = calculateDueDate(e.target.value);
-          const dueDateDisplay = document.getElementById('dueDateDisplay');
-          if (dueDateDisplay) {
-            dueDateDisplay.textContent = `到期日：${dueDate.toLocaleDateString('zh-TW')}`;
-          }
-        });
-      }
-
-      // 計算總覽數據
-      async function calculateOverviewData() {
-        try {
-          const { customers } = await fetchCustomers(1, 1000); // 獲取所有客戶
-          const today = new Date();
-          
-          // 今日到期數據
-          const dueTodayCustomers = customers.filter(customer => {
-            const dueDate = calculateDueDate(customer.contractDate);
-            return dueDate.toDateString() === today.toDateString();
-          });
-          
-          const dueTodayRent = dueTodayCustomers.reduce((sum, customer) => sum + customer.rent, 0);
-          const dueTodayPrice = dueTodayCustomers.reduce((sum, customer) => sum + customer.salePrice, 0);
-          
-          // 進行中合約
-          const activeCustomers = customers.filter(c => c.status === 'active');
-          const totalRent = activeCustomers.reduce((sum, customer) => sum + customer.rent, 0);
-          const avgRent = activeCustomers.length ? Math.round(totalRent / activeCustomers.length) : 0;
-          
-          // 逾期帳款
-          const overdueCustomers = customers.filter(customer => {
-            const dueDate = calculateDueDate(customer.contractDate);
-            return dueDate < today && customer.status !== 'paid' && customer.status !== 'buyback';
-          });
-          
-          const overdueAmount = overdueCustomers.reduce((sum, customer) => {
-            return sum + (customer.unpaidAmount || customer.rent);
-          }, 0);
-          
-          const overdueRate = customers.length ? 
-            Math.round((overdueCustomers.length / customers.length) * 100) : 0;
-          
-          // 更新總覽卡片
-          document.querySelector('#dueTodayRent').textContent = formatAmount(dueTodayRent);
-          document.querySelector('#dueTodayPrice').textContent = formatAmount(dueTodayPrice);
-          document.querySelector('#dueTodayCount').textContent = dueTodayCustomers.length;
-          
-          document.querySelector('#activeCount').textContent = activeCustomers.length;
-          document.querySelector('#monthlyRent').textContent = formatAmount(totalRent * 4);
-          document.querySelector('#avgRent').textContent = formatAmount(avgRent);
-          
-          document.querySelector('#overdueCount').textContent = overdueCustomers.length;
-          document.querySelector('#overdueAmount').textContent = formatAmount(overdueAmount);
-          document.querySelector('#overdueRate').textContent = `${overdueRate}%`;
-          
-        } catch (error) {
-          console.error('Error calculating overview data:', error);
-        }
-      }
-
-      // 在頁面載入和切換到總覽頁時更新數據
-      calculateOverviewData();
-      document.querySelector('[data-section="overview"]').addEventListener('click', calculateOverviewData);
+      // 初始化總覽頁面
+      updateOverviewStats();
     });
 
-    // 客戶卡片展開/收起
-    function toggleCustomerDetails(header) {
-      const card = header.closest('.customer-card');
-      const details = header.nextElementSibling;
+    // 漢堡選單功能
+    const toggleSidebar = () => {
+      const sidebar = document.querySelector('.sidebar');
+      const mainContent = document.querySelector('.main-content');
       
-      // 收起其他所有展開的卡片
-      document.querySelectorAll('.customer-card').forEach(card => {
-        if (card !== header.closest('.customer-card')) {
-          card.classList.remove('expanded');
+      sidebar.classList.toggle('active');
+      mainContent.classList.toggle('sidebar-hidden');
+    };
+
+    // 在小螢幕上點擊導航連結時自動收起側邊欄
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+          toggleSidebar();
         }
       });
+    });
 
-      // 切換當前卡片的展開狀態
-      card.classList.toggle('expanded');
-    }
-
-    // 更新客戶狀態
-    async function updateStatus(customerId, status) {
-      try {
-        await updateCustomerStatus(customerId, status);
-        const { customers } = await fetchCustomers();
-        renderCustomerList(customers);
-      } catch (error) {
-        console.error('Error updating status:', error);
-        showError('更新狀態失敗');
-      }
-    }
-
-    // 編輯客戶資料
-    async function editCustomer(customerId) {
-      // TODO: 實現編輯功能
-      // 1. 獲取客戶資料
-      // 2. 填充編輯表單
-      // 3. 顯示編輯表單
-      alert('編輯功能開發中');
-    }
-
-    // 合約生成功能
-    async function fillContract() {
-      const data = {
-        name: document.getElementById('name').value,
-        id: document.getElementById('id').value,
-        address: document.getElementById('address').value,
-        model: document.getElementById('model').value,
-        capacity: document.getElementById('capacity').value,
-        hasCreditor: document.getElementById('hasCreditor').value,
-        defect: document.getElementById('defect').value,
-        imei: document.getElementById('imei').value,
-        price: document.getElementById('price').value,
-        rent: document.getElementById('rent').value,
-        bank: document.getElementById('bank').value,
-        accountName: document.getElementById('accountName').value,
-        account: document.getElementById('account').value
+    // 工具函數
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
       };
-
-      // 驗證必填欄位
-      const requiredFields = ['name', 'id', 'address', 'model', 'imei', 'price', 'rent'];
-      for (const field of requiredFields) {
-        if (!data[field]) {
-          showError(`請填寫${getFieldLabel(field)}`);
-          return;
-        }
-      }
-
-      // 填充合約欄位
-      fillContractFields(data);
-      
-      // 啟用下載按鈕
-      document.getElementById('downloadBtn').disabled = false;
-    }
-
-    function getFieldLabel(field) {
-      const labelMap = {
-        name: '姓名',
-        id: '身分證字號',
-        address: '地址',
-        model: '手機型號',
-        imei: 'IMEI碼',
-        price: '總價',
-        rent: '租金'
-      };
-      return labelMap[field] || field;
-    }
-
-    function fillContractFields(data) {
-      // 第一頁
-      setField('sellerNameField', data.name);
-      setField('sellerIdField', data.id);
-      setField('sellerAddressField', data.address);
-      setField('phoneModelField', `${data.model} ${data.capacity || ''}`);
-      setField('imeiField', data.imei);
-      setField('totalPriceField', formatAmount(data.price));
-      setField('bankBranchField', data.bank);
-      setField('accountNameField', data.accountName);
-      setField('accountNumberField', data.account);
-      setField('signerIdField', data.id);
-
-      // 設置日期
-      const now = new Date();
-      setField('yearField', now.getFullYear() - 1911);
-      setField('monthField', now.getMonth() + 1);
-      setField('dayField', now.getDate());
-
-      // 設置債權人選項
-      setField('creditorNoneField', data.hasCreditor === '無' ? 'V' : '');
-      setField('creditorYesField', data.hasCreditor === '有' ? 'V' : '');
-
-      // 設置瑕疵項目
-      const defectFields = {
-        '螢幕觸控異常': 'defectTouch',
-        '螢幕破裂': 'defectCrack',
-        '螢幕顯示功能異常': 'defectDisplay',
-        '充電功能異常': 'defectCharge',
-        '實體部件異常': 'defectHardware'
-      };
-
-      Object.entries(defectFields).forEach(([defectType, fieldId]) => {
-        setField(fieldId, data.defect === defectType ? 'V' : '');
-      });
-
-      // 第二頁
-      setField('contractorNameField', data.name);
-      setField('model2Field', `${data.model} ${data.capacity || ''}`);
-      setField('imei2Field', data.imei);
-      setField('price2Field', formatAmount(data.price));
-      setField('rent2Field', formatAmount(data.rent));
-      setField('address2Field', data.address);
-      setField('id2Field', data.id);
-
-      // 設置租賃期間
-      const startDate = new Date();
-      const endDate = new Date(startDate);
-      endDate.setDate(endDate.getDate() + 7);
-
-      setField('startYearField', startDate.getFullYear() - 1911);
-      setField('startMonthField', startDate.getMonth() + 1);
-      setField('startDayField', startDate.getDate());
-      setField('endYearField', endDate.getFullYear() - 1911);
-      setField('endMonthField', endDate.getMonth() + 1);
-      setField('endDayField', endDate.getDate());
-
-      // 第三頁
-      setField('signerId3Field', data.id);
-      setField('year3Field', now.getFullYear() - 1911);
-      setField('month3Field', now.getMonth() + 1);
-      setField('day3Field', now.getDate());
-    }
-
-    function setField(id, value) {
-      const field = document.getElementById(id);
-      if (field) {
-        field.textContent = value;
-        field.style.visibility = 'visible';
-      }
-    }
-
-    async function downloadPDF() {
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF('p', 'px', [1448, 2048]);
-      
-      // 顯示載入中
-      document.querySelector('.loading-overlay').style.display = 'flex';
-      
-      try {
-        // 轉換每一頁
-        for (let i = 1; i <= 3; i++) {
-          const page = document.getElementById(`contractPage${i}`);
-          const canvas = await html2canvas(page, {
-            scale: 2,
-            useCORS: true,
-            allowTaint: true
-          });
-          
-          const imgData = canvas.toDataURL('image/jpeg', 1.0);
-          
-          if (i > 1) {
-            pdf.addPage([1448, 2048], 'p');
-          }
-          
-          pdf.addImage(imgData, 'JPEG', 0, 0, 1448, 2048);
-        }
-        
-        // 下載 PDF
-        pdf.save('contract.pdf');
-      } catch (error) {
-        console.error('Error generating PDF:', error);
-        showError('生成 PDF 失敗');
-      } finally {
-        // 隱藏載入中
-        document.querySelector('.loading-overlay').style.display = 'none';
-      }
-    }
-
-    // 新增記錄繳款函數
-    async function recordPayment(customerId, amount) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/customers/${customerId}/payment`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            amount,
-            date: new Date().toISOString().split('T')[0],
-            status: '已繳款'
-          })
-        });
-
-        if (!response.ok) throw new Error('記錄繳款失敗');
-        
-        showSuccess('繳款記錄成功');
-        const { customers } = await fetchCustomers();
-        renderCustomerList(customers);
-      } catch (error) {
-        console.error('Error recording payment:', error);
-        showError('記錄繳款失敗');
-      }
     }
   </script>
 </body>
-</html> 
+</html>
