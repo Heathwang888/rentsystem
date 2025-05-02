@@ -218,82 +218,92 @@
 
     /* 客戶列表容器 */
     .customer-cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
       padding: 1rem;
     }
 
     /* 客戶卡片樣式 */
     .customer-card {
       background: white;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-      transition: all 0.3s cubic-bezier(.25,.8,.25,1);
-      overflow: hidden;
-    }
-
-    .customer-card:hover {
-      box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+      border-radius: 4px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      width: 100%;
     }
 
     .card-header {
-      padding: 0.75rem 1rem;
-      background: #f8f9fa;
-      border-bottom: 1px solid #eee;
+      padding: 0.75rem;
       cursor: pointer;
       transition: background-color 0.2s;
+      border-bottom: 1px solid #eee;
     }
 
     .card-header:hover {
-      background: #e9ecef;
+      background: #f8f9fa;
     }
 
     .header-content {
       display: grid;
-      grid-template-columns: 2fr 1fr 1fr;
-      gap: 0.5rem;
+      grid-template-columns: 2fr 2fr 1fr 1fr 1fr auto;
+      gap: 1rem;
       align-items: center;
     }
 
     .customer-info {
       display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
+      align-items: center;
+      gap: 0.5rem;
     }
 
     .customer-name {
-      font-weight: 500;
-      color: #333;
       font-size: 1rem;
-      margin-bottom: 0.25rem;
+      color: #333;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .model-info {
       color: #666;
-      font-size: 0.85rem;
+      font-size: 0.9rem;
     }
 
-    .payment-info {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 0.25rem;
-    }
-
-    .price-rent-info {
-      color: #666;
-      font-size: 0.85rem;
+    .price-info, .rent-info {
       text-align: right;
+      white-space: nowrap;
+    }
+
+    .payment-alert {
+      font-size: 0.9rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    .payment-alert.overdue {
+      background: #ffebee;
+      color: #d32f2f;
+    }
+
+    .payment-alert.today {
+      background: #fff3e0;
+      color: #f57c00;
+    }
+
+    .payment-alert.upcoming {
+      background: #e8f5e9;
+      color: #2e7d32;
     }
 
     .status-badge {
       padding: 0.25rem 0.5rem;
       border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 500;
+      font-size: 0.9rem;
       text-align: center;
       white-space: nowrap;
+      font-weight: 500;
     }
 
     .status-renting { 
@@ -311,18 +321,12 @@
       color: #424242; 
     }
 
-    .payment-alert {
-      font-size: 0.85rem;
+    .notes-badge {
+      background: #e3f2fd;
+      color: #1976d2;
       padding: 0.25rem 0.5rem;
       border-radius: 4px;
-      background: #fff3e0;
-      color: #f57c00;
-    }
-
-    .payment-alert.today {
-      background: #ffebee;
-      color: #d32f2f;
-      font-weight: 500;
+      font-size: 0.8rem;
     }
 
     .card-content {
@@ -432,15 +436,6 @@
 
     .record-item:last-child {
       border-bottom: none;
-    }
-
-    .notes-badge {
-      background: #e3f2fd;
-      color: #1976d2;
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      margin-left: 0.5rem;
     }
 
     /* 合約生成表單樣式 */
@@ -1167,17 +1162,31 @@
       return diffDays;
     }
 
-    function getPaymentStatusText(daysUntilPayment, unpaidAmount) {
+    function getPaymentStatusText(daysUntilPayment, unpaidAmount, status) {
+      // 如果是已買回或呆帳，不顯示付款狀態
+      if (status === 'buyback' || status === 'locked') {
+        return '';
+      }
+
       if (unpaidAmount > 0) {
-        return `尚餘 ${formatAmount(unpaidAmount)}`;
+        return `待繳 ${formatAmount(unpaidAmount)}`;
       }
       if (daysUntilPayment === 0) {
-        return '今日須繳款';
+        return '今日應繳款';
       } else if (daysUntilPayment < 0) {
-        return `已逾期 ${Math.abs(daysUntilPayment)} 日`;
+        return `逾期 ${Math.abs(daysUntilPayment)} 天`;
       } else {
-        return `尚餘 ${daysUntilPayment} 日繳款`;
+        return `${daysUntilPayment} 天後繳款`;
       }
+    }
+
+    function getPaymentAlertClass(daysUntilPayment, status) {
+      if (status === 'buyback' || status === 'locked') {
+        return '';
+      }
+      if (daysUntilPayment < 0) return 'overdue';
+      if (daysUntilPayment === 0) return 'today';
+      return 'upcoming';
     }
 
     // 顯示/隱藏加載動畫
@@ -1325,50 +1334,54 @@
       const headerContent = document.createElement('div');
       headerContent.className = 'header-content';
       
-      // 客戶資訊區（左側）
+      // 客戶姓名和備註
       const customerInfo = document.createElement('div');
       customerInfo.className = 'customer-info';
       customerInfo.innerHTML = `
-        <div class="customer-name">
-          ${customer.name || '未命名客戶'}
-          ${customer.notes ? '<span class="notes-badge">有備註</span>' : ''}
-        </div>
-        <div class="model-info">${customer.model || '無型號'}</div>
+        <span class="customer-name">${customer.name || '未命名客戶'}</span>
+        ${customer.notes ? '<span class="notes-badge">有備註</span>' : ''}
       `;
       
-      // 付款資訊區（中間）
-      const paymentInfo = document.createElement('div');
-      paymentInfo.className = 'payment-info';
-      paymentInfo.innerHTML = `
-        <div class="price-rent-info">
-          ${formatAmount(customer.salePrice)}
-          <br>
-          ${formatAmount(customer.rent)}/週
-        </div>
-      `;
+      // 手機型號
+      const modelInfo = document.createElement('div');
+      modelInfo.className = 'model-info';
+      modelInfo.textContent = customer.model || '無型號';
       
-      // 狀態區（右側）
-      const statusInfo = document.createElement('div');
-      statusInfo.className = 'status-info';
+      // 價金
+      const priceInfo = document.createElement('div');
+      priceInfo.className = 'price-info';
+      priceInfo.textContent = formatAmount(customer.salePrice);
       
+      // 租金
+      const rentInfo = document.createElement('div');
+      rentInfo.className = 'rent-info';
+      rentInfo.textContent = `${formatAmount(customer.rent)}/週`;
+      
+      // 付款狀態
       const nextPaymentDate = calculateNextPaymentDate(
         new Date(customer.contractDate),
         customer.lastPaymentDate ? new Date(customer.lastPaymentDate) : null
       );
       const daysUntilPayment = getDaysUntilPayment(nextPaymentDate);
       
-      statusInfo.innerHTML = `
-        <div class="payment-alert ${daysUntilPayment === 0 ? 'today' : ''}">
-          ${getPaymentStatusText(daysUntilPayment, customer.unpaidAmount || 0)}
-        </div>
-        <div class="status-badge status-${customer.status || 'renting'}">
-          ${getStatusText(customer.status)}
-        </div>
-      `;
+      const paymentStatus = document.createElement('div');
+      const paymentStatusText = getPaymentStatusText(daysUntilPayment, customer.unpaidAmount || 0, customer.status);
+      if (paymentStatusText) {
+        paymentStatus.className = `payment-alert ${getPaymentAlertClass(daysUntilPayment, customer.status)}`;
+        paymentStatus.textContent = paymentStatusText;
+      }
+      
+      // 狀態標籤
+      const status = document.createElement('div');
+      status.className = `status-badge status-${customer.status || 'renting'}`;
+      status.textContent = getStatusText(customer.status);
       
       headerContent.appendChild(customerInfo);
-      headerContent.appendChild(paymentInfo);
-      headerContent.appendChild(statusInfo);
+      headerContent.appendChild(modelInfo);
+      headerContent.appendChild(priceInfo);
+      headerContent.appendChild(rentInfo);
+      headerContent.appendChild(paymentStatus);
+      headerContent.appendChild(status);
       
       header.appendChild(headerContent);
       header.onclick = () => {
@@ -1377,7 +1390,7 @@
       
       card.appendChild(header);
       
-      // 展開內容保持不變
+      // 展開內容
       const content = document.createElement('div');
       content.className = 'card-content';
       
@@ -1412,36 +1425,42 @@
           </div>
         </div>
 
-        <div class="detail-group">
-          <h4>繳款紀錄</h4>
-          ${generatePaymentRecords(customer)}
-        </div>
+        ${customer.status === 'renting' ? `
+          <div class="detail-group">
+            <h4>繳款紀錄</h4>
+            ${generatePaymentRecords(customer)}
+          </div>
+        ` : ''}
       `;
 
       // 功能按鈕區
       const actionButtons = document.createElement('div');
       actionButtons.className = 'action-buttons';
       actionButtons.innerHTML = `
-        <button class="button button-primary" onclick="showPaymentForm('${customer._id}')">繳款</button>
-        <button class="button button-info" onclick="downloadContract('${customer._id}')">下載合約</button>
-        <button class="button button-info" onclick="downloadIdFront('${customer._id}')">身分證正面</button>
-        <button class="button button-info" onclick="downloadIdBack('${customer._id}')">身分證反面</button>
         ${customer.status === 'renting' ? `
+          <button class="button button-primary" onclick="showPaymentForm('${customer._id}')">繳款</button>
           <button class="button button-success" onclick="handleBuyback('${customer._id}')">買回</button>
           <button class="button button-danger" onclick="handleLock('${customer._id}')">呆帳鎖機</button>
         ` : ''}
+        <button class="button button-info" onclick="downloadContract('${customer._id}')">下載合約</button>
+        <button class="button button-info" onclick="downloadIdFront('${customer._id}')">身分證正面</button>
+        <button class="button button-info" onclick="downloadIdBack('${customer._id}')">身分證反面</button>
       `;
 
       // 繳款表單
-      const paymentForm = document.createElement('div');
-      paymentForm.className = 'payment-form';
-      paymentForm.id = `payment-form-${customer._id}`;
-      paymentForm.innerHTML = `
-        <div class="form-group">
-          <input type="number" placeholder="輸入繳款金額" id="payment-amount-${customer._id}">
-          <button class="button button-success" onclick="handlePayment('${customer._id}')">確認繳款</button>
-        </div>
-      `;
+      if (customer.status === 'renting') {
+        const paymentForm = document.createElement('div');
+        paymentForm.className = 'payment-form';
+        paymentForm.id = `payment-form-${customer._id}`;
+        paymentForm.style.display = 'none';
+        paymentForm.innerHTML = `
+          <div class="form-group">
+            <input type="number" placeholder="輸入繳款金額" id="payment-amount-${customer._id}">
+            <button class="button button-success" onclick="handlePayment('${customer._id}')">確認繳款</button>
+          </div>
+        `;
+        content.appendChild(paymentForm);
+      }
 
       // 備註區域
       const notesSection = document.createElement('div');
@@ -1454,7 +1473,6 @@
       
       content.appendChild(details);
       content.appendChild(actionButtons);
-      content.appendChild(paymentForm);
       content.appendChild(notesSection);
       card.appendChild(content);
       
