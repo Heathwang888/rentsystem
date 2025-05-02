@@ -237,12 +237,34 @@
       padding: 0.75rem;
       transition: background-color 0.2s;
       border-bottom: 1px solid #eee;
-    }
-
-    .header-content {
       display: flex;
       align-items: center;
       gap: 1rem;
+    }
+
+    .payment-button {
+      padding: 0.5rem 1rem;
+      background: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background-color 0.2s;
+      min-width: 80px;
+      flex-shrink: 0;
+    }
+
+    .payment-button:hover {
+      background: #1565c0;
+    }
+
+    .header-content {
+      display: grid;
+      grid-template-columns: 2fr 2fr 1fr 1fr 1fr auto;
+      gap: 1rem;
+      align-items: center;
+      flex: 1;
     }
 
     .customer-info {
@@ -270,22 +292,6 @@
     .status-badge {
       width: 80px;
       text-align: center;
-    }
-
-    .payment-button {
-      margin-right: 1rem;
-      padding: 0.5rem 1rem;
-      background: #1976d2;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: background-color 0.2s;
-    }
-
-    .payment-button:hover {
-      background: #1565c0;
     }
 
     .payment-alert {
@@ -1337,9 +1343,6 @@
       const header = document.createElement('div');
       header.className = 'card-header';
       
-      const headerContent = document.createElement('div');
-      headerContent.className = 'header-content';
-      
       // 付款按鈕
       if (customer.status === 'renting') {
         const paymentButton = document.createElement('button');
@@ -1349,8 +1352,11 @@
           e.stopPropagation();
           showPaymentForm(customer._id);
         };
-        headerContent.appendChild(paymentButton);
+        header.appendChild(paymentButton);
       }
+      
+      const headerContent = document.createElement('div');
+      headerContent.className = 'header-content';
       
       // 客戶姓名和備註
       const customerInfo = document.createElement('div');
