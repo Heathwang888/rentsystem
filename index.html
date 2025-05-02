@@ -216,24 +216,29 @@
       background: #1565c0;
     }
 
-    /* 客戶卡片樣式 */
+    /* 客戶列表容器 */
     .customer-cards {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 1rem;
       padding: 1rem;
     }
 
+    /* 客戶卡片樣式 */
     .customer-card {
       background: white;
       border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      margin-bottom: 1rem;
-      width: 100%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+      transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+      overflow: hidden;
+    }
+
+    .customer-card:hover {
+      box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
     }
 
     .card-header {
-      padding: 1rem;
+      padding: 0.75rem 1rem;
       background: #f8f9fa;
       border-bottom: 1px solid #eee;
       cursor: pointer;
@@ -246,25 +251,78 @@
 
     .header-content {
       display: grid;
-      grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr auto;
-      gap: 1rem;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 0.5rem;
       align-items: center;
     }
 
     .customer-info {
       display: flex;
-      align-items: center;
-      gap: 0.5rem;
+      flex-direction: column;
+      gap: 0.25rem;
     }
 
     .customer-name {
       font-weight: 500;
       color: #333;
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
     }
 
-    .model-info, .price-info, .rent-info, .contract-date {
+    .model-info {
       color: #666;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
+    }
+
+    .payment-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.25rem;
+    }
+
+    .price-rent-info {
+      color: #666;
+      font-size: 0.85rem;
+      text-align: right;
+    }
+
+    .status-badge {
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .status-renting { 
+      background: #e3f2fd; 
+      color: #1976d2; 
+    }
+
+    .status-buyback { 
+      background: #e8f5e9; 
+      color: #2e7d32; 
+    }
+
+    .status-locked { 
+      background: #f5f5f5; 
+      color: #424242; 
+    }
+
+    .payment-alert {
+      font-size: 0.85rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      background: #fff3e0;
+      color: #f57c00;
+    }
+
+    .payment-alert.today {
+      background: #ffebee;
+      color: #d32f2f;
+      font-weight: 500;
     }
 
     .card-content {
@@ -275,84 +333,74 @@
 
     .customer-card.expanded .card-content {
       max-height: 2000px;
+      padding: 1rem;
     }
 
-    .status-badge {
-      padding: 0.25rem 0.75rem;
+    .detail-group {
+      margin-bottom: 1rem;
+      padding: 0.75rem;
+      background: #f8f9fa;
       border-radius: 4px;
-      font-size: 0.875rem;
+    }
+
+    .detail-group h4 {
+      margin: 0 0 0.5rem 0;
+      color: #666;
+      font-size: 0.9rem;
       font-weight: 500;
     }
 
-    .status-active { background: #e3f2fd; color: #1976d2; }
-    .status-paid { background: #e8f5e9; color: #2e7d32; }
-    .status-unpaid { background: #ffebee; color: #d32f2f; }
-    .status-partial { background: #fff3e0; color: #f57c00; }
-    .status-buyback { background: #f3e5f5; color: #7b1fa2; }
-    .status-locked { background: #424242; color: white; }
-
-    .payment-info {
+    .detail-item {
       display: flex;
-      gap: 1rem;
-      margin-top: 0.5rem;
-      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
     }
 
-    .payment-info .label {
+    .detail-item .label {
+      width: 100px;
       color: #666;
     }
 
-    .payment-info .value {
-      font-weight: 500;
-    }
-
-    .due-date {
-      color: #d32f2f;
-      font-weight: 500;
-    }
-
-    .due-date.today {
-      background: #ffebee;
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
+    .detail-item .value {
+      flex: 1;
+      color: #333;
     }
 
     .action-buttons {
       display: flex;
+      flex-wrap: wrap;
       gap: 0.5rem;
       margin-top: 1rem;
-      flex-wrap: wrap;
     }
 
     .button {
       padding: 0.5rem 1rem;
       border: none;
       border-radius: 4px;
-      font-size: 0.875rem;
+      font-size: 0.85rem;
       font-weight: 500;
       cursor: pointer;
       transition: all 0.2s;
+      white-space: nowrap;
     }
 
-    .button-primary { background: #1976d2; color: white; }
-    .button-success { background: #2e7d32; color: white; }
-    .button-danger { background: #d32f2f; color: white; }
-    .button-warning { background: #f57c00; color: white; }
-    .button-info { background: #0288d1; color: white; }
+    .button:hover {
+      filter: brightness(0.95);
+    }
 
-    .partial-payment-form {
-      display: none;
+    .button:active {
+      transform: translateY(1px);
+    }
+
+    .payment-form {
       margin-top: 1rem;
       padding: 1rem;
-      background: #f5f5f5;
+      background: #f8f9fa;
       border-radius: 4px;
+      display: none;
     }
 
-    .partial-payment-form.active {
-      display: block;
-    }
-
-    .partial-payment-form input {
+    .payment-form input {
       width: 100%;
       padding: 0.5rem;
       margin-bottom: 0.5rem;
@@ -360,46 +408,39 @@
       border-radius: 4px;
     }
 
-    .notes {
+    .notes-section {
       margin-top: 1rem;
-      padding: 1rem;
-      background: #f5f5f5;
-      border-radius: 4px;
     }
 
-    .notes textarea {
+    .notes-section textarea {
       width: 100%;
-      min-height: 100px;
+      min-height: 80px;
       padding: 0.5rem;
       border: 1px solid #ddd;
       border-radius: 4px;
       resize: vertical;
+      margin-bottom: 0.5rem;
     }
 
-    .file-downloads {
+    .record-item {
       display: flex;
-      gap: 0.5rem;
-      margin-top: 1rem;
+      justify-content: space-between;
+      padding: 0.5rem;
+      border-bottom: 1px solid #eee;
+      font-size: 0.85rem;
     }
 
-    .file-download-button {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      background: #f5f5f5;
-      border: 1px solid #ddd;
+    .record-item:last-child {
+      border-bottom: none;
+    }
+
+    .notes-badge {
+      background: #e3f2fd;
+      color: #1976d2;
+      padding: 0.25rem 0.5rem;
       border-radius: 4px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .file-download-button:hover {
-      background: #e0e0e0;
-    }
-
-    .file-download-button i {
-      font-size: 1.25rem;
+      font-size: 0.75rem;
+      margin-left: 0.5rem;
     }
 
     /* 合約生成表單樣式 */
@@ -603,261 +644,6 @@
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
-    }
-
-    /* 客戶列表樣式 */
-    .customer-cards {
-      display: grid;
-      gap: 1rem;
-      padding: 1rem;
-    }
-
-    .customer-card {
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      overflow: hidden;
-    }
-
-    .card-header {
-      padding: 1rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      background: #f8f9fa;
-      border-bottom: 1px solid #eee;
-    }
-
-    .header-content {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .card-header h3 {
-      margin: 0;
-      font-size: 1.1rem;
-      color: #333;
-    }
-
-    .card-content {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease-out;
-    }
-
-    .customer-card.expanded .card-content {
-      max-height: 1000px;
-    }
-
-    .customer-details {
-      padding: 1rem;
-    }
-
-    .detail-group {
-      margin-bottom: 1rem;
-    }
-
-    .detail-group h4 {
-      margin: 0 0 0.5rem 0;
-      color: #666;
-      font-size: 0.9rem;
-    }
-
-    .detail-item {
-      display: flex;
-      margin-bottom: 0.5rem;
-    }
-
-    .detail-item .label {
-      width: 100px;
-      color: #666;
-      font-size: 0.9rem;
-    }
-
-    .detail-item .value {
-      flex: 1;
-      color: #333;
-    }
-
-    .action-buttons {
-      padding: 1rem;
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      border-top: 1px solid #eee;
-    }
-
-    .no-data {
-      text-align: center;
-      padding: 2rem;
-      color: #666;
-    }
-
-    /* 響應式調整 */
-    @media (min-width: 768px) {
-      .customer-cards {
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      }
-    }
-
-    /* 新增篩選器樣式 */
-    .filters {
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-    }
-
-    .filters select {
-      padding: 0.5rem 1rem;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      background: white;
-      font-size: 0.875rem;
-    }
-
-    /* 更新客戶卡片樣式 */
-    .customer-card {
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      margin-bottom: 1rem;
-      overflow: hidden;
-    }
-
-    .card-header {
-      padding: 1rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      background: #f8f9fa;
-      border-bottom: 1px solid #eee;
-    }
-
-    .header-content {
-      flex: 1;
-    }
-
-    .customer-name {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .customer-name h3 {
-      margin: 0;
-      font-size: 1.1rem;
-      color: #333;
-    }
-
-    .notes-badge {
-      background: #e3f2fd;
-      color: #1976d2;
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
-    }
-
-    .payment-info {
-      margin-top: 0.5rem;
-      font-size: 0.875rem;
-      color: #666;
-    }
-
-    .payment-status {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .status-badge {
-      padding: 0.25rem 0.75rem;
-      border-radius: 4px;
-      font-size: 0.875rem;
-      font-weight: 500;
-    }
-
-    .status-renting { background: #e3f2fd; color: #1976d2; }
-    .status-buyback { background: #e8f5e9; color: #2e7d32; }
-    .status-locked { background: #424242; color: white; }
-
-    .payment-alert {
-      color: #d32f2f;
-      font-weight: 500;
-    }
-
-    .payment-alert.today {
-      background: #ffebee;
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
-    }
-
-    .action-buttons {
-      display: flex;
-      gap: 0.5rem;
-      margin-top: 1rem;
-    }
-
-    .payment-record {
-      margin-top: 1rem;
-      padding: 1rem;
-      background: #f5f5f5;
-      border-radius: 4px;
-    }
-
-    .record-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 0.5rem 0;
-      border-bottom: 1px solid #eee;
-    }
-
-    .record-item:last-child {
-      border-bottom: none;
-    }
-
-    .file-downloads {
-      display: flex;
-      gap: 0.5rem;
-      margin-top: 1rem;
-    }
-
-    .payment-form {
-      display: none;
-      margin-top: 1rem;
-      padding: 1rem;
-      background: #f5f5f5;
-      border-radius: 4px;
-    }
-
-    .payment-form.active {
-      display: block;
-    }
-
-    .payment-form input {
-      width: 100%;
-      padding: 0.5rem;
-      margin-bottom: 0.5rem;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
-
-    .notes-section {
-      margin-top: 1rem;
-      padding: 1rem;
-      background: #f5f5f5;
-      border-radius: 4px;
-    }
-
-    .notes-section textarea {
-      width: 100%;
-      min-height: 100px;
-      padding: 0.5rem;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      resize: vertical;
     }
   </style>
 </head>
@@ -1539,61 +1325,50 @@
       const headerContent = document.createElement('div');
       headerContent.className = 'header-content';
       
-      // 客戶姓名和備註
+      // 客戶資訊區（左側）
       const customerInfo = document.createElement('div');
       customerInfo.className = 'customer-info';
       customerInfo.innerHTML = `
-        <span class="customer-name">${customer.name || '未命名客戶'}</span>
-        ${customer.notes ? '<span class="notes-badge">有備註</span>' : ''}
+        <div class="customer-name">
+          ${customer.name || '未命名客戶'}
+          ${customer.notes ? '<span class="notes-badge">有備註</span>' : ''}
+        </div>
+        <div class="model-info">${customer.model || '無型號'}</div>
       `;
       
-      // 手機型號
-      const modelInfo = document.createElement('div');
-      modelInfo.className = 'model-info';
-      modelInfo.textContent = customer.model || '無型號';
+      // 付款資訊區（中間）
+      const paymentInfo = document.createElement('div');
+      paymentInfo.className = 'payment-info';
+      paymentInfo.innerHTML = `
+        <div class="price-rent-info">
+          ${formatAmount(customer.salePrice)}
+          <br>
+          ${formatAmount(customer.rent)}/週
+        </div>
+      `;
       
-      // 價金
-      const priceInfo = document.createElement('div');
-      priceInfo.className = 'price-info';
-      priceInfo.textContent = formatAmount(customer.salePrice);
+      // 狀態區（右側）
+      const statusInfo = document.createElement('div');
+      statusInfo.className = 'status-info';
       
-      // 租金
-      const rentInfo = document.createElement('div');
-      rentInfo.className = 'rent-info';
-      rentInfo.textContent = `${formatAmount(customer.rent)}/週`;
-      
-      // 合約日期
-      const contractDate = document.createElement('div');
-      contractDate.className = 'contract-date';
-      contractDate.textContent = new Date(customer.contractDate).toLocaleDateString();
-      
-      // 付款狀態
       const nextPaymentDate = calculateNextPaymentDate(
         new Date(customer.contractDate),
         customer.lastPaymentDate ? new Date(customer.lastPaymentDate) : null
       );
       const daysUntilPayment = getDaysUntilPayment(nextPaymentDate);
       
-      const paymentStatus = document.createElement('div');
-      paymentStatus.className = 'payment-status';
-      paymentStatus.innerHTML = `
-        <span class="payment-alert ${daysUntilPayment === 0 ? 'today' : ''}">
+      statusInfo.innerHTML = `
+        <div class="payment-alert ${daysUntilPayment === 0 ? 'today' : ''}">
           ${getPaymentStatusText(daysUntilPayment, customer.unpaidAmount || 0)}
-        </span>
+        </div>
+        <div class="status-badge status-${customer.status || 'renting'}">
+          ${getStatusText(customer.status)}
+        </div>
       `;
       
-      // 狀態標籤
-      const status = document.createElement('span');
-      status.className = `status-badge status-${customer.status || 'renting'}`;
-      status.textContent = getStatusText(customer.status);
-      
       headerContent.appendChild(customerInfo);
-      headerContent.appendChild(modelInfo);
-      headerContent.appendChild(priceInfo);
-      headerContent.appendChild(rentInfo);
-      headerContent.appendChild(contractDate);
-      headerContent.appendChild(paymentStatus);
-      headerContent.appendChild(status);
+      headerContent.appendChild(paymentInfo);
+      headerContent.appendChild(statusInfo);
       
       header.appendChild(headerContent);
       header.onclick = () => {
@@ -1602,7 +1377,7 @@
       
       card.appendChild(header);
       
-      // 卡片展開內容
+      // 展開內容保持不變
       const content = document.createElement('div');
       content.className = 'card-content';
       
@@ -1661,7 +1436,6 @@
       const paymentForm = document.createElement('div');
       paymentForm.className = 'payment-form';
       paymentForm.id = `payment-form-${customer._id}`;
-      paymentForm.style.display = 'none';
       paymentForm.innerHTML = `
         <div class="form-group">
           <input type="number" placeholder="輸入繳款金額" id="payment-amount-${customer._id}">
