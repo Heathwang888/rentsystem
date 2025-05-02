@@ -1553,32 +1553,33 @@
         `;
         content.appendChild(paymentForm);
 
-        // 添加繳款金額變更事件監聽
-        const amountInput = document.getElementById(`payment-amount-${customer._id}`);
-        const typeInfo = document.getElementById(`payment-type-${customer._id}`);
-        
-        amountInput.addEventListener('input', () => {
-          const amount = parseFloat(amountInput.value) || 0;
-          let typeText = '';
-          let typeClass = '';
-          
-          if (amount < customer.rent) {
-            typeText = `部分繳款，尚欠 ${formatAmount(customer.rent - amount)}`;
-            typeClass = 'partial';
-          } else if (amount === customer.rent) {
-            typeText = '續租一週';
-            typeClass = 'rent';
-          } else if (amount === customer.salePrice) {
-            typeText = '買回手機';
-            typeClass = 'buyback';
-          } else if (amount > customer.rent && amount < customer.salePrice) {
-            typeText = '續租一週，多餘金額將計入下次租金';
-            typeClass = 'rent';
+        // 修正：appendChild 之後再加事件監聽
+        setTimeout(() => {
+          const amountInput = document.getElementById(`payment-amount-${customer._id}`);
+          const typeInfo = document.getElementById(`payment-type-${customer._id}`);
+          if (amountInput && typeInfo) {
+            amountInput.addEventListener('input', () => {
+              const amount = parseFloat(amountInput.value) || 0;
+              let typeText = '';
+              let typeClass = '';
+              if (amount < customer.rent) {
+                typeText = `部分繳款，尚欠 ${formatAmount(customer.rent - amount)}`;
+                typeClass = 'partial';
+              } else if (amount === customer.rent) {
+                typeText = '續租一週';
+                typeClass = 'rent';
+              } else if (amount === customer.salePrice) {
+                typeText = '買回手機';
+                typeClass = 'buyback';
+              } else if (amount > customer.rent && amount < customer.salePrice) {
+                typeText = '續租一週，多餘金額將計入下次租金';
+                typeClass = 'rent';
+              }
+              typeInfo.textContent = typeText;
+              typeInfo.className = `payment-type-info ${typeClass}`;
+            });
           }
-          
-          typeInfo.textContent = typeText;
-          typeInfo.className = `payment-type-info ${typeClass}`;
-        });
+        }, 0);
       }
 
       content.appendChild(details);
