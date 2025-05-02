@@ -235,66 +235,57 @@
 
     .card-header {
       padding: 0.75rem;
-      cursor: pointer;
       transition: background-color 0.2s;
       border-bottom: 1px solid #eee;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .header-actions {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 0.5rem;
     }
 
     .header-content {
-      display: grid;
-      grid-template-columns: 2fr 2fr 1fr 1fr 1fr auto;
-      gap: 1rem;
+      display: flex;
       align-items: center;
+      gap: 1rem;
+    }
+
+    .customer-info {
+      flex: 2;
+    }
+
+    .model-info {
+      flex: 2;
+    }
+
+    .price-info {
+      flex: 1;
+      text-align: right;
+    }
+
+    .rent-info {
+      flex: 1;
+      text-align: right;
+    }
+
+    .payment-status {
+      flex: 1;
+    }
+
+    .status-badge {
+      width: 80px;
+      text-align: center;
     }
 
     .payment-button {
+      margin-right: 1rem;
       padding: 0.5rem 1rem;
       background: #1976d2;
       color: white;
       border: none;
       border-radius: 4px;
       cursor: pointer;
-      white-space: nowrap;
       font-size: 0.9rem;
       transition: background-color 0.2s;
-      min-width: 80px;
     }
 
     .payment-button:hover {
       background: #1565c0;
-    }
-
-    .customer-info {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .customer-name {
-      font-size: 1rem;
-      color: #333;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .model-info {
-      color: #666;
-      font-size: 0.9rem;
-    }
-
-    .price-info, .rent-info {
-      text-align: right;
-      white-space: nowrap;
     }
 
     .payment-alert {
@@ -318,15 +309,6 @@
     .payment-alert.upcoming {
       background: #e8f5e9;
       color: #2e7d32;
-    }
-
-    .status-badge {
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.9rem;
-      text-align: center;
-      white-space: nowrap;
-      font-weight: 500;
     }
 
     .status-renting { 
@@ -1354,25 +1336,21 @@
       
       const header = document.createElement('div');
       header.className = 'card-header';
-
-      // 新增一個容器用於放置付款按鈕
-      const headerActions = document.createElement('div');
-      headerActions.className = 'header-actions';
       
-      // 如果是租賃中的客戶，添加付款按鈕
+      const headerContent = document.createElement('div');
+      headerContent.className = 'header-content';
+      
+      // 付款按鈕
       if (customer.status === 'renting') {
         const paymentButton = document.createElement('button');
         paymentButton.className = 'payment-button';
         paymentButton.textContent = '繳款';
         paymentButton.onclick = (e) => {
-          e.stopPropagation(); // 防止觸發卡片展開
+          e.stopPropagation();
           showPaymentForm(customer._id);
         };
-        headerActions.appendChild(paymentButton);
+        headerContent.appendChild(paymentButton);
       }
-      
-      const headerContent = document.createElement('div');
-      headerContent.className = 'header-content';
       
       // 客戶姓名和備註
       const customerInfo = document.createElement('div');
@@ -1405,10 +1383,10 @@
       const daysUntilPayment = getDaysUntilPayment(nextPaymentDate);
       
       const paymentStatus = document.createElement('div');
+      paymentStatus.className = 'payment-status';
       const paymentStatusText = getPaymentStatusText(daysUntilPayment, customer.unpaidAmount || 0, customer.status);
       if (paymentStatusText) {
-        paymentStatus.className = `payment-alert ${getPaymentAlertClass(daysUntilPayment, customer.status)}`;
-        paymentStatus.textContent = paymentStatusText;
+        paymentStatus.innerHTML = `<div class="payment-alert ${getPaymentAlertClass(daysUntilPayment, customer.status)}">${paymentStatusText}</div>`;
       }
       
       // 狀態標籤
@@ -1423,12 +1401,9 @@
       headerContent.appendChild(paymentStatus);
       headerContent.appendChild(status);
       
-      // 先添加付款按鈕容器，再添加內容
-      header.appendChild(headerActions);
       header.appendChild(headerContent);
       
       header.onclick = (e) => {
-        // 如果點擊的是付款按鈕，不展開卡片
         if (e.target.classList.contains('payment-button')) {
           return;
         }
