@@ -1327,6 +1327,7 @@
     function createCustomerCard(customer) {
       const card = document.createElement('div');
       card.className = 'customer-card';
+      card.id = `customer-${customer._id}`; // 添加 ID 以便找到對應的備註區域
       
       const header = document.createElement('div');
       header.className = 'card-header';
@@ -1457,6 +1458,7 @@
           <div class="form-group">
             <input type="number" placeholder="輸入繳款金額" id="payment-amount-${customer._id}">
             <button class="button button-success" onclick="handlePayment('${customer._id}')">確認繳款</button>
+            <button class="button button-danger" onclick="showPaymentForm('${customer._id}')">取消</button>
           </div>
         `;
         content.appendChild(paymentForm);
@@ -1468,7 +1470,9 @@
       notesSection.innerHTML = `
         <h4>備註</h4>
         <textarea placeholder="輸入備註內容">${customer.notes || ''}</textarea>
-        <button class="button button-primary" onclick="saveNotes('${customer._id}')">儲存備註</button>
+        <div class="button-group">
+          <button class="button button-primary" onclick="saveNotes('${customer._id}')">儲存備註</button>
+        </div>
       `;
       
       content.appendChild(details);
@@ -1537,7 +1541,10 @@
 
     // 儲存備註
     async function saveNotes(customerId) {
-      const notes = document.querySelector(`#customer-${customerId} .notes-section textarea`).value;
+      const textarea = document.querySelector(`#customer-${customerId} .notes-section textarea`);
+      if (!textarea) return;
+
+      const notes = textarea.value;
       
       try {
         showLoading();
@@ -1552,6 +1559,7 @@
         if (!response.ok) throw new Error('儲存備註失敗');
         
         await loadCustomers();
+        alert('備註已儲存');
       } catch (error) {
         console.error('儲存備註失敗:', error);
         alert('儲存備註失敗');
@@ -1563,17 +1571,22 @@
     // 顯示繳款表單
     function showPaymentForm(customerId) {
       const form = document.getElementById(`payment-form-${customerId}`);
-      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+      if (form) {
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+      }
     }
 
     // 處理繳款
     async function handlePayment(customerId) {
-      const paymentAmount = parseFloat(document.querySelector(`#payment-amount-${customerId}`).value);
-      if (!paymentAmount || paymentAmount <= 0) {
+      const amountInput = document.getElementById(`payment-amount-${customerId}`);
+      if (!amountInput) return;
+
+      const amount = parseFloat(amountInput.value);
+      if (!amount || amount <= 0) {
         alert('請輸入有效的繳款金額');
         return;
       }
-      
+
       try {
         showLoading();
         const response = await fetch(`${API_BASE_URL}/customers/${customerId}/payment`, {
@@ -1581,15 +1594,19 @@
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ amount: paymentAmount })
+          body: JSON.stringify({ amount })
         });
-        
+
         if (!response.ok) throw new Error('繳款失敗');
-        
+
         // 重新載入客戶列表
         await loadCustomers();
         // 隱藏繳款表單
-        document.getElementById(`payment-form-${customerId}`).style.display = 'none';
+        const form = document.getElementById(`payment-form-${customerId}`);
+        if (form) {
+          form.style.display = 'none';
+        }
+        amountInput.value = '';
       } catch (error) {
         console.error('繳款失敗:', error);
         alert('繳款失敗');
@@ -1762,6 +1779,85 @@
       // 更新總覽數據
       updateOverviewStats();
     });
+
+    // 下載相關函數
+    async function downloadContract(customerId) {
+      try {
+        showLoading();
+        const response = await fetch(`${API_BASE_URL}/customers/${customerId}/contract`, {
+          method: 'GET'
+        });
+        
+        if (!response.ok) throw new Error('下載失敗');
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `contract_${customerId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } catch (error) {
+        console.error('下載合約失敗:', error);
+        alert('下載合約失敗');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function downloadIdFront(customerId) {
+      try {
+        showLoading();
+        const response = await fetch(`${API_BASE_URL}/customers/${customerId}/id-front`, {
+          method: 'GET'
+        });
+        
+        if (!response.ok) throw new Error('下載失敗');
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `id_front_${customerId}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } catch (error) {
+        console.error('下載身分證正面失敗:', error);
+        alert('下載身分證正面失敗');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    async function downloadIdBack(customerId) {
+      try {
+        showLoading();
+        const response = await fetch(`${API_BASE_URL}/customers/${customerId}/id-back`, {
+          method: 'GET'
+        });
+        
+        if (!response.ok) throw new Error('下載失敗');
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `id_back_${customerId}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } catch (error) {
+        console.error('下載身分證反面失敗:', error);
+        alert('下載身分證反面失敗');
+      } finally {
+        hideLoading();
+      }
+    }
   </script>
 </body>
 </html>
