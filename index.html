@@ -1331,6 +1331,18 @@
       return `$${amount.toLocaleString()}`;
     }
 
+    function getStatusText(status) {
+      const statusMap = {
+        'renting': '租賃中',
+        'active': '租賃中',
+        'buyback': '已買回',
+        'locked': '呆帳',
+        'paid': '已付清',
+        'partial': '部分付款'
+      };
+      return statusMap[status] || status;
+    }
+
     function calculateNextPaymentDate(contractDate, lastPaymentDate) {
       const baseDate = lastPaymentDate || contractDate;
       const nextDate = new Date(baseDate);
