@@ -417,11 +417,15 @@
     }
 
     .payment-form {
-      margin-top: 1rem;
-      padding: 1rem;
       background: #f8f9fa;
+      padding: 1rem;
+      margin-top: 1rem;
       border-radius: 4px;
       display: none;
+    }
+
+    .payment-form .form-group {
+      margin-bottom: 1rem;
     }
 
     .payment-form input {
@@ -430,6 +434,21 @@
       margin-bottom: 0.5rem;
       border: 1px solid #ddd;
       border-radius: 4px;
+    }
+
+    .payment-form .button-group {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .button-primary {
+      background: #1976d2;
+      color: white;
+    }
+
+    .button-secondary {
+      background: #6c757d;
+      color: white;
     }
 
     .notes-section {
@@ -1349,7 +1368,9 @@
 
     // 創建客戶卡片
     function createCustomerCard(customer) {
-      console.log('Creating card for customer:', customer); // 添加調試日誌
+      console.log('Creating card for customer:', customer);
+      console.log('Customer ID:', customer._id);
+      console.log('Customer status:', customer.status);
       
       const card = document.createElement('div');
       card.className = 'customer-card';
@@ -1360,7 +1381,7 @@
       
       // 付款按鈕
       if (customer.status === 'renting' || !customer.status) {
-        console.log('Customer status is renting, adding payment button'); // 添加調試日誌
+        console.log('Adding payment button for customer:', customer.name);
         const paymentButton = document.createElement('button');
         paymentButton.className = 'payment-button';
         paymentButton.textContent = '繳款';
@@ -1368,9 +1389,11 @@
         paymentButton.onclick = (e) => {
           e.stopPropagation();
           e.preventDefault();
+          console.log('Payment button clicked for customer:', customer._id);
           showPaymentForm(customer._id);
         };
         header.insertBefore(paymentButton, header.firstChild);
+        console.log('Payment button added to header');
       }
       
       const headerContent = document.createElement('div');
@@ -1436,10 +1459,28 @@
       
       card.appendChild(header);
       
-      // 展開內容
+      // 付款表單
+      const paymentForm = document.createElement('div');
+      paymentForm.className = 'payment-form';
+      paymentForm.id = `payment-form-${customer._id}`;
+      paymentForm.style.display = 'none';
+      paymentForm.innerHTML = `
+        <div class="form-group">
+          <input type="number" id="payment-amount-${customer._id}" placeholder="輸入繳款金額" class="form-control">
+          <div class="button-group">
+            <button class="button button-primary" onclick="handlePayment('${customer._id}')">確認繳款</button>
+            <button class="button button-secondary" onclick="hidePaymentForm('${customer._id}')">取消</button>
+          </div>
+        </div>
+      `;
+      console.log('插入 payment form:', paymentForm.id);
+      
+      // 將付款表單添加到卡片內容區域
       const content = document.createElement('div');
       content.className = 'card-content';
+      content.appendChild(paymentForm);
       
+      // 其他卡片內容
       const details = document.createElement('div');
       details.className = 'customer-details';
       details.innerHTML = `
@@ -1478,50 +1519,8 @@
           </div>
         ` : ''}
       `;
-
-      // 功能按鈕區
-      const actionButtons = document.createElement('div');
-      actionButtons.className = 'action-buttons';
-      actionButtons.innerHTML = `
-        ${customer.status === 'renting' ? `
-          <button class="button button-success" onclick="handleBuyback('${customer._id}')">買回</button>
-          <button class="button button-danger" onclick="handleLock('${customer._id}')">呆帳鎖機</button>
-        ` : ''}
-        <button class="button button-info" onclick="downloadContract('${customer._id}')">下載合約</button>
-        <button class="button button-info" onclick="downloadIdFront('${customer._id}')">身分證正面</button>
-        <button class="button button-info" onclick="downloadIdBack('${customer._id}')">身分證反面</button>
-      `;
-
-      // 繳款表單
-      if (customer.status === 'renting') {
-        const paymentForm = document.createElement('div');
-        paymentForm.className = 'payment-form';
-        paymentForm.id = `payment-form-${customer._id}`;
-        paymentForm.style.display = 'none';
-        paymentForm.innerHTML = `
-          <div class="form-group">
-            <input type="number" placeholder="輸入繳款金額" id="payment-amount-${customer._id}">
-            <button class="button button-success" onclick="handlePayment('${customer._id}')">確認繳款</button>
-            <button class="button button-danger" onclick="showPaymentForm('${customer._id}')">取消</button>
-          </div>
-        `;
-        content.appendChild(paymentForm);
-      }
-
-      // 備註區域
-      const notesSection = document.createElement('div');
-      notesSection.className = 'notes-section';
-      notesSection.innerHTML = `
-        <h4>備註</h4>
-        <textarea placeholder="輸入備註內容">${customer.notes || ''}</textarea>
-        <div class="button-group">
-          <button class="button button-primary" onclick="saveNotes('${customer._id}')">儲存備註</button>
-        </div>
-      `;
       
       content.appendChild(details);
-      content.appendChild(actionButtons);
-      content.appendChild(notesSection);
       card.appendChild(content);
       
       return card;
@@ -1541,89 +1540,35 @@
       `).join('');
     }
 
-    // 處理買回
-    async function handleBuyback(customerId) {
-      if (!confirm('確定要將此客戶標記為已買回？')) return;
-      
-      try {
-        showLoading();
-        const response = await fetch(`${API_BASE_URL}/customers/${customerId}/buyback`, {
-          method: 'POST'
-        });
-        
-        if (!response.ok) throw new Error('操作失敗');
-        
-        await loadCustomers();
-      } catch (error) {
-        console.error('買回操作失敗:', error);
-        alert('買回操作失敗');
-      } finally {
-        hideLoading();
-      }
-    }
-
-    // 處理呆帳鎖機
-    async function handleLock(customerId) {
-      if (!confirm('確定要將此客戶標記為呆帳鎖機？')) return;
-      
-      try {
-        showLoading();
-        const response = await fetch(`${API_BASE_URL}/customers/${customerId}/lock`, {
-          method: 'POST'
-        });
-        
-        if (!response.ok) throw new Error('操作失敗');
-        
-        await loadCustomers();
-      } catch (error) {
-        console.error('鎖機操作失敗:', error);
-        alert('鎖機操作失敗');
-      } finally {
-        hideLoading();
-      }
-    }
-
-    // 儲存備註
-    async function saveNotes(customerId) {
-      const textarea = document.querySelector(`#customer-${customerId} .notes-section textarea`);
-      if (!textarea) return;
-
-      const notes = textarea.value;
-      
-      try {
-        showLoading();
-        const response = await fetch(`${API_BASE_URL}/customers/${customerId}/notes/update`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ notes })
-        });
-        
-        if (!response.ok) throw new Error('儲存備註失敗');
-        
-        await loadCustomers();
-        alert('備註已儲存');
-      } catch (error) {
-        console.error('儲存備註失敗:', error);
-        alert('儲存備註失敗');
-      } finally {
-        hideLoading();
-      }
-    }
-
-    // 顯示繳款表單
+    // 顯示付款表單
     function showPaymentForm(customerId) {
+      console.log('Showing payment form for customer:', customerId);
       const form = document.getElementById(`payment-form-${customerId}`);
       if (form) {
-        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        console.log('Found payment form:', form.id);
+        form.style.display = 'block';
+      } else {
+        console.error('Payment form not found for customer:', customerId);
       }
     }
 
-    // 處理繳款
+    // 隱藏付款表單
+    function hidePaymentForm(customerId) {
+      console.log('Hiding payment form for customer:', customerId);
+      const form = document.getElementById(`payment-form-${customerId}`);
+      if (form) {
+        form.style.display = 'none';
+      }
+    }
+
+    // 處理付款
     async function handlePayment(customerId) {
+      console.log('Processing payment for customer:', customerId);
       const amountInput = document.getElementById(`payment-amount-${customerId}`);
-      if (!amountInput) return;
+      if (!amountInput) {
+        console.error('Payment amount input not found');
+        return;
+      }
 
       const amount = parseFloat(amountInput.value);
       if (!amount || amount <= 0) {
@@ -1633,6 +1578,7 @@
 
       try {
         showLoading();
+        console.log('Sending payment request:', { customerId, amount });
         const response = await fetch(`${API_BASE_URL}/customers/${customerId}/payment`, {
           method: 'POST',
           headers: {
@@ -1646,13 +1592,11 @@
         // 重新載入客戶列表
         await loadCustomers();
         // 隱藏繳款表單
-        const form = document.getElementById(`payment-form-${customerId}`);
-        if (form) {
-          form.style.display = 'none';
-        }
+        hidePaymentForm(customerId);
         amountInput.value = '';
+        alert('繳款成功');
       } catch (error) {
-        console.error('繳款失敗:', error);
+        console.error('Payment failed:', error);
         alert('繳款失敗');
       } finally {
         hideLoading();
