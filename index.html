@@ -231,6 +231,7 @@
       box-shadow: 0 1px 2px rgba(0,0,0,0.1);
       width: 100%;
       margin-bottom: 8px;
+      position: relative;
     }
 
     .card-header {
@@ -240,6 +241,8 @@
       display: flex;
       align-items: center;
       gap: 1rem;
+      position: relative;
+      z-index: 1;
     }
 
     .payment-button {
@@ -253,6 +256,10 @@
       transition: background-color 0.2s;
       min-width: 80px;
       flex-shrink: 0;
+      display: inline-block !important;
+      position: relative;
+      z-index: 2;
+      margin-right: 1rem;
     }
 
     .payment-button:hover {
@@ -265,6 +272,8 @@
       gap: 1rem;
       align-items: center;
       flex: 1;
+      position: relative;
+      z-index: 1;
     }
 
     .customer-info {
@@ -1297,10 +1306,14 @@
         const statusFilter = document.getElementById('statusFilter').value;
         const searchQuery = document.getElementById('searchInput').value;
         
+        console.log('Loading customers with filter:', statusFilter); // 添加調試日誌
+        
         const response = await fetch(`${API_BASE_URL}/customers?status=${statusFilter}&search=${searchQuery}&page=${currentPage}&limit=${itemsPerPage}`);
         if (!response.ok) throw new Error('獲取客戶列表失敗');
         
         const data = await response.json();
+        console.log('Received customers data:', data); // 添加調試日誌
+        
         totalPages = Math.ceil(data.total / itemsPerPage);
         
         renderCustomerList(data.customers);
@@ -1336,6 +1349,8 @@
 
     // 創建客戶卡片
     function createCustomerCard(customer) {
+      console.log('Creating card for customer:', customer); // 添加調試日誌
+      
       const card = document.createElement('div');
       card.className = 'customer-card';
       card.id = `customer-${customer._id}`;
@@ -1344,15 +1359,18 @@
       header.className = 'card-header';
       
       // 付款按鈕
-      if (customer.status === 'renting') {
+      if (customer.status === 'renting' || !customer.status) {
+        console.log('Customer status is renting, adding payment button'); // 添加調試日誌
         const paymentButton = document.createElement('button');
         paymentButton.className = 'payment-button';
         paymentButton.textContent = '繳款';
+        paymentButton.style.display = 'inline-block';
         paymentButton.onclick = (e) => {
           e.stopPropagation();
+          e.preventDefault();
           showPaymentForm(customer._id);
         };
-        header.appendChild(paymentButton);
+        header.insertBefore(paymentButton, header.firstChild);
       }
       
       const headerContent = document.createElement('div');
