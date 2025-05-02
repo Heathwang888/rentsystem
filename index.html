@@ -666,6 +666,164 @@
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       }
     }
+
+    /* 新增篩選器樣式 */
+    .filters {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .filters select {
+      padding: 0.5rem 1rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: white;
+      font-size: 0.875rem;
+    }
+
+    /* 更新客戶卡片樣式 */
+    .customer-card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      background: #f8f9fa;
+      border-bottom: 1px solid #eee;
+    }
+
+    .header-content {
+      flex: 1;
+    }
+
+    .customer-name {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .customer-name h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      color: #333;
+    }
+
+    .notes-badge {
+      background: #e3f2fd;
+      color: #1976d2;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+    }
+
+    .payment-info {
+      margin-top: 0.5rem;
+      font-size: 0.875rem;
+      color: #666;
+    }
+
+    .payment-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .status-renting { background: #e3f2fd; color: #1976d2; }
+    .status-buyback { background: #e8f5e9; color: #2e7d32; }
+    .status-locked { background: #424242; color: white; }
+
+    .payment-alert {
+      color: #d32f2f;
+      font-weight: 500;
+    }
+
+    .payment-alert.today {
+      background: #ffebee;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .payment-record {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #f5f5f5;
+      border-radius: 4px;
+    }
+
+    .record-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .record-item:last-child {
+      border-bottom: none;
+    }
+
+    .file-downloads {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .payment-form {
+      display: none;
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #f5f5f5;
+      border-radius: 4px;
+    }
+
+    .payment-form.active {
+      display: block;
+    }
+
+    .payment-form input {
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .notes-section {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #f5f5f5;
+      border-radius: 4px;
+    }
+
+    .notes-section textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      resize: vertical;
+    }
   </style>
 </head>
 <body>
@@ -789,20 +947,25 @@
     <!-- 客戶管理頁面 -->
     <section id="customers" class="page-section">
       <div class="container">
-        <!-- 客戶列表 -->
         <div class="customer-list">
           <div class="list-header">
             <h3>客戶列表</h3>
-            <div class="search-box">
-              <input type="text" id="searchInput" placeholder="搜尋客戶...">
+            <div class="filters">
+              <select id="statusFilter">
+                <option value="all">全部</option>
+                <option value="due">今日須繳款</option>
+                <option value="buyback">已買回</option>
+                <option value="locked">呆帳鎖機</option>
+              </select>
+              <div class="search-box">
+                <input type="text" id="searchInput" placeholder="搜尋客戶...">
+              </div>
             </div>
           </div>
 
           <div class="customer-cards">
             <!-- 客戶卡片將由 JavaScript 動態生成 -->
           </div>
-
-          <div class="pagination"></div>
         </div>
       </div>
     </section>
@@ -1156,15 +1319,31 @@
       return `$${amount.toLocaleString()}`;
     }
 
-    function getStatusText(status) {
-      const statusMap = {
-        'active': '進行中',
-        'paid': '已付清',
-        'partial': '部分付款',
-        'buyback': '買回',
-        'locked': '呆帳鎖機'
-      };
-      return statusMap[status] || status;
+    function calculateNextPaymentDate(contractDate, lastPaymentDate) {
+      const baseDate = lastPaymentDate || contractDate;
+      const nextDate = new Date(baseDate);
+      nextDate.setDate(nextDate.getDate() + 7);
+      return nextDate;
+    }
+
+    function getDaysUntilPayment(nextPaymentDate) {
+      const today = new Date();
+      const diffTime = nextPaymentDate - today;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays;
+    }
+
+    function getPaymentStatusText(daysUntilPayment, unpaidAmount) {
+      if (unpaidAmount > 0) {
+        return `尚餘 ${formatAmount(unpaidAmount)}`;
+      }
+      if (daysUntilPayment === 0) {
+        return '今日須繳款';
+      } else if (daysUntilPayment < 0) {
+        return `已逾期 ${Math.abs(daysUntilPayment)} 日`;
+      } else {
+        return `尚餘 ${daysUntilPayment} 日繳款`;
+      }
     }
 
     // 加載客戶列表
@@ -1210,6 +1389,12 @@
       const card = document.createElement('div');
       card.className = 'customer-card';
       
+      const nextPaymentDate = calculateNextPaymentDate(
+        new Date(customer.contractDate),
+        customer.lastPaymentDate ? new Date(customer.lastPaymentDate) : null
+      );
+      const daysUntilPayment = getDaysUntilPayment(nextPaymentDate);
+      
       const header = document.createElement('div');
       header.className = 'card-header';
       header.onclick = () => toggleCardContent(card);
@@ -1217,12 +1402,38 @@
       const headerContent = document.createElement('div');
       headerContent.className = 'header-content';
       
+      const nameSection = document.createElement('div');
+      nameSection.className = 'customer-name';
+      
       const title = document.createElement('h3');
       title.textContent = customer.name || '未命名客戶';
-      headerContent.appendChild(title);
+      nameSection.appendChild(title);
+      
+      if (customer.notes) {
+        const notesBadge = document.createElement('span');
+        notesBadge.className = 'notes-badge';
+        notesBadge.textContent = '有備註';
+        nameSection.appendChild(notesBadge);
+      }
+      
+      const paymentInfo = document.createElement('div');
+      paymentInfo.className = 'payment-info';
+      
+      const paymentStatus = document.createElement('div');
+      paymentStatus.className = 'payment-status';
+      
+      const statusText = document.createElement('span');
+      statusText.className = `payment-alert ${daysUntilPayment === 0 ? 'today' : ''}`;
+      statusText.textContent = getPaymentStatusText(daysUntilPayment, customer.unpaidAmount || 0);
+      
+      paymentStatus.appendChild(statusText);
+      paymentInfo.appendChild(paymentStatus);
+      
+      headerContent.appendChild(nameSection);
+      headerContent.appendChild(paymentInfo);
       
       const status = document.createElement('span');
-      status.className = `status-badge status-${customer.status || 'active'}`;
+      status.className = `status-badge status-${customer.status || 'renting'}`;
       status.textContent = getStatusText(customer.status);
       
       header.appendChild(headerContent);
@@ -1231,123 +1442,220 @@
       
       const content = document.createElement('div');
       content.className = 'card-content';
-      content.innerHTML = `
-        <div class="customer-details">
-          <div class="detail-group">
-            <h4>基本資料</h4>
-            <div class="detail-item">
-              <span class="label">身分證字號：</span>
-              <span class="value">${customer.idNumber || '無'}</span>
-            </div>
-            <div class="detail-item">
-              <span class="label">電話：</span>
-              <span class="value">${customer.phone || '無'}</span>
-            </div>
-            <div class="detail-item">
-              <span class="label">地址：</span>
-              <span class="value">${customer.address || '無'}</span>
-            </div>
-          </div>
-          <div class="detail-group">
-            <h4>手機資訊</h4>
-            <div class="detail-item">
-              <span class="label">型號：</span>
-              <span class="value">${customer.model || '無'}</span>
-            </div>
-            <div class="detail-item">
-              <span class="label">IMEI：</span>
-              <span class="value">${customer.imei || '無'}</span>
-            </div>
-          </div>
-          <div class="detail-group">
-            <h4>付款資訊</h4>
-            <div class="detail-item">
-              <span class="label">售價：</span>
-              <span class="value">${formatAmount(customer.salePrice)}</span>
-            </div>
-            <div class="detail-item">
-              <span class="label">租金：</span>
-              <span class="value">${formatAmount(customer.rent)}/週</span>
-            </div>
-            ${customer.unpaidAmount ? `
-            <div class="detail-item">
-              <span class="label">未付金額：</span>
-              <span class="value">${formatAmount(customer.unpaidAmount)}</span>
-            </div>
-            ` : ''}
-          </div>
+      
+      const details = document.createElement('div');
+      details.className = 'customer-details';
+      
+      // 基本資料
+      const basicInfo = document.createElement('div');
+      basicInfo.className = 'detail-group';
+      basicInfo.innerHTML = `
+        <h4>基本資料</h4>
+        <div class="detail-item">
+          <span class="label">身分證字號：</span>
+          <span class="value">${customer.idNumber || '無'}</span>
         </div>
-        <div class="action-buttons">
-          <button class="button button-primary" onclick="handleBuyback('${customer._id}')">買回</button>
-          ${customer.status !== 'paid' ? `
-          <button class="button button-success" onclick="handlePayment('${customer._id}', ${customer.rent})">已繳款</button>
-          ` : ''}
-          <button class="button button-warning" onclick="showPartialPaymentForm('${customer._id}')">未繳足額</button>
-          <button class="button button-danger" onclick="handleLock('${customer._id}')">呆帳鎖機</button>
+        <div class="detail-item">
+          <span class="label">電話：</span>
+          <span class="value">${customer.phone || '無'}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">地址：</span>
+          <span class="value">${customer.address || '無'}</span>
         </div>
       `;
+      
+      // 手機資訊
+      const phoneInfo = document.createElement('div');
+      phoneInfo.className = 'detail-group';
+      phoneInfo.innerHTML = `
+        <h4>手機資訊</h4>
+        <div class="detail-item">
+          <span class="label">型號：</span>
+          <span class="value">${customer.model || '無'}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">IMEI：</span>
+          <span class="value">${customer.imei || '無'}</span>
+        </div>
+      `;
+      
+      // 付款資訊
+      const paymentDetails = document.createElement('div');
+      paymentDetails.className = 'detail-group';
+      paymentDetails.innerHTML = `
+        <h4>付款資訊</h4>
+        <div class="detail-item">
+          <span class="label">售價：</span>
+          <span class="value">${formatAmount(customer.salePrice)}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">租金：</span>
+          <span class="value">${formatAmount(customer.rent)}/週</span>
+        </div>
+        ${customer.unpaidAmount ? `
+        <div class="detail-item">
+          <span class="label">未付金額：</span>
+          <span class="value">${formatAmount(customer.unpaidAmount)}</span>
+        </div>
+        ` : ''}
+      `;
+      
+      // 繳款紀錄
+      const paymentRecord = document.createElement('div');
+      paymentRecord.className = 'payment-record';
+      paymentRecord.innerHTML = `
+        <h4>繳款紀錄</h4>
+        ${generatePaymentRecords(customer)}
+      `;
+      
+      // 繳款表單
+      const paymentForm = document.createElement('div');
+      paymentForm.className = 'payment-form';
+      paymentForm.innerHTML = `
+        <h4>繳款</h4>
+        <input type="number" placeholder="輸入繳款金額" id="paymentAmount">
+        <button class="button button-primary" onclick="handlePayment('${customer._id}')">確認繳款</button>
+      `;
+      
+      // 備註欄位
+      const notesSection = document.createElement('div');
+      notesSection.className = 'notes-section';
+      notesSection.innerHTML = `
+        <h4>備註</h4>
+        <textarea placeholder="輸入備註內容">${customer.notes || ''}</textarea>
+        <button class="button button-primary" onclick="saveNotes('${customer._id}')">儲存備註</button>
+      `;
+      
+      // 文件下載
+      const fileDownloads = document.createElement('div');
+      fileDownloads.className = 'file-downloads';
+      fileDownloads.innerHTML = `
+        <button class="button button-info" onclick="downloadContract('${customer._id}')">下載合約 (PDF)</button>
+        <button class="button button-info" onclick="downloadIdFront('${customer._id}')">下載身分證正面</button>
+        <button class="button button-info" onclick="downloadIdBack('${customer._id}')">下載身分證反面</button>
+      `;
+      
+      details.appendChild(basicInfo);
+      details.appendChild(phoneInfo);
+      details.appendChild(paymentDetails);
+      content.appendChild(details);
+      content.appendChild(paymentRecord);
+      content.appendChild(paymentForm);
+      content.appendChild(notesSection);
+      content.appendChild(fileDownloads);
       
       card.appendChild(content);
       return card;
     }
 
-    // 切換卡片內容顯示
-    function toggleCardContent(card) {
-      const content = card.querySelector('.card-content');
-      const isExpanded = content.style.maxHeight;
+    function generatePaymentRecords(customer) {
+      if (!customer.paymentRecords || customer.paymentRecords.length === 0) {
+        return '<div class="no-data">暫無繳款紀錄</div>';
+      }
       
-      if (isExpanded) {
-        content.style.maxHeight = null;
-        card.classList.remove('expanded');
-      } else {
-        content.style.maxHeight = content.scrollHeight + 'px';
-        card.classList.add('expanded');
+      return customer.paymentRecords.map(record => `
+        <div class="record-item">
+          <span>${new Date(record.date).toLocaleDateString()}</span>
+          <span>${formatAmount(record.amount)}</span>
+        </div>
+      `).join('');
+    }
+
+    // 處理繳款
+    async function handlePayment(customerId) {
+      const paymentAmount = parseFloat(document.querySelector('#paymentAmount').value);
+      if (!paymentAmount || paymentAmount <= 0) {
+        alert('請輸入有效的繳款金額');
+        return;
+      }
+      
+      try {
+        showLoading();
+        const response = await fetch(`${API_BASE_URL}/customers/${customerId}/payment`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ amount: paymentAmount })
+        });
+        
+        if (!response.ok) throw new Error('繳款失敗');
+        
+        // 重新載入客戶列表
+        await loadCustomers();
+      } catch (error) {
+        console.error('繳款失敗:', error);
+        alert('繳款失敗');
+      } finally {
+        hideLoading();
       }
     }
 
-    // 顯示/隱藏加載動畫
-    function showLoading() {
-      const overlay = document.querySelector('.loading-overlay');
-      if (overlay) overlay.style.display = 'flex';
-    }
-
-    function hideLoading() {
-      const overlay = document.querySelector('.loading-overlay');
-      if (overlay) overlay.style.display = 'none';
-    }
-
-    // 初始化導航
-    function initializeNavigation() {
-      const navLinks = document.querySelectorAll('.nav-link');
-      const sections = document.querySelectorAll('.page-section');
+    // 儲存備註
+    async function saveNotes(customerId) {
+      const notes = document.querySelector(`#customer-${customerId} .notes-section textarea`).value;
       
-      // 處理導航點擊
-      navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          
-          // 移除所有活動狀態
-          navLinks.forEach(l => l.classList.remove('active'));
-          sections.forEach(s => s.classList.remove('active'));
-          
-          // 添加當前活動狀態
-          link.classList.add('active');
-          const targetSection = document.getElementById(link.dataset.section);
-          if (targetSection) {
-            targetSection.classList.add('active');
-            
-            // 如果是客戶列表頁面，則載入客戶數據
-            if (link.dataset.section === 'customers') {
-              loadCustomers();
-            }
-          }
+      try {
+        showLoading();
+        const response = await fetch(`${API_BASE_URL}/customers/${customerId}/notes`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ notes })
         });
+        
+        if (!response.ok) throw new Error('儲存備註失敗');
+        
+        // 重新載入客戶列表
+        await loadCustomers();
+      } catch (error) {
+        console.error('儲存備註失敗:', error);
+        alert('儲存備註失敗');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // 初始化篩選器
+    function initializeFilters() {
+      const statusFilter = document.getElementById('statusFilter');
+      const searchInput = document.getElementById('searchInput');
+      
+      statusFilter.addEventListener('change', () => {
+        loadCustomers();
       });
+      
+      searchInput.addEventListener('input', () => {
+        loadCustomers();
+      });
+    }
+
+    // 更新載入客戶列表函數
+    async function loadCustomers() {
+      try {
+        showLoading();
+        const statusFilter = document.getElementById('statusFilter').value;
+        const searchQuery = document.getElementById('searchInput').value;
+        
+        const response = await fetch(`${API_BASE_URL}/customers?status=${statusFilter}&search=${searchQuery}`);
+        if (!response.ok) throw new Error('獲取客戶列表失敗');
+        
+        const data = await response.json();
+        renderCustomerList(data.customers);
+      } catch (error) {
+        console.error('載入客戶列表失敗:', error);
+        alert('載入客戶列表失敗');
+      } finally {
+        hideLoading();
+      }
     }
 
     // 初始化
     document.addEventListener('DOMContentLoaded', () => {
       initializeNavigation();
+      initializeFilters();
       
       // 載入初始客戶列表
       const customersSection = document.getElementById('customers');
