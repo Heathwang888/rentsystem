@@ -1331,6 +1331,33 @@
       return `$${amount.toLocaleString()}`;
     }
 
+    function calculateNextPaymentDate(contractDate, lastPaymentDate) {
+      const baseDate = lastPaymentDate || contractDate;
+      const nextDate = new Date(baseDate);
+      nextDate.setDate(nextDate.getDate() + 7);
+      return nextDate;
+    }
+
+    function getDaysUntilPayment(nextPaymentDate) {
+      const today = new Date();
+      const diffTime = nextPaymentDate - today;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays;
+    }
+
+    function getPaymentStatusText(daysUntilPayment, unpaidAmount) {
+      if (unpaidAmount > 0) {
+        return `尚餘 ${formatAmount(unpaidAmount)}`;
+      }
+      if (daysUntilPayment === 0) {
+        return '今日須繳款';
+      } else if (daysUntilPayment < 0) {
+        return `已逾期 ${Math.abs(daysUntilPayment)} 日`;
+      } else {
+        return `尚餘 ${daysUntilPayment} 日繳款`;
+      }
+    }
+
     // 顯示/隱藏加載動畫
     function showLoading() {
       const overlay = document.querySelector('.loading-overlay');
@@ -1346,25 +1373,68 @@
     async function updateOverviewStats() {
       try {
         showLoading();
-        const response = await fetch(`${API_BASE_URL}/overview`);
-        if (!response.ok) throw new Error('獲取總覽數據失敗');
+        // 從客戶列表計算總覽數據
+        const response = await fetch(`${API_BASE_URL}/customers`);
+        if (!response.ok) throw new Error('獲取客戶列表失敗');
         
         const data = await response.json();
+        const customers = data.customers || [];
+        
+        // 計算今日到期數據
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const dueToday = customers.filter(customer => {
+          const nextPaymentDate = calculateNextPaymentDate(
+            new Date(customer.contractDate),
+            customer.lastPaymentDate ? new Date(customer.lastPaymentDate) : null
+          );
+          nextPaymentDate.setHours(0, 0, 0, 0);
+          return nextPaymentDate.getTime() === today.getTime();
+        });
+        
+        // 計算進行中合約數據
+        const activeContracts = customers.filter(customer => 
+          customer.status === 'renting' || customer.status === 'active'
+        );
+        
+        // 計算逾期帳款數據
+        const overdue = customers.filter(customer => {
+          const nextPaymentDate = calculateNextPaymentDate(
+            new Date(customer.contractDate),
+            customer.lastPaymentDate ? new Date(customer.lastPaymentDate) : null
+          );
+          return nextPaymentDate < today;
+        });
         
         // 更新今日到期數據
-        document.getElementById('dueTodayRent').textContent = formatAmount(data.dueToday.rent);
-        document.getElementById('dueTodayPrice').textContent = formatAmount(data.dueToday.price);
-        document.getElementById('dueTodayCount').textContent = data.dueToday.count;
+        document.getElementById('dueTodayRent').textContent = formatAmount(
+          dueToday.reduce((sum, customer) => sum + (customer.rent || 0), 0)
+        );
+        document.getElementById('dueTodayPrice').textContent = formatAmount(
+          dueToday.reduce((sum, customer) => sum + (customer.salePrice || 0), 0)
+        );
+        document.getElementById('dueTodayCount').textContent = dueToday.length;
         
         // 更新進行中合約數據
-        document.getElementById('activeCount').textContent = data.activeContracts.count;
-        document.getElementById('monthlyRent').textContent = formatAmount(data.activeContracts.monthlyRent);
-        document.getElementById('avgRent').textContent = formatAmount(data.activeContracts.avgRent);
+        document.getElementById('activeCount').textContent = activeContracts.length;
+        document.getElementById('monthlyRent').textContent = formatAmount(
+          activeContracts.reduce((sum, customer) => sum + (customer.rent || 0) * 4, 0)
+        );
+        document.getElementById('avgRent').textContent = formatAmount(
+          activeContracts.length > 0 
+            ? activeContracts.reduce((sum, customer) => sum + (customer.rent || 0), 0) / activeContracts.length
+            : 0
+        );
         
         // 更新逾期帳款數據
-        document.getElementById('overdueCount').textContent = data.overdue.count;
-        document.getElementById('overdueAmount').textContent = formatAmount(data.overdue.amount);
-        document.getElementById('overdueRate').textContent = `${data.overdue.rate}%`;
+        document.getElementById('overdueCount').textContent = overdue.length;
+        document.getElementById('overdueAmount').textContent = formatAmount(
+          overdue.reduce((sum, customer) => sum + (customer.rent || 0), 0)
+        );
+        document.getElementById('overdueRate').textContent = customers.length > 0
+          ? `${Math.round((overdue.length / customers.length) * 100)}%`
+          : '0%';
         
       } catch (error) {
         console.error('更新總覽數據失敗:', error);
@@ -1820,8 +1890,6 @@
       // 更新總覽數據
       updateOverviewStats();
     });
-
-    // 保留其他原有函數...
   </script>
 </body>
 </html>
