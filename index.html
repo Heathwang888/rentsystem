@@ -1316,6 +1316,35 @@
       if (overlay) overlay.style.display = 'none';
     }
 
+    // 初始化導航
+    function initializeNavigation() {
+      const navLinks = document.querySelectorAll('.nav-link');
+      const sections = document.querySelectorAll('.page-section');
+      
+      // 處理導航點擊
+      navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          
+          // 移除所有活動狀態
+          navLinks.forEach(l => l.classList.remove('active'));
+          sections.forEach(s => s.classList.remove('active'));
+          
+          // 添加當前活動狀態
+          link.classList.add('active');
+          const targetSection = document.getElementById(link.dataset.section);
+          if (targetSection) {
+            targetSection.classList.add('active');
+            
+            // 如果是客戶列表頁面，則載入客戶數據
+            if (link.dataset.section === 'customers') {
+              loadCustomers();
+            }
+          }
+        });
+      });
+    }
+
     // 初始化
     document.addEventListener('DOMContentLoaded', () => {
       initializeNavigation();
