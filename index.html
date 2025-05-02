@@ -646,6 +646,69 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
+    /* 繳款相關樣式 */
+    .payment-info {
+      margin-bottom: 15px;
+      padding: 10px;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+    }
+
+    .payment-info div {
+      margin: 5px 0;
+    }
+
+    .unpaid-alert {
+      color: #dc3545;
+      font-weight: bold;
+    }
+
+    .payment-type-info {
+      margin: 10px 0;
+      padding: 8px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .payment-type-info.partial {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+
+    .payment-type-info.rent {
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    .payment-type-info.buyback {
+      background-color: #cce5ff;
+      color: #004085;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .button-success {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .button-danger {
+      background-color: #dc3545;
+      color: white;
+    }
   </style>
 </head>
 <body>
@@ -1475,7 +1538,13 @@
         paymentForm.innerHTML = `
           <div class="form-group">
             <h4>繳款</h4>
+            <div class="payment-info">
+              <div>每週租金：${formatAmount(customer.rent)}</div>
+              <div>買回金額：${formatAmount(customer.salePrice)}</div>
+              ${customer.unpaidAmount ? `<div class="unpaid-alert">尚欠租金：${formatAmount(customer.unpaidAmount)}</div>` : ''}
+            </div>
             <input type="number" placeholder="輸入繳款金額" id="payment-amount-${customer._id}" value="${customer.rent || ''}">
+            <div id="payment-type-${customer._id}" class="payment-type-info"></div>
             <div class="form-actions">
               <button class="button button-success" onclick="handlePayment('${customer._id}')">確認繳款</button>
               <button class="button button-danger" onclick="hidePaymentForm('${customer._id}')">取消</button>
@@ -1483,6 +1552,33 @@
           </div>
         `;
         content.appendChild(paymentForm);
+
+        // 添加繳款金額變更事件監聽
+        const amountInput = document.getElementById(`payment-amount-${customer._id}`);
+        const typeInfo = document.getElementById(`payment-type-${customer._id}`);
+        
+        amountInput.addEventListener('input', () => {
+          const amount = parseFloat(amountInput.value) || 0;
+          let typeText = '';
+          let typeClass = '';
+          
+          if (amount < customer.rent) {
+            typeText = `部分繳款，尚欠 ${formatAmount(customer.rent - amount)}`;
+            typeClass = 'partial';
+          } else if (amount === customer.rent) {
+            typeText = '續租一週';
+            typeClass = 'rent';
+          } else if (amount === customer.salePrice) {
+            typeText = '買回手機';
+            typeClass = 'buyback';
+          } else if (amount > customer.rent && amount < customer.salePrice) {
+            typeText = '續租一週，多餘金額將計入下次租金';
+            typeClass = 'rent';
+          }
+          
+          typeInfo.textContent = typeText;
+          typeInfo.className = `payment-type-info ${typeClass}`;
+        });
       }
 
       content.appendChild(details);
@@ -1548,12 +1644,35 @@
       try {
         showLoading();
         console.log('Sending payment request:', { customerId, amount });
+        
+        // 獲取客戶當前信息
+        const customerResponse = await fetch(`${API_BASE_URL}/customers/${customerId}`);
+        if (!customerResponse.ok) throw new Error('獲取客戶信息失敗');
+        const customer = await customerResponse.json();
+        
+        // 判斷繳款類型
+        let paymentType = '';
+        if (amount < customer.rent) {
+          paymentType = 'partial';
+        } else if (amount === customer.rent) {
+          paymentType = 'rent';
+        } else if (amount === customer.salePrice) {
+          paymentType = 'buyback';
+        } else if (amount > customer.rent && amount < customer.salePrice) {
+          paymentType = 'rent';
+        }
+
         const response = await fetch(`${API_BASE_URL}/customers/${customerId}/payment`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ amount })
+          body: JSON.stringify({ 
+            amount,
+            type: paymentType,
+            rent: customer.rent,
+            salePrice: customer.salePrice
+          })
         });
 
         if (!response.ok) {
@@ -1566,7 +1685,21 @@
         // 隱藏繳款表單
         hidePaymentForm(customerId);
         amountInput.value = '';
-        alert('繳款成功');
+        
+        // 根據繳款類型顯示不同提示
+        switch(paymentType) {
+          case 'partial':
+            alert(`部分繳款成功，尚欠 ${formatAmount(customer.rent - amount)}`);
+            break;
+          case 'rent':
+            alert('續租成功，租期已延長7天');
+            break;
+          case 'buyback':
+            alert('買回成功，合約已終止');
+            break;
+          default:
+            alert('繳款成功');
+        }
       } catch (error) {
         console.error('Payment failed:', error);
         alert(`繳款失敗: ${error.message}`);
