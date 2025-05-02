@@ -230,6 +230,7 @@
       border-radius: 4px;
       box-shadow: 0 1px 2px rgba(0,0,0,0.1);
       width: 100%;
+      margin-bottom: 8px;
     }
 
     .card-header {
@@ -237,15 +238,20 @@
       cursor: pointer;
       transition: background-color 0.2s;
       border-bottom: 1px solid #eee;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
     }
 
-    .card-header:hover {
-      background: #f8f9fa;
+    .header-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
     }
 
     .header-content {
       display: grid;
-      grid-template-columns: auto 2fr 2fr 1fr 1fr 1fr auto;
+      grid-template-columns: 2fr 2fr 1fr 1fr 1fr auto;
       gap: 1rem;
       align-items: center;
     }
@@ -260,6 +266,7 @@
       white-space: nowrap;
       font-size: 0.9rem;
       transition: background-color 0.2s;
+      min-width: 80px;
     }
 
     .payment-button:hover {
@@ -1347,11 +1354,12 @@
       
       const header = document.createElement('div');
       header.className = 'card-header';
+
+      // 新增一個容器用於放置付款按鈕
+      const headerActions = document.createElement('div');
+      headerActions.className = 'header-actions';
       
-      const headerContent = document.createElement('div');
-      headerContent.className = 'header-content';
-      
-      // 繳款按鈕（放在最前面）
+      // 如果是租賃中的客戶，添加付款按鈕
       if (customer.status === 'renting') {
         const paymentButton = document.createElement('button');
         paymentButton.className = 'payment-button';
@@ -1360,8 +1368,11 @@
           e.stopPropagation(); // 防止觸發卡片展開
           showPaymentForm(customer._id);
         };
-        headerContent.appendChild(paymentButton);
+        headerActions.appendChild(paymentButton);
       }
+      
+      const headerContent = document.createElement('div');
+      headerContent.className = 'header-content';
       
       // 客戶姓名和備註
       const customerInfo = document.createElement('div');
@@ -1412,8 +1423,15 @@
       headerContent.appendChild(paymentStatus);
       headerContent.appendChild(status);
       
+      // 先添加付款按鈕容器，再添加內容
+      header.appendChild(headerActions);
       header.appendChild(headerContent);
-      header.onclick = () => {
+      
+      header.onclick = (e) => {
+        // 如果點擊的是付款按鈕，不展開卡片
+        if (e.target.classList.contains('payment-button')) {
+          return;
+        }
         card.classList.toggle('expanded');
       };
       
