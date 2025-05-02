@@ -431,6 +431,7 @@
       justify-content: center;
       gap: 0.5rem;
       margin-top: 2rem;
+      padding: 1rem;
     }
 
     .page-button {
@@ -440,6 +441,8 @@
       background: white;
       cursor: pointer;
       transition: all 0.2s;
+      min-width: 40px;
+      text-align: center;
     }
 
     .page-button:hover {
@@ -450,6 +453,11 @@
       background: #1976d2;
       color: white;
       border-color: #1976d2;
+    }
+
+    .page-button.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     /* 新增樣式 */
@@ -966,6 +974,10 @@
           <div class="customer-cards">
             <!-- 客戶卡片將由 JavaScript 動態生成 -->
           </div>
+
+          <div class="pagination">
+            <!-- 分頁按鈕將由 JavaScript 動態生成 -->
+          </div>
         </div>
       </div>
     </section>
@@ -1346,15 +1358,26 @@
       }
     }
 
+    // 分頁相關變數
+    let currentPage = 1;
+    const itemsPerPage = 10;
+    let totalPages = 1;
+
     // 加載客戶列表
     async function loadCustomers() {
       try {
         showLoading();
-        const response = await fetch(`${API_BASE_URL}/customers`);
+        const statusFilter = document.getElementById('statusFilter').value;
+        const searchQuery = document.getElementById('searchInput').value;
+        
+        const response = await fetch(`${API_BASE_URL}/customers?status=${statusFilter}&search=${searchQuery}&page=${currentPage}&limit=${itemsPerPage}`);
         if (!response.ok) throw new Error('獲取客戶列表失敗');
+        
         const data = await response.json();
-        console.log('Loaded customers:', data); // 調試用
+        totalPages = Math.ceil(data.total / itemsPerPage);
+        
         renderCustomerList(data.customers);
+        renderPagination();
       } catch (error) {
         console.error('載入客戶列表失敗:', error);
         alert('載入客戶列表失敗');
@@ -1618,38 +1641,106 @@
       }
     }
 
+    // 渲染分頁按鈕
+    function renderPagination() {
+      const pagination = document.querySelector('.pagination');
+      if (!pagination) return;
+
+      pagination.innerHTML = '';
+
+      // 上一頁按鈕
+      const prevButton = document.createElement('button');
+      prevButton.className = `page-button ${currentPage === 1 ? 'disabled' : ''}`;
+      prevButton.innerHTML = '&laquo;';
+      prevButton.onclick = () => {
+        if (currentPage > 1) {
+          currentPage--;
+          loadCustomers();
+        }
+      };
+      pagination.appendChild(prevButton);
+
+      // 頁碼按鈕
+      const maxVisiblePages = 5;
+      let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+      let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+      if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+      }
+
+      if (startPage > 1) {
+        const firstPageButton = document.createElement('button');
+        firstPageButton.className = 'page-button';
+        firstPageButton.textContent = '1';
+        firstPageButton.onclick = () => {
+          currentPage = 1;
+          loadCustomers();
+        };
+        pagination.appendChild(firstPageButton);
+
+        if (startPage > 2) {
+          const ellipsis = document.createElement('span');
+          ellipsis.textContent = '...';
+          pagination.appendChild(ellipsis);
+        }
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        const pageButton = document.createElement('button');
+        pageButton.className = `page-button ${i === currentPage ? 'active' : ''}`;
+        pageButton.textContent = i;
+        pageButton.onclick = () => {
+          currentPage = i;
+          loadCustomers();
+        };
+        pagination.appendChild(pageButton);
+      }
+
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+          const ellipsis = document.createElement('span');
+          ellipsis.textContent = '...';
+          pagination.appendChild(ellipsis);
+        }
+
+        const lastPageButton = document.createElement('button');
+        lastPageButton.className = 'page-button';
+        lastPageButton.textContent = totalPages;
+        lastPageButton.onclick = () => {
+          currentPage = totalPages;
+          loadCustomers();
+        };
+        pagination.appendChild(lastPageButton);
+      }
+
+      // 下一頁按鈕
+      const nextButton = document.createElement('button');
+      nextButton.className = `page-button ${currentPage === totalPages ? 'disabled' : ''}`;
+      nextButton.innerHTML = '&raquo;';
+      nextButton.onclick = () => {
+        if (currentPage < totalPages) {
+          currentPage++;
+          loadCustomers();
+        }
+      };
+      pagination.appendChild(nextButton);
+    }
+
     // 初始化篩選器
     function initializeFilters() {
       const statusFilter = document.getElementById('statusFilter');
       const searchInput = document.getElementById('searchInput');
       
       statusFilter.addEventListener('change', () => {
+        currentPage = 1; // 重置到第一頁
         loadCustomers();
       });
       
       searchInput.addEventListener('input', () => {
+        currentPage = 1; // 重置到第一頁
         loadCustomers();
       });
-    }
-
-    // 更新載入客戶列表函數
-    async function loadCustomers() {
-      try {
-        showLoading();
-        const statusFilter = document.getElementById('statusFilter').value;
-        const searchQuery = document.getElementById('searchInput').value;
-        
-        const response = await fetch(`${API_BASE_URL}/customers?status=${statusFilter}&search=${searchQuery}`);
-        if (!response.ok) throw new Error('獲取客戶列表失敗');
-        
-        const data = await response.json();
-        renderCustomerList(data.customers);
-      } catch (error) {
-        console.error('載入客戶列表失敗:', error);
-        alert('載入客戶列表失敗');
-      } finally {
-        hideLoading();
-      }
     }
 
     // 初始化
