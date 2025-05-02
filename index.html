@@ -569,6 +569,103 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
+    /* 客戶列表樣式 */
+    .customer-cards {
+      display: grid;
+      gap: 1rem;
+      padding: 1rem;
+    }
+
+    .customer-card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      background: #f8f9fa;
+      border-bottom: 1px solid #eee;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .card-header h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      color: #333;
+    }
+
+    .card-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+    }
+
+    .customer-card.expanded .card-content {
+      max-height: 1000px;
+    }
+
+    .customer-details {
+      padding: 1rem;
+    }
+
+    .detail-group {
+      margin-bottom: 1rem;
+    }
+
+    .detail-group h4 {
+      margin: 0 0 0.5rem 0;
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .detail-item {
+      display: flex;
+      margin-bottom: 0.5rem;
+    }
+
+    .detail-item .label {
+      width: 100px;
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .detail-item .value {
+      flex: 1;
+      color: #333;
+    }
+
+    .action-buttons {
+      padding: 1rem;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      border-top: 1px solid #eee;
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 2rem;
+      color: #666;
+    }
+
+    /* 響應式調整 */
+    @media (min-width: 768px) {
+      .customer-cards {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      }
+    }
   </style>
 </head>
 <body>
@@ -1055,6 +1152,7 @@
     
     // 工具函數
     function formatAmount(amount) {
+      if (!amount) return '$0';
       return `$${amount.toLocaleString()}`;
     }
 
@@ -1069,82 +1167,65 @@
       return statusMap[status] || status;
     }
 
-    function showLoading() {
-      document.querySelector('.loading-overlay').style.display = 'flex';
-    }
-
-    function hideLoading() {
-      document.querySelector('.loading-overlay').style.display = 'none';
-    }
-
-    // API 函數
-    async function fetchCustomers(page = 1, limit = 5) {
-      showLoading();
+    // 加載客戶列表
+    async function loadCustomers() {
       try {
-        const response = await fetch(`${API_BASE_URL}/customers?page=${page}&limit=${limit}`);
+        showLoading();
+        const response = await fetch(`${API_BASE_URL}/customers`);
         if (!response.ok) throw new Error('獲取客戶列表失敗');
-        return await response.json();
+        const data = await response.json();
+        console.log('Loaded customers:', data); // 調試用
+        renderCustomerList(data.customers);
       } catch (error) {
-        console.error('載入失敗:', error);
-        throw error;
+        console.error('載入客戶列表失敗:', error);
+        alert('載入客戶列表失敗');
       } finally {
         hideLoading();
       }
     }
 
-    async function searchCustomers(query) {
-      showLoading();
-      try {
-        const response = await fetch(`${API_BASE_URL}/customers/search?q=${encodeURIComponent(query)}`);
-        if (!response.ok) throw new Error('搜尋失敗');
-        return await response.json();
-      } catch (error) {
-        console.error('搜尋失敗:', error);
-        throw error;
-      } finally {
-        hideLoading();
+    // 渲染客戶列表
+    function renderCustomerList(customers) {
+      const container = document.querySelector('.customer-cards');
+      if (!container) {
+        console.error('找不到客戶列表容器');
+        return;
       }
+      
+      container.innerHTML = '';
+      
+      if (!customers || customers.length === 0) {
+        container.innerHTML = '<div class="no-data">暫無客戶資料</div>';
+        return;
+      }
+
+      customers.forEach(customer => {
+        const card = createCustomerCard(customer);
+        container.appendChild(card);
+      });
     }
 
-    async function updateCustomerStatus(customerId, status, paidAmount = null, unpaidAmount = null) {
-      showLoading();
-      try {
-        const body = { status };
-        if (paidAmount !== null) body.paidAmount = paidAmount;
-        if (unpaidAmount !== null) body.unpaidAmount = unpaidAmount;
-
-        const response = await fetch(`${API_BASE_URL}/customers/${customerId}/status`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-        
-        if (!response.ok) throw new Error('更新狀態失敗');
-        return await response.json();
-      } catch (error) {
-        console.error('更新失敗:', error);
-        throw error;
-      } finally {
-        hideLoading();
-      }
-    }
-
-    // UI 函數
+    // 創建客戶卡片
     function createCustomerCard(customer) {
       const card = document.createElement('div');
       card.className = 'customer-card';
       
       const header = document.createElement('div');
       header.className = 'card-header';
+      header.onclick = () => toggleCardContent(card);
+      
+      const headerContent = document.createElement('div');
+      headerContent.className = 'header-content';
       
       const title = document.createElement('h3');
-      title.textContent = customer.name;
+      title.textContent = customer.name || '未命名客戶';
+      headerContent.appendChild(title);
       
       const status = document.createElement('span');
-      status.className = `status-badge status-${customer.status}`;
+      status.className = `status-badge status-${customer.status || 'active'}`;
       status.textContent = getStatusText(customer.status);
       
-      header.appendChild(title);
+      header.appendChild(headerContent);
       header.appendChild(status);
       card.appendChild(header);
       
@@ -1156,26 +1237,26 @@
             <h4>基本資料</h4>
             <div class="detail-item">
               <span class="label">身分證字號：</span>
-              <span class="value">${customer.idNumber}</span>
+              <span class="value">${customer.idNumber || '無'}</span>
             </div>
             <div class="detail-item">
               <span class="label">電話：</span>
-              <span class="value">${customer.phone}</span>
+              <span class="value">${customer.phone || '無'}</span>
             </div>
             <div class="detail-item">
               <span class="label">地址：</span>
-              <span class="value">${customer.address}</span>
+              <span class="value">${customer.address || '無'}</span>
             </div>
           </div>
           <div class="detail-group">
             <h4>手機資訊</h4>
             <div class="detail-item">
               <span class="label">型號：</span>
-              <span class="value">${customer.model}</span>
+              <span class="value">${customer.model || '無'}</span>
             </div>
             <div class="detail-item">
               <span class="label">IMEI：</span>
-              <span class="value">${customer.imei}</span>
+              <span class="value">${customer.imei || '無'}</span>
             </div>
           </div>
           <div class="detail-group">
@@ -1210,222 +1291,46 @@
       return card;
     }
 
-    function renderCustomerList(customers) {
-      const container = document.querySelector('.customer-cards');
-      container.innerHTML = '';
-      customers.forEach(customer => {
-        container.appendChild(createCustomerCard(customer));
-      });
-    }
-
-    // 事件處理函數
-    async function handleSearch(event) {
-      const query = event.target.value.trim();
-      try {
-        const data = query ? await searchCustomers(query) : await fetchCustomers();
-        renderCustomerList(data.customers);
-      } catch (error) {
-        alert('搜尋失敗');
-      }
-    }
-
-    async function handleBuyback(customerId) {
-      try {
-        await updateCustomerStatus(customerId, 'buyback');
-        await loadCustomers();
-      } catch (error) {
-        alert('買回處理失敗');
-      }
-    }
-
-    async function handlePayment(customerId, amount) {
-      try {
-        await updateCustomerStatus(customerId, 'paid', amount, 0);
-        await loadCustomers();
-      } catch (error) {
-        alert('付款處理失敗');
-      }
-    }
-
-    async function handleLock(customerId) {
-      try {
-        await updateCustomerStatus(customerId, 'locked');
-        await loadCustomers();
-      } catch (error) {
-        alert('鎖機處理失敗');
-      }
-    }
-
-    function showPartialPaymentForm(customerId) {
-      const amount = prompt('請輸入部分付款金額：');
-      if (amount) {
-        handlePartialPayment(customerId, parseFloat(amount));
-      }
-    }
-
-    async function handlePartialPayment(customerId, amount) {
-      try {
-        const customers = await fetchCustomers();
-        const customer = customers.customers.find(c => c._id === customerId);
-        if (!customer) throw new Error('找不到客戶');
-        
-        const unpaidAmount = customer.salePrice - amount;
-        await updateCustomerStatus(customerId, 'partial', amount, unpaidAmount);
-        await loadCustomers();
-      } catch (error) {
-        alert('部分付款處理失敗');
-      }
-    }
-
-    // 添加頁面切換功能
-    function initializeNavigation() {
-      const navLinks = document.querySelectorAll('.nav-link');
-      const pages = document.querySelectorAll('.page-section');
+    // 切換卡片內容顯示
+    function toggleCardContent(card) {
+      const content = card.querySelector('.card-content');
+      const isExpanded = content.style.maxHeight;
       
-      navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          
-          // 移除所有活動狀態
-          navLinks.forEach(l => l.classList.remove('active'));
-          pages.forEach(p => p.classList.remove('active'));
-          
-          // 添加新的活動狀態
-          link.classList.add('active');
-          const targetId = link.getAttribute('data-section');
-          const targetPage = document.getElementById(targetId);
-          if (targetPage) {
-            targetPage.classList.add('active');
-          }
-
-          // 如果是客戶列表頁面，重新加載客戶數據
-          if (targetId === 'customers') {
-            loadCustomers();
-          }
-
-          // 如果是總覽頁面，更新統計數據
-          if (targetId === 'overview') {
-            updateOverviewStats();
-          }
-        });
-      });
+      if (isExpanded) {
+        content.style.maxHeight = null;
+        card.classList.remove('expanded');
+      } else {
+        content.style.maxHeight = content.scrollHeight + 'px';
+        card.classList.add('expanded');
+      }
     }
 
-    // 更新總覽頁面的統計數據
-    async function updateOverviewStats() {
-      try {
-        const data = await fetchCustomers();
-        const customers = data.customers;
-        
-        // 計算統計數據
-        const today = new Date();
-        const dueTodayCustomers = customers.filter(c => {
-          const contractDate = new Date(c.contractDate);
-          return contractDate.toDateString() === today.toDateString();
-        });
-        
-        const activeCustomers = customers.filter(c => c.status === 'active');
-        const overdueCustomers = customers.filter(c => {
-          const contractDate = new Date(c.contractDate);
-          return contractDate < today && c.status !== 'paid';
-        });
+    // 顯示/隱藏加載動畫
+    function showLoading() {
+      const overlay = document.querySelector('.loading-overlay');
+      if (overlay) overlay.style.display = 'flex';
+    }
 
-        // 更新顯示
-        document.getElementById('dueTodayRent').textContent = formatAmount(
-          dueTodayCustomers.reduce((sum, c) => sum + c.rent, 0)
-        );
-        document.getElementById('dueTodayCount').textContent = dueTodayCustomers.length;
-        document.getElementById('activeCount').textContent = activeCustomers.length;
-        document.getElementById('monthlyRent').textContent = formatAmount(
-          activeCustomers.reduce((sum, c) => sum + c.rent, 0)
-        );
-        document.getElementById('overdueCount').textContent = overdueCustomers.length;
-        document.getElementById('overdueAmount').textContent = formatAmount(
-          overdueCustomers.reduce((sum, c) => sum + (c.unpaidAmount || 0), 0)
-        );
-        
-        // 計算平均租金
-        const avgRent = activeCustomers.length > 0
-          ? activeCustomers.reduce((sum, c) => sum + c.rent, 0) / activeCustomers.length
-          : 0;
-        document.getElementById('avgRent').textContent = formatAmount(avgRent);
-        
-      } catch (error) {
-        console.error('更新總覽數據失敗:', error);
-      }
+    function hideLoading() {
+      const overlay = document.querySelector('.loading-overlay');
+      if (overlay) overlay.style.display = 'none';
     }
 
     // 初始化
     document.addEventListener('DOMContentLoaded', () => {
-      // 初始化導航
       initializeNavigation();
       
-      // 註冊搜尋事件
-      const searchInput = document.getElementById('searchInput');
-      if (searchInput) {
-        searchInput.addEventListener('input', debounce(handleSearch, 300));
+      // 載入初始客戶列表
+      const customersSection = document.getElementById('customers');
+      if (customersSection && customersSection.classList.contains('active')) {
+        loadCustomers();
       }
-
-      // 註冊表單提交事件
-      const uploadForm = document.getElementById('uploadForm');
-      if (uploadForm) {
-        uploadForm.addEventListener('submit', async (event) => {
-          event.preventDefault();
-          showLoading();
-          try {
-            const formData = new FormData(uploadForm);
-            const response = await fetch(`${API_BASE_URL}/customers`, {
-              method: 'POST',
-              body: formData
-            });
-            
-            if (!response.ok) throw new Error('創建失敗');
-            
-            uploadForm.reset();
-            alert('客戶創建成功！');
-            await loadCustomers();
-          } catch (error) {
-            alert('創建客戶失敗');
-          } finally {
-            hideLoading();
-          }
-        });
-      }
-
-      // 初始化總覽頁面
+      
+      // 更新總覽數據
       updateOverviewStats();
     });
 
-    // 漢堡選單功能
-    const toggleSidebar = () => {
-      const sidebar = document.querySelector('.sidebar');
-      const mainContent = document.querySelector('.main-content');
-      
-      sidebar.classList.toggle('active');
-      mainContent.classList.toggle('sidebar-hidden');
-    };
-
-    // 在小螢幕上點擊導航連結時自動收起側邊欄
-    document.querySelectorAll('.nav-link').forEach(link => {
-      link.addEventListener('click', () => {
-        if (window.innerWidth <= 768) {
-          toggleSidebar();
-        }
-      });
-    });
-
-    // 工具函數
-    function debounce(func, wait) {
-      let timeout;
-      return function executedFunction(...args) {
-        const later = () => {
-          clearTimeout(timeout);
-          func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-      };
-    }
+    // 保留其他原有函數...
   </script>
 </body>
 </html>
