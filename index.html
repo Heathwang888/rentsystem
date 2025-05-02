@@ -231,7 +231,6 @@
       box-shadow: 0 1px 2px rgba(0,0,0,0.1);
       width: 100%;
       margin-bottom: 8px;
-      position: relative;
     }
 
     .card-header {
@@ -241,8 +240,6 @@
       display: flex;
       align-items: center;
       gap: 1rem;
-      position: relative;
-      z-index: 1;
     }
 
     .payment-button {
@@ -256,10 +253,6 @@
       transition: background-color 0.2s;
       min-width: 80px;
       flex-shrink: 0;
-      display: inline-block !important;
-      position: relative;
-      z-index: 2;
-      margin-right: 1rem;
     }
 
     .payment-button:hover {
@@ -272,43 +265,45 @@
       gap: 1rem;
       align-items: center;
       flex: 1;
-      position: relative;
-      z-index: 1;
     }
 
     .customer-info {
-      flex: 2;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .customer-name {
+      font-weight: 500;
+      color: #333;
+    }
+
+    .notes-badge {
+      background: #e3f2fd;
+      color: #1976d2;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
     }
 
     .model-info {
-      flex: 2;
+      color: #666;
     }
 
-    .price-info {
-      flex: 1;
+    .price-info, .rent-info {
       text-align: right;
-    }
-
-    .rent-info {
-      flex: 1;
-      text-align: right;
+      white-space: nowrap;
     }
 
     .payment-status {
-      flex: 1;
-    }
-
-    .status-badge {
-      width: 80px;
       text-align: center;
     }
 
     .payment-alert {
-      font-size: 0.9rem;
+      display: inline-block;
       padding: 0.25rem 0.5rem;
       border-radius: 4px;
-      white-space: nowrap;
-      text-align: center;
+      font-size: 0.9rem;
     }
 
     .payment-alert.overdue {
@@ -326,27 +321,27 @@
       color: #2e7d32;
     }
 
-    .status-renting { 
-      background: #e3f2fd; 
-      color: #1976d2; 
-    }
-
-    .status-buyback { 
-      background: #e8f5e9; 
-      color: #2e7d32; 
-    }
-
-    .status-locked { 
-      background: #f5f5f5; 
-      color: #424242; 
-    }
-
-    .notes-badge {
-      background: #e3f2fd;
-      color: #1976d2;
+    .status-badge {
       padding: 0.25rem 0.5rem;
       border-radius: 4px;
-      font-size: 0.8rem;
+      font-size: 0.9rem;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .status-renting {
+      background: #e3f2fd;
+      color: #1976d2;
+    }
+
+    .status-buyback {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .status-locked {
+      background: #f5f5f5;
+      color: #424242;
     }
 
     .card-content {
@@ -394,60 +389,30 @@
       display: flex;
       flex-wrap: wrap;
       gap: 0.5rem;
-      margin-top: 1rem;
+      margin: 1rem 0;
     }
 
     .button {
       padding: 0.5rem 1rem;
       border: none;
       border-radius: 4px;
-      font-size: 0.85rem;
-      font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
+      font-size: 0.9rem;
+      transition: background-color 0.2s;
     }
 
-    .button:hover {
-      filter: brightness(0.95);
-    }
-
-    .button:active {
-      transform: translateY(1px);
-    }
-
-    .payment-form {
-      background: #f8f9fa;
-      padding: 1rem;
-      margin-top: 1rem;
-      border-radius: 4px;
-      display: none;
-    }
-
-    .payment-form .form-group {
-      margin-bottom: 1rem;
-    }
-
-    .payment-form input {
-      width: 100%;
-      padding: 0.5rem;
-      margin-bottom: 0.5rem;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
-
-    .payment-form .button-group {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .button-primary {
-      background: #1976d2;
+    .button-success {
+      background: #2e7d32;
       color: white;
     }
 
-    .button-secondary {
-      background: #6c757d;
+    .button-danger {
+      background: #d32f2f;
+      color: white;
+    }
+
+    .button-info {
+      background: #1976d2;
       color: white;
     }
 
@@ -461,20 +426,22 @@
       padding: 0.5rem;
       border: 1px solid #ddd;
       border-radius: 4px;
-      resize: vertical;
       margin-bottom: 0.5rem;
     }
 
-    .record-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 0.5rem;
-      border-bottom: 1px solid #eee;
-      font-size: 0.85rem;
+    .payment-form {
+      background: #f8f9fa;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 4px;
     }
 
-    .record-item:last-child {
-      border-bottom: none;
+    .payment-form input {
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
     }
 
     /* 合約生成表單樣式 */
@@ -1368,161 +1335,156 @@
 
     // 創建客戶卡片
     function createCustomerCard(customer) {
-      console.log('Creating card for customer:', customer);
-      console.log('Customer ID:', customer._id);
-      console.log('Customer status:', customer.status);
-      
+      console.log('建立卡片，客戶資料:', customer);
+
+      const isRenting = customer.status === 'renting' || customer.status === 'active' || !customer.status;
+
       const card = document.createElement('div');
       card.className = 'customer-card';
       card.id = `customer-${customer._id}`;
-      
+
       const header = document.createElement('div');
       header.className = 'card-header';
-      
-      // 付款按鈕
-      if (customer.status === 'renting' || !customer.status) {
-        console.log('Adding payment button for customer:', customer.name);
+
+      // 👉 繳款按鈕（只有在租賃中才顯示）
+      if (isRenting) {
         const paymentButton = document.createElement('button');
         paymentButton.className = 'payment-button';
         paymentButton.textContent = '繳款';
-        paymentButton.style.display = 'inline-block';
         paymentButton.onclick = (e) => {
-          e.stopPropagation();
           e.preventDefault();
-          console.log('Payment button clicked for customer:', customer._id);
+          e.stopPropagation();
           showPaymentForm(customer._id);
         };
-        header.insertBefore(paymentButton, header.firstChild);
-        console.log('Payment button added to header');
+        header.appendChild(paymentButton);
       }
-      
+
+      // 👉 表頭內容
       const headerContent = document.createElement('div');
       headerContent.className = 'header-content';
-      
-      // 客戶姓名和備註
+
       const customerInfo = document.createElement('div');
       customerInfo.className = 'customer-info';
       customerInfo.innerHTML = `
         <span class="customer-name">${customer.name || '未命名客戶'}</span>
         ${customer.notes ? '<span class="notes-badge">有備註</span>' : ''}
       `;
-      
-      // 手機型號
+
       const modelInfo = document.createElement('div');
       modelInfo.className = 'model-info';
       modelInfo.textContent = customer.model || '無型號';
-      
-      // 價金
+
       const priceInfo = document.createElement('div');
       priceInfo.className = 'price-info';
       priceInfo.textContent = formatAmount(customer.salePrice);
-      
-      // 租金
+
       const rentInfo = document.createElement('div');
       rentInfo.className = 'rent-info';
       rentInfo.textContent = `${formatAmount(customer.rent)}/週`;
-      
-      // 付款狀態
+
       const nextPaymentDate = calculateNextPaymentDate(
         new Date(customer.contractDate),
         customer.lastPaymentDate ? new Date(customer.lastPaymentDate) : null
       );
       const daysUntilPayment = getDaysUntilPayment(nextPaymentDate);
-      
+      const paymentStatusText = getPaymentStatusText(daysUntilPayment, customer.unpaidAmount || 0, customer.status);
+      const alertClass = getPaymentAlertClass(daysUntilPayment, customer.status);
+
       const paymentStatus = document.createElement('div');
       paymentStatus.className = 'payment-status';
-      const paymentStatusText = getPaymentStatusText(daysUntilPayment, customer.unpaidAmount || 0, customer.status);
       if (paymentStatusText) {
-        paymentStatus.innerHTML = `<div class="payment-alert ${getPaymentAlertClass(daysUntilPayment, customer.status)}">${paymentStatusText}</div>`;
+        paymentStatus.innerHTML = `<div class="payment-alert ${alertClass}">${paymentStatusText}</div>`;
       }
-      
-      // 狀態標籤
+
       const status = document.createElement('div');
       status.className = `status-badge status-${customer.status || 'renting'}`;
       status.textContent = getStatusText(customer.status);
-      
+
+      // 組合 header
       headerContent.appendChild(customerInfo);
       headerContent.appendChild(modelInfo);
       headerContent.appendChild(priceInfo);
       headerContent.appendChild(rentInfo);
       headerContent.appendChild(paymentStatus);
       headerContent.appendChild(status);
-      
       header.appendChild(headerContent);
-      
+
+      // 👉 點擊展開
       header.onclick = (e) => {
-        if (e.target.classList.contains('payment-button')) {
-          return;
+        if (!e.target.classList.contains('payment-button')) {
+          card.classList.toggle('expanded');
         }
-        card.classList.toggle('expanded');
       };
-      
       card.appendChild(header);
-      
-      // 付款表單
-      const paymentForm = document.createElement('div');
-      paymentForm.className = 'payment-form';
-      paymentForm.id = `payment-form-${customer._id}`;
-      paymentForm.style.display = 'none';
-      paymentForm.innerHTML = `
-        <div class="form-group">
-          <input type="number" id="payment-amount-${customer._id}" placeholder="輸入繳款金額" class="form-control">
-          <div class="button-group">
-            <button class="button button-primary" onclick="handlePayment('${customer._id}')">確認繳款</button>
-            <button class="button button-secondary" onclick="hidePaymentForm('${customer._id}')">取消</button>
-          </div>
-        </div>
-      `;
-      console.log('插入 payment form:', paymentForm.id);
-      
-      // 將付款表單添加到卡片內容區域
+
+      // 👉 展開內容
       const content = document.createElement('div');
       content.className = 'card-content';
-      content.appendChild(paymentForm);
-      
-      // 其他卡片內容
+
       const details = document.createElement('div');
       details.className = 'customer-details';
       details.innerHTML = `
         <div class="detail-group">
           <h4>聯絡資訊</h4>
-          <div class="detail-item">
-            <span class="label">身分證字號：</span>
-            <span class="value">${customer.idNumber || '無'}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">電話：</span>
-            <span class="value">${customer.phone || '無'}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">地址：</span>
-            <span class="value">${customer.address || '無'}</span>
-          </div>
+          <div class="detail-item"><span class="label">身分證字號：</span><span class="value">${customer.idNumber || '無'}</span></div>
+          <div class="detail-item"><span class="label">電話：</span><span class="value">${customer.phone || '無'}</span></div>
+          <div class="detail-item"><span class="label">地址：</span><span class="value">${customer.address || '無'}</span></div>
         </div>
-        
         <div class="detail-group">
-          <h4>手機詳細資訊</h4>
-          <div class="detail-item">
-            <span class="label">IMEI：</span>
-            <span class="value">${customer.imei || '無'}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">螢幕密碼：</span>
-            <span class="value">${customer.screenPassword || '無'}</span>
-          </div>
+          <h4>手機資訊</h4>
+          <div class="detail-item"><span class="label">IMEI：</span><span class="value">${customer.imei || '無'}</span></div>
+          <div class="detail-item"><span class="label">螢幕密碼：</span><span class="value">${customer.screenPassword || '無'}</span></div>
         </div>
-
-        ${customer.status === 'renting' ? `
+        ${isRenting ? `
           <div class="detail-group">
             <h4>繳款紀錄</h4>
             ${generatePaymentRecords(customer)}
           </div>
         ` : ''}
       `;
-      
+
+      const actionButtons = document.createElement('div');
+      actionButtons.className = 'action-buttons';
+      actionButtons.innerHTML = `
+        ${isRenting ? `
+          <button class="button button-success" onclick="handleBuyback('${customer._id}')">買回</button>
+          <button class="button button-danger" onclick="handleLock('${customer._id}')">呆帳鎖機</button>
+        ` : ''}
+        <button class="button button-info" onclick="downloadContract('${customer._id}')">下載合約</button>
+        <button class="button button-info" onclick="downloadIdFront('${customer._id}')">身分證正面</button>
+        <button class="button button-info" onclick="downloadIdBack('${customer._id}')">身分證反面</button>
+      `;
+
+      const notesSection = document.createElement('div');
+      notesSection.className = 'notes-section';
+      notesSection.innerHTML = `
+        <h4>備註</h4>
+        <textarea placeholder="輸入備註內容">${customer.notes || ''}</textarea>
+        <div class="button-group">
+          <button class="button button-primary" onclick="saveNotes('${customer._id}')">儲存備註</button>
+        </div>
+      `;
+
+      if (isRenting) {
+        const paymentForm = document.createElement('div');
+        paymentForm.className = 'payment-form';
+        paymentForm.id = `payment-form-${customer._id}`;
+        paymentForm.style.display = 'none';
+        paymentForm.innerHTML = `
+          <div class="form-group">
+            <input type="number" placeholder="輸入繳款金額" id="payment-amount-${customer._id}">
+            <button class="button button-success" onclick="handlePayment('${customer._id}')">確認繳款</button>
+            <button class="button button-danger" onclick="showPaymentForm('${customer._id}')">取消</button>
+          </div>
+        `;
+        content.appendChild(paymentForm);
+      }
+
       content.appendChild(details);
+      content.appendChild(actionButtons);
+      content.appendChild(notesSection);
       card.appendChild(content);
-      
+
       return card;
     }
 
