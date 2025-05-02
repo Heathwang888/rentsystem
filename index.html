@@ -1636,24 +1636,136 @@
             <span class="value">${customer.screenPassword || '無'}</span>
           </div>
         </div>
+
+        <div class="detail-group">
+          <h4>繳款紀錄</h4>
+          ${generatePaymentRecords(customer)}
+        </div>
       `;
-      
-      // 繳款按鈕和表單
-      const paymentSection = document.createElement('div');
-      paymentSection.className = 'payment-section';
-      paymentSection.innerHTML = `
+
+      // 功能按鈕區
+      const actionButtons = document.createElement('div');
+      actionButtons.className = 'action-buttons';
+      actionButtons.innerHTML = `
         <button class="button button-primary" onclick="showPaymentForm('${customer._id}')">繳款</button>
-        <div class="payment-form" id="payment-form-${customer._id}">
+        <button class="button button-info" onclick="downloadContract('${customer._id}')">下載合約</button>
+        <button class="button button-info" onclick="downloadIdFront('${customer._id}')">身分證正面</button>
+        <button class="button button-info" onclick="downloadIdBack('${customer._id}')">身分證反面</button>
+        ${customer.status === 'renting' ? `
+          <button class="button button-success" onclick="handleBuyback('${customer._id}')">買回</button>
+          <button class="button button-danger" onclick="handleLock('${customer._id}')">呆帳鎖機</button>
+        ` : ''}
+      `;
+
+      // 繳款表單
+      const paymentForm = document.createElement('div');
+      paymentForm.className = 'payment-form';
+      paymentForm.id = `payment-form-${customer._id}`;
+      paymentForm.style.display = 'none';
+      paymentForm.innerHTML = `
+        <div class="form-group">
           <input type="number" placeholder="輸入繳款金額" id="payment-amount-${customer._id}">
           <button class="button button-success" onclick="handlePayment('${customer._id}')">確認繳款</button>
         </div>
       `;
+
+      // 備註區域
+      const notesSection = document.createElement('div');
+      notesSection.className = 'notes-section';
+      notesSection.innerHTML = `
+        <h4>備註</h4>
+        <textarea placeholder="輸入備註內容">${customer.notes || ''}</textarea>
+        <button class="button button-primary" onclick="saveNotes('${customer._id}')">儲存備註</button>
+      `;
       
       content.appendChild(details);
-      content.appendChild(paymentSection);
+      content.appendChild(actionButtons);
+      content.appendChild(paymentForm);
+      content.appendChild(notesSection);
       card.appendChild(content);
       
       return card;
+    }
+
+    // 生成繳款紀錄
+    function generatePaymentRecords(customer) {
+      if (!customer.paymentRecords || customer.paymentRecords.length === 0) {
+        return '<div class="no-data">暫無繳款紀錄</div>';
+      }
+      
+      return customer.paymentRecords.map(record => `
+        <div class="record-item">
+          <span>${new Date(record.date).toLocaleDateString()}</span>
+          <span>${formatAmount(record.amount)}</span>
+        </div>
+      `).join('');
+    }
+
+    // 處理買回
+    async function handleBuyback(customerId) {
+      if (!confirm('確定要將此客戶標記為已買回？')) return;
+      
+      try {
+        showLoading();
+        const response = await fetch(`${API_BASE_URL}/customers/${customerId}/buyback`, {
+          method: 'POST'
+        });
+        
+        if (!response.ok) throw new Error('操作失敗');
+        
+        await loadCustomers();
+      } catch (error) {
+        console.error('買回操作失敗:', error);
+        alert('買回操作失敗');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // 處理呆帳鎖機
+    async function handleLock(customerId) {
+      if (!confirm('確定要將此客戶標記為呆帳鎖機？')) return;
+      
+      try {
+        showLoading();
+        const response = await fetch(`${API_BASE_URL}/customers/${customerId}/lock`, {
+          method: 'POST'
+        });
+        
+        if (!response.ok) throw new Error('操作失敗');
+        
+        await loadCustomers();
+      } catch (error) {
+        console.error('鎖機操作失敗:', error);
+        alert('鎖機操作失敗');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // 儲存備註
+    async function saveNotes(customerId) {
+      const notes = document.querySelector(`#customer-${customerId} .notes-section textarea`).value;
+      
+      try {
+        showLoading();
+        const response = await fetch(`${API_BASE_URL}/customers/${customerId}/notes`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ notes })
+        });
+        
+        if (!response.ok) throw new Error('儲存備註失敗');
+        
+        await loadCustomers();
+      } catch (error) {
+        console.error('儲存備註失敗:', error);
+        alert('儲存備註失敗');
+      } finally {
+        hideLoading();
+      }
     }
 
     // 顯示繳款表單
@@ -1684,6 +1796,8 @@
         
         // 重新載入客戶列表
         await loadCustomers();
+        // 隱藏繳款表單
+        document.getElementById(`payment-form-${customerId}`).style.display = 'none';
       } catch (error) {
         console.error('繳款失敗:', error);
         alert('繳款失敗');
