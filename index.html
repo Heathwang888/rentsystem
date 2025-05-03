@@ -4,7 +4,539 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs');<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>手機租賃後台系統</title>
+  <style>
+    body { margin: 0; font-family: 'Noto Sans TC', sans-serif; background: #f4f4f4; }
+    .sidebar {
+      width: 200px; height: 100vh; background: #333; color: #fff;
+      position: fixed; top: 0; left: 0; display: flex; flex-direction: column;
+    }
+    .sidebar button {
+      background: none; border: none; color: #fff; padding: 20px;
+      text-align: left; cursor: pointer; font-size: 16px;
+    }
+    .sidebar button:hover { background: #444; }
+    .page-content { margin-left: 200px; padding: 20px; }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    form label { display: block; margin: 10px 0; }
+    input, select { margin-left: 10px; }
+
+    /* 客戶列表樣式 */
+    .customer-card {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+      background: #fff;
+    }
+    .card-header {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .right-section span {
+      margin-left: 10px;
+    }
+    .card-summary {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-actions button {
+      margin-right: 10px;
+    }
+    .filter-bar button.active {
+      background: #f3cc00;
+    }
+    .note-input {
+      width: 200px;
+    }
+    .modal {
+      position: fixed;
+      z-index: 999;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      width: 300px;
+      border-radius: 8px;
+    }
+    .close-modal {
+      float: right;
+      cursor: pointer;
+    }
+    .status-tag {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .status-tag.renting { background: #e3f2fd; color: #1976d2; }
+    .status-tag.buyback { background: #e8f5e9; color: #2e7d32; }
+    .status-tag.locked { background: #ffebee; color: #c62828; }
+    .due-today {
+      background: #fff3e0;
+      color: #e65100;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .balance-info {
+      color: #d32f2f;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <!-- 側邊欄 -->
+  <div class="sidebar">
+    <button onclick="showPage('dashboard')">📊 總覽</button>
+    <button onclick="showPage('list')">📁 客戶列表</button>
+    <button onclick="showPage('add')">➕ 新增客戶</button>
+    <button onclick="showPage('edit')">✏️ 編輯客戶</button>
+    <button onclick="showPage('contract')">📄 合約產製</button>
+  </div>
+
+  <!-- 主要頁面區 -->
+  <div class="page-content">
+    <!-- 總覽頁 -->
+    <div id="dashboard" class="page active">
+      <h2>這是總覽頁</h2>
+    </div>
+
+    <!-- 客戶列表 -->
+    <div id="list" class="page">
+      <div class="filter-bar">
+        <button class="filter-btn active" data-filter="all">全部</button>
+        <button class="filter-btn" data-filter="renting">租賃中</button>
+        <button class="filter-btn" data-filter="buyback">已買回</button>
+        <button class="filter-btn" data-filter="locked">呆帳</button>
+      </div>
+
+      <div class="customer-list">
+        <!-- 客戶卡片會由 JavaScript 動態生成 -->
+      </div>
+    </div>
+
+    <!-- 新增客戶 -->
+    <div id="add" class="page">
+      <h2>新增客戶</h2>
+      <form id="add-customer-form" enctype="multipart/form-data">
+        <label>姓名：<input type="text" name="name" required></label><br>
+        <label>身分證字號：<input type="text" name="idNumber" required></label><br>
+        <label>手機號碼：<input type="text" name="phone" required></label><br>
+        <label>戶籍地址：<input type="text" name="address" required></label><br>
+        <label>現居地址：<input type="text" name="contactAddress" id="currentAddress"></label>
+        <label><input type="checkbox" id="sameAsRegistered"> 同戶籍地址</label><br>
+
+        <label>手機型號：
+          <select name="model" required>
+            <option>iPhone 12</option>
+            <option>iPhone 12 mini</option>
+            <option>iPhone 12 Pro</option>
+            <option>iPhone 12 Pro Max</option>
+            <option>iPhone 13</option>
+            <option>iPhone 13 mini</option>
+            <option>iPhone 13 Pro</option>
+            <option>iPhone 13 Pro Max</option>
+            <option>iPhone 14</option>
+            <option>iPhone 14 Plus</option>
+            <option>iPhone 14 Pro</option>
+            <option>iPhone 14 Pro Max</option>
+            <option>iPhone 15</option>
+            <option>iPhone 15 Plus</option>
+            <option>iPhone 15 Pro</option>
+            <option>iPhone 15 Pro Max</option>
+          </select>
+        </label><br>
+        <label>IMEI：<input type="text" name="imei" required></label><br>
+        <label>序號：<input type="text" name="serialNumber" required></label><br>
+        <label>買賣價：<input type="number" name="salePrice" required></label><br>
+        <label>週租金：<input type="number" name="rent" required></label><br>
+        <label>收款帳戶銀行：<input type="text" name="bank" required></label><br>
+        <label>戶名：<input type="text" name="bankAccountName" required></label><br>
+        <label>帳號：<input type="text" name="bankAccountNumber" required></label><br>
+        <label>合約起始日：<input type="date" name="contractDate" required></label><br>
+        <label>合約 PDF：<input type="file" name="contractFile" accept="application/pdf"></label><br>
+        <label>身分證正面：<input type="file" name="idFront" accept="image/*"></label><br>
+        <label>身分證反面：<input type="file" name="idBack" accept="image/*"></label><br>
+        <button type="submit">送出新增</button>
+      </form>
+    </div>
+
+    <!-- 編輯客戶 -->
+    <div id="edit" class="page">
+      <h2>編輯客戶資料</h2>
+      <input type="text" id="searchKeyword" placeholder="輸入姓名或身分證字號">
+      <button onclick="searchCustomer()">搜尋</button>
+      <form id="edit-form" style="display:none;">
+        <input type="hidden" name="id">
+        <label>姓名：<input type="text" name="name" required></label>
+        <label>身分證字號：<input type="text" name="idNumber" required></label>
+        <label>手機號碼：<input type="text" name="phone" required></label>
+        <label>戶籍地址：<input type="text" name="address" required></label>
+        <label>現居地址：<input type="text" name="contactAddress"></label>
+        <label>手機型號：<input type="text" name="model"></label>
+        <label>IMEI：<input type="text" name="imei"></label>
+        <label>序號：<input type="text" name="serialNumber"></label>
+        <label>買賣價：<input type="number" name="salePrice"></label>
+        <label>週租金：<input type="number" name="rent"></label>
+        <label>收款帳戶銀行：<input type="text" name="bank"></label>
+        <label>戶名：<input type="text" name="bankAccountName"></label>
+        <label>帳號：<input type="text" name="bankAccountNumber"></label>
+        <label>合約起始日：<input type="text" name="contractDate"></label>
+        <button type="submit">確認修改</button>
+      </form>
+    </div>
+
+    <!-- 合約產製 -->
+    <div id="contract" class="page">
+      <h2>合約產製（空白頁）</h2>
+    </div>
+  </div>
+
+  <!-- 繳款彈窗 -->
+  <div id="payment-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      <h3>繳款紀錄</h3>
+      <label>繳款金額：</label>
+      <input type="number" id="payment-amount" placeholder="請輸入金額">
+      <button id="submit-payment">確認繳款</button>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE_URL = 'https://five-iridescent-flyaway.glitch.me';
+
+    // 切換頁面
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+      
+      // 如果是客戶列表頁，載入客戶資料
+      if (pageId === 'list') {
+        loadCustomers();
+      }
+    }
+
+    // 載入客戶列表
+    async function loadCustomers() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/customers`);
+        const data = await response.json();
+        
+        const customerList = document.querySelector('.customer-list');
+        customerList.innerHTML = ''; // 清空現有列表
+        
+        data.customers.forEach(customer => {
+          const card = createCustomerCard(customer);
+          customerList.appendChild(card);
+        });
+      } catch (error) {
+        console.error('載入客戶列表失敗:', error);
+        alert('載入客戶列表失敗，請稍後再試');
+      }
+    }
+
+    // 創建客戶卡片
+    function createCustomerCard(customer) {
+      const card = document.createElement('div');
+      card.className = 'customer-card';
+      card.dataset.status = customer.status;
+      card.dataset.id = customer._id;
+
+      // 計算到期日和狀態
+      const contractDate = new Date(customer.contractDate);
+      const dueDate = new Date(contractDate);
+      dueDate.setDate(dueDate.getDate() + 7);
+      const today = new Date();
+      
+      let statusTag = '';
+      if (customer.status === 'renting') {
+        if (today.toDateString() === dueDate.toDateString()) {
+          statusTag = '本日應繳款';
+        } else if (today > dueDate) {
+          const daysOverdue = Math.floor((today - dueDate) / (1000 * 60 * 60 * 24));
+          statusTag = `逾期 ${daysOverdue} 日`;
+        }
+      }
+
+      // 計算累計繳款和未付金額
+      const totalPaid = customer.paymentRecords?.reduce((sum, record) => sum + record.amount, 0) || 0;
+      const unpaidAmount = customer.rent - (totalPaid % customer.rent);
+
+      card.innerHTML = `
+        <div class="card-header">
+          <div class="card-top">
+            <strong>${customer.name}</strong>
+            ${customer.notes ? `<span class="note-tag">（${customer.notes}）</span>` : ''}
+            <div class="right-section">
+              ${unpaidAmount > 0 ? `<span class="balance-info">尚有餘額 $${unpaidAmount} 元</span>` : ''}
+              <span class="status-tag ${customer.status}">${getStatusText(customer.status)}</span>
+              ${statusTag ? `<span class="due-today">${statusTag}</span>` : ''}
+            </div>
+          </div>
+          <div class="card-summary">
+            <span>${customer.model}</span> ｜ 
+            <span>價金：$${customer.salePrice}</span> ｜ 
+            <span>租金：$${customer.rent}</span>
+            <button class="pay-btn" onclick="showPaymentModal('${customer._id}', ${customer.rent})">繳款</button>
+          </div>
+          <button class="toggle-detail" onclick="toggleDetails(this)">▼ 展開</button>
+        </div>
+
+        <div class="card-detail" style="display:none;">
+          <p><strong>手機號碼：</strong>${customer.phone}</p>
+          <p><strong>身分證字號：</strong>${customer.idNumber}</p>
+          <p><strong>手機型號：</strong>${customer.model}</p>
+          <p><strong>IMEI：</strong>${customer.imei}</p>
+          <p><strong>序號：</strong>${customer.serialNumber}</p>
+          <p><strong>戶籍地址：</strong>${customer.address}</p>
+          <p><strong>通訊地址：</strong>${customer.contactAddress || '同上'}</p>
+          <p><strong>合約起始日：</strong>${formatDate(customer.contractDate)}</p>
+          <p><strong>買賣價金：</strong>$${customer.salePrice}</p>
+          <p><strong>租金：</strong>$${customer.rent} / 週</p>
+          <p><strong>撥款帳戶：</strong>${customer.bank} / 戶名：${customer.bankAccountName} / 帳號：${customer.bankAccountNumber}</p>
+          <p><strong>歷史繳款紀錄：</strong></p>
+          <ul>
+            ${customer.paymentRecords?.map(record => 
+              `<li>${formatDate(record.date)} - $${record.amount}</li>`
+            ).join('') || ''}
+          </ul>
+          <p><strong>備註：</strong> 
+            <input type="text" class="note-input" placeholder="輸入備註..." value="${customer.notes || ''}">
+            <button class="save-note" onclick="saveNote('${customer._id}', this)">確認</button>
+          </p>
+
+          <div class="card-actions">
+            <button class="download-contract" onclick="downloadFile('${customer._id}', 'contract')">下載合約</button>
+            <button class="download-id" onclick="downloadFile('${customer._id}', 'id')">下載身分證</button>
+            <button class="download-disbursement" onclick="downloadFile('${customer._id}', 'disbursement')">下載撥款水單</button>
+            <button class="mark-locked" onclick="markAsLocked('${customer._id}')">呆帳(鎖機)</button>
+          </div>
+        </div>
+      `;
+
+      return card;
+    }
+
+    // 顯示繳款彈窗
+    function showPaymentModal(customerId, rent) {
+      const modal = document.getElementById('payment-modal');
+      const amountInput = document.getElementById('payment-amount');
+      const submitBtn = document.getElementById('submit-payment');
+      
+      amountInput.value = rent; // 預設顯示租金金額
+      
+      // 移除舊的事件監聽器
+      const newSubmitBtn = submitBtn.cloneNode(true);
+      submitBtn.parentNode.replaceChild(newSubmitBtn, submitBtn);
+      
+      // 添加新的事件監聽器
+      newSubmitBtn.addEventListener('click', async () => {
+        const amount = parseFloat(amountInput.value);
+        if (!amount || amount <= 0) {
+          alert('請輸入有效的金額');
+          return;
+        }
+        
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/customers/${customerId}/payment`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ amount })
+          });
+          
+          if (!response.ok) {
+            throw new Error('繳款失敗');
+          }
+          
+          modal.style.display = 'none';
+          alert('✅ 繳款成功');
+          loadCustomers(); // 重新載入客戶列表
+        } catch (error) {
+          console.error('繳款失敗:', error);
+          alert('繳款失敗，請稍後再試');
+        }
+      });
+      
+      modal.style.display = 'block';
+    }
+
+    // 保存備註
+    async function saveNote(customerId, button) {
+      const input = button.previousElementSibling;
+      const notes = input.value;
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/customers/${customerId}/notes`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ notes })
+        });
+        
+        if (!response.ok) {
+          throw new Error('更新備註失敗');
+        }
+        
+        alert('✅ 備註更新成功');
+        loadCustomers(); // 重新載入客戶列表
+      } catch (error) {
+        console.error('更新備註失敗:', error);
+        alert('更新備註失敗，請稍後再試');
+      }
+    }
+
+    // 標記為呆帳
+    async function markAsLocked(customerId) {
+      if (!confirm('確定要將此客戶標記為呆帳嗎？')) {
+        return;
+      }
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/customers/${customerId}/lock`, {
+          method: 'POST'
+        });
+        
+        if (!response.ok) {
+          throw new Error('標記呆帳失敗');
+        }
+        
+        alert('✅ 已標記為呆帳');
+        loadCustomers(); // 重新載入客戶列表
+      } catch (error) {
+        console.error('標記呆帳失敗:', error);
+        alert('標記呆帳失敗，請稍後再試');
+      }
+    }
+
+    // 下載文件
+    async function downloadFile(customerId, type) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/customers/${customerId}/files/${type}`);
+        
+        if (!response.ok) {
+          throw new Error('下載文件失敗');
+        }
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${type}-${customerId}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } catch (error) {
+        console.error('下載文件失敗:', error);
+        alert('下載文件失敗，請稍後再試');
+      }
+    }
+
+    // 切換詳細資訊顯示
+    function toggleDetails(button) {
+      const detail = button.closest('.customer-card').querySelector('.card-detail');
+      detail.style.display = detail.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // 格式化日期
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('zh-TW');
+    }
+
+    // 獲取狀態文字
+    function getStatusText(status) {
+      const statusMap = {
+        'renting': '租賃中',
+        'buyback': '已買回',
+        'locked': '呆帳'
+      };
+      return statusMap[status] || status;
+    }
+
+    // 初始化頁面
+    document.addEventListener('DOMContentLoaded', () => {
+      // 篩選按鈕事件
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const filter = btn.dataset.filter;
+          document.querySelectorAll('.customer-card').forEach(card => {
+            card.style.display = (filter === 'all' || card.dataset.status === filter) ? 'block' : 'none';
+          });
+        });
+      });
+
+      // 關閉繳款視窗
+      document.querySelector('.close-modal').addEventListener('click', () => {
+        document.getElementById('payment-modal').style.display = 'none';
+      });
+
+      // 同戶籍地址勾選
+      const sameBox = document.getElementById('sameAsRegistered');
+      if (sameBox) {
+        sameBox.addEventListener('change', () => {
+          const reg = document.querySelector('[name="address"]');
+          const cur = document.getElementById('currentAddress');
+          if (sameBox.checked) cur.value = reg.value;
+        });
+      }
+
+      // 新增客戶表單提交
+      const addForm = document.getElementById('add-customer-form');
+      if (addForm) {
+        addForm.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          const formData = new FormData(this);
+
+          try {
+            const response = await fetch(`${API_BASE_URL}/api/customers`, {
+              method: 'POST',
+              body: formData
+            });
+
+            if (!response.ok) {
+              throw new Error('新增客戶失敗');
+            }
+
+            alert('✅ 新增成功');
+            this.reset();
+            showPage('list'); // 切換到列表頁
+            loadCustomers(); // 重新載入客戶列表
+          } catch (error) {
+            console.error('新增客戶失敗:', error);
+            alert('新增客戶失敗，請稍後再試');
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html> 
 const { v4: uuidv4 } = require('uuid');
 
 const app = express();
