@@ -18,14 +18,11 @@
     .page-content { margin-left: 200px; padding: 20px; }
     .page { display: none; }
     .page.active { display: block; }
-
     form label { display: block; margin: 10px 0; }
     input, select { margin-left: 10px; }
   </style>
 </head>
 <body>
-
-  <!-- 側邊欄 -->
   <div class="sidebar">
     <button onclick="showPage('dashboard')">📊 總覽</button>
     <button onclick="showPage('list')">📁 客戶列表</button>
@@ -33,364 +30,137 @@
     <button onclick="showPage('edit')">✏️ 編輯客戶</button>
     <button onclick="showPage('contract')">📄 合約產製</button>
   </div>
-
-  <!-- 主要頁面區 -->
   <div class="page-content">
-
-    <!-- 總覽頁 -->
     <div id="dashboard" class="page active">
       <h2>這是總覽頁</h2>
     </div>
-
-    <!-- 客戶列表 -->
     <div id="list" class="page">
-<!-- 客戶列表頁 HTML 片段 -->
-<div class="filter-bar">
-  <button class="filter-btn active" data-filter="all">全部</button>
-  <button class="filter-btn" data-filter="active">租賃中</button>
-  <button class="filter-btn" data-filter="bought">已買回</button>
-  <button class="filter-btn" data-filter="locked">呆帳</button>
-</div>
-
-<div class="customer-list">
-  <div class="customer-card" data-status="active">
-    <div class="card-header">
-      <div class="card-top">
-        <strong>張三</strong>
-        <span class="note-tag">（備註字眼）</span>
-        <div class="right-section">
-          <span class="balance-info">尚有餘額 $1,000 元</span>
-          <span class="status-tag">租賃中</span>
-          <span class="due-today">本日應繳款</span>
-        </div>
-      </div>
-      <div class="card-summary">
-        <span>iPhone 13</span> ｜ 
-        <span>價金：$6,000</span> ｜ 
-        <span>租金：$1,500</span>
-        <button class="pay-btn">繳款</button>
-      </div>
-      <button class="toggle-detail">▼ 展開</button>
+      <h2>載入中...</h2>
     </div>
-
-    <div class="card-detail" style="display:none;">
-      <p><strong>手機號碼：</strong>0900-123-456</p>
-      <p><strong>身分證字號：</strong>A123456789</p>
-      <p><strong>手機型號：</strong>iPhone 13</p>
-      <p><strong>IMEI：</strong>356789012345678</p>
-      <p><strong>序號：</strong>XYZ12345678</p>
-      <p><strong>戶籍地址：</strong>高雄市苓雅區光華一路123號</p>
-      <p><strong>通訊地址：</strong>同上</p>
-      <p><strong>合約起始日：</strong>2025/05/01</p>
-      <p><strong>買賣價金：</strong>$6,000</p>
-      <p><strong>租金：</strong>$1,500 / 週</p>
-      <p><strong>撥款帳戶：</strong>第一銀行 高雄分行 / 戶名：張三 / 帳號：123-456789-001</p>
-      <p><strong>歷史繳款紀錄：</strong></p>
-      <ul>
-        <li>2025/05/01 - $1,500</li>
-      </ul>
-      <p><strong>備註：</strong> 
-        <input type="text" class="note-input" placeholder="輸入備註..." value="">
-        <button class="save-note">確認</button>
-      </p>
-
-      <div class="card-actions">
-        <button class="download-contract">下載合約</button>
-        <button class="download-id">下載身分證</button>
-        <button class="download-disbursement">下載撥款水單</button>
-        <button class="mark-locked">呆帳(鎖機)</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- 繳款彈窗 -->
-<div id="payment-modal" class="modal" style="display:none;">
-  <div class="modal-content">
-    <span class="close-modal">&times;</span>
-    <h3>繳款紀錄</h3>
-    <label>繳款金額：</label>
-    <input type="number" id="payment-amount" placeholder="請輸入金額">
-    <button id="submit-payment">確認繳款</button>
-  </div>
-</div>
-
-<script>
-  // 切換展開 / 收合
-  document.querySelectorAll('.toggle-detail').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const detail = btn.closest('.customer-card').querySelector('.card-detail');
-      detail.style.display = detail.style.display === 'none' ? 'block' : 'none';
-    });
-  });
-
-  // 篩選邏輯
-  document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const filter = btn.dataset.filter;
-      document.querySelectorAll('.customer-card').forEach(card => {
-        card.style.display = (filter === 'all' || card.dataset.status === filter) ? 'block' : 'none';
-      });
-    });
-  });
-
-  // 彈出繳款視窗
-  document.querySelectorAll('.pay-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.getElementById('payment-modal').style.display = 'block';
-    });
-  });
-
-  // 關閉視窗
-  document.querySelector('.close-modal').addEventListener('click', () => {
-    document.getElementById('payment-modal').style.display = 'none';
-  });
-</script>
-
-<style>
-  .customer-card {
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 12px;
-    margin-bottom: 10px;
-    background: #fff;
-  }
-  .card-header {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .card-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .right-section span {
-    margin-left: 10px;
-  }
-  .card-summary {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .card-actions button {
-    margin-right: 10px;
-  }
-  .filter-bar button.active {
-    background: #f3cc00;
-  }
-  .note-input {
-    width: 200px;
-  }
-  .modal {
-    position: fixed;
-    z-index: 999;
-    left: 0; top: 0;
-    width: 100%; height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-  }
-  .modal-content {
-    background-color: #fff;
-    margin: 10% auto;
-    padding: 20px;
-    width: 300px;
-    border-radius: 8px;
-  }
-  .close-modal {
-    float: right;
-    cursor: pointer;
-  }
-</style>
-
-    </div>
-
-    <!-- 新增客戶 -->
     <div id="add" class="page">
-      <!-- 新增客戶頁 HTML 片段 -->
-<h2>新增客戶</h2>
-<form id="add-customer-form" enctype="multipart/form-data">
-  <label>姓名：<input type="text" name="name" required></label><br>
-  <label>身分證字號：<input type="text" name="idNumber" required></label><br>
-  <label>手機號碼：<input type="text" name="mobile" required></label><br>
-  <label>戶籍地址：<input type="text" name="registeredAddress" required></label><br>
-  <label>現居地址：<input type="text" name="currentAddress" id="currentAddress"></label>
-  <label><input type="checkbox" id="sameAsRegistered"> 同戶籍地址</label><br>
-
-  <label>手機型號：
-    <select name="model">
-      <option>iPhone 12</option>
-      <option>iPhone 12 mini</option>
-      <option>iPhone 12 Pro</option>
-      <option>iPhone 12 Pro Max</option>
-      <option>iPhone 13</option>
-      <option>iPhone 13 mini</option>
-      <option>iPhone 13 Pro</option>
-      <option>iPhone 13 Pro Max</option>
-      <option>iPhone 14</option>
-      <option>iPhone 14 Plus</option>
-      <option>iPhone 14 Pro</option>
-      <option>iPhone 14 Pro Max</option>
-      <option>iPhone 15</option>
-      <option>iPhone 15 Plus</option>
-      <option>iPhone 15 Pro</option>
-      <option>iPhone 15 Pro Max</option>
-      <option>iPhone 16 </option>
-      <option>iPhone 16 e</option>
-      <option>iPhone 16 Plus</option>
-      <option>iPhone 16 Pro</option>
-      <option>iPhone 16 Pro Max</option>
-    </select>
-  </label><br>
-        <label>IMEI：<input type="text" name="imei" required></label>
-        <label>序號：<input type="text" name="serialNumber" required></label>
-        <label>買賣價：<input type="number" name="price" required></label>
-        <label>週租金：<input type="number" name="rent" required></label>
-        <label>收款帳戶銀行：<input type="text" name="bank" required></label>
-        <label>戶名：<input type="text" name="bankAccountName" required></label>
-        <label>帳號：<input type="text" name="bankAccountNumber" required></label>
-        <label>合約起始日：<input type="date" name="contractDate" id="contractDate" required></label>
-        <label>合約 PDF：<input type="file" name="contractPdf" accept="application/pdf"></label>
-        <label>身分證正面：<input type="file" name="idFront" accept="image/*"></label>
-        <label>身分證反面：<input type="file" name="idBack" accept="image/*"></label>
-        <label>撥款水單：<input type="file" name="paymentSlip" accept="image/*,application/pdf"></label>
-        <button type="submit">送出新增</button>
-      </form>
-    </div>
-        <div id="edit" class="page">
-      <h2>編輯客戶資料</h2>
-      <input type="text" id="searchKeyword" placeholder="輸入姓名或身分證字號">
-      <button onclick="searchCustomer()">搜尋</button>
-      <form id="edit-form" style="display:none;">
-        <input type="hidden" name="id">
+      <h2>新增客戶</h2>
+      <form id="add-customer-form" enctype="multipart/form-data">
         <label>姓名：<input type="text" name="name" required></label>
         <label>身分證字號：<input type="text" name="idNumber" required></label>
         <label>手機號碼：<input type="text" name="mobile" required></label>
         <label>戶籍地址：<input type="text" name="registeredAddress" required></label>
-        <label>現居地址：<input type="text" name="currentAddress"></label>
+        <label>現居地址：<input type="text" name="currentAddress" id="currentAddress"></label>
+        <label><input type="checkbox" id="sameAsRegistered"> 同戶籍地址</label>
         <label>手機型號：<input type="text" name="model"></label>
         <label>IMEI：<input type="text" name="imei"></label>
         <label>序號：<input type="text" name="serialNumber"></label>
         <label>買賣價：<input type="number" name="price"></label>
         <label>週租金：<input type="number" name="rent"></label>
-        <label>收款帳戶銀行：<input type="text" name="bank"></label>
+        <label>銀行：<input type="text" name="bank"></label>
         <label>戶名：<input type="text" name="bankAccountName"></label>
         <label>帳號：<input type="text" name="bankAccountNumber"></label>
-        <label>合約起始日：<input type="text" name="contractDate"></label>
-        <button type="submit">確認修改</button>
+        <label>合約起始日：<input type="date" name="contractDate" id="contractDate"></label>
+        <button type="submit">送出新增</button>
       </form>
     </div>
-
+    <div id="edit" class="page">
+      <h2>編輯客戶資料（待實作）</h2>
+    </div>
     <div id="contract" class="page">
       <h2>合約產製（空白頁）</h2>
     </div>
   </div>
 
+  <div id="payment-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span class="close-modal" onclick="document.getElementById('payment-modal').style.display='none'">&times;</span>
+      <h3>繳款紀錄</h3>
+      <label>繳款金額：</label>
+      <input type="number" id="payment-amount" placeholder="請輸入金額">
+      <button id="submit-payment">確認繳款</button>
+    </div>
+  </div>
 
-  <!-- JS 功能 -->
   <script>
     function showPage(pageId) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.getElementById(pageId).classList.add('active');
+      if (pageId === 'list') loadCustomerList();
     }
 
-    // 保護式綁定避免錯誤
-    document.addEventListener('DOMContentLoaded', () => {
-      const sameBox = document.getElementById('sameAsRegistered');
-      if (sameBox) {
-        sameBox.addEventListener('change', () => {
-          const reg = document.querySelector('[name=\"registeredAddress\"]');
-          const cur = document.getElementById('currentAddress');
-          if (sameBox.checked) cur.value = reg.value;
-        });
-      }
-
-      // 新增表單送出處理
-      document.getElementById('add-customer-form').addEventListener('submit', function (e) {
-        e.preventDefault();
-        const form = this;
-        const formData = new FormData(form);
-
-        // 民國格式處理
-        const dateStr = document.getElementById('contractDate').value;
-        const date = new Date(dateStr);
-        const year = date.getFullYear() - 1911;
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const day = date.getDate().toString().padStart(2, '0');
-        const rocDate = `${year}/${month}/${day}`;
-        formData.set('contractDate', rocDate);
-
-        function loadCustomerList() {
-  fetch('https://five-iridescent-flyaway.glitch.me/customers')
-    .then(res => res.json())
-    .then(data => {
-      const list = document.querySelector('.customer-list');
-      list.innerHTML = ''; // 清空原本範例
-
-      data.forEach(cust => {
-        const card = document.createElement('div');
-        card.className = 'customer-card';
-        card.dataset.status = cust.status;
-
-        card.innerHTML = `
-          <div class="card-header">
-            <div class="card-top">
-              <strong>${cust.name}</strong>
-              <span class="note-tag">（${cust.note || '無備註'}）</span>
-              <div class="right-section">
-                ${cust.balance > 0 ? `<span class="balance-info">尚有餘額 $${cust.balance} 元</span>` : ''}
-                <span class="status-tag">${cust.status}</span>
-                ${cust.dueToday ? `<span class="due-today">本日應繳款</span>` : ''}
-              </div>
-            </div>
-            <div class="card-summary">
-              <span>${cust.model}</span> ｜ 
-              <span>價金：$${cust.price}</span> ｜ 
-              <span>租金：$${cust.rent}</span>
-              <button class="pay-btn" onclick="openPaymentModal('${cust._id}')">繳款</button>
-            </div>
-            <button class="toggle-detail">▼ 展開</button>
-          </div>
-
-          <div class="card-detail" style="display:none;">
-            <p><strong>手機號碼：</strong>${cust.mobile}</p>
-            <p><strong>身分證字號：</strong>${cust.idNumber}</p>
-            <p><strong>IMEI：</strong>${cust.imei}</p>
-            <p><strong>序號：</strong>${cust.serialNumber}</p>
-            <p><strong>戶籍地址：</strong>${cust.registeredAddress}</p>
-            <p><strong>通訊地址：</strong>${cust.currentAddress}</p>
-            <p><strong>合約起始日：</strong>${cust.contractDate}</p>
-            <p><strong>撥款帳戶：</strong>${cust.bank} / ${cust.bankAccountName} / ${cust.bankAccountNumber}</p>
-            <p><strong>歷史繳款紀錄：</strong></p>
-            <ul>${(cust.payments || []).map(p => `<li>${p.date} - $${p.amount}</li>`).join('')}</ul>
-            <p><strong>備註：</strong> 
-              <input type="text" class="note-input" value="${cust.note || ''}">
-              <button onclick="saveNote('${cust._id}', this)">確認</button>
-            </p>
-            <div class="card-actions">
-              <button>下載合約</button>
-              <button>下載身分證</button>
-              <button>下載撥款水單</button>
-              <button>呆帳(鎖機)</button>
-            </div>
-          </div>
-        `;
-
-        card.querySelector('.toggle-detail').addEventListener('click', () => {
-          const detail = card.querySelector('.card-detail');
-          detail.style.display = detail.style.display === 'none' ? 'block' : 'none';
-        });
-
-        list.appendChild(card);
-      });
-    })
-    .catch(err => console.error('載入客戶失敗:', err));
-}
-      });
+    document.getElementById('sameAsRegistered').addEventListener('change', function () {
+      const reg = document.querySelector('[name="registeredAddress"]');
+      const cur = document.getElementById('currentAddress');
+      if (this.checked) cur.value = reg.value;
     });
-    
+
+    document.getElementById('add-customer-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const form = this;
+      const formData = new FormData(form);
+      const dateStr = document.getElementById('contractDate').value;
+      const date = new Date(dateStr);
+      const rocDate = `${date.getFullYear() - 1911}/${(date.getMonth()+1).toString().padStart(2,'0')}/${date.getDate().toString().padStart(2,'0')}`;
+      formData.set('contractDate', rocDate);
+
+      fetch('https://five-iridescent-flyaway.glitch.me/api/customers/create', {
+        method: 'POST',
+        body: formData
+      }).then(res => res.json()).then(() => {
+        alert('✅ 新增成功');
+        form.reset();
+        showPage('list');
+        loadCustomerList();
+      }).catch(() => alert('❌ 新增失敗'));
+    });
+
+    function loadCustomerList() {
+      fetch('https://five-iridescent-flyaway.glitch.me/customers')
+        .then(res => res.json())
+        .then(data => {
+          const listContainer = document.getElementById('list');
+          listContainer.innerHTML = '';
+          data.forEach(cust => {
+            const card = document.createElement('div');
+            card.className = 'customer-card';
+            card.innerHTML = `
+              <div class="card-header">
+                <div><strong>${cust.name}</strong> (${cust.status})</div>
+                <div>手機型號：${cust.model}，租金：$${cust.rent}</div>
+                <button onclick="openPaymentModal('${cust._id}')">繳款</button>
+              </div>
+              <div>
+                <input type="text" value="${cust.note || ''}" />
+                <button onclick="saveNote('${cust._id}', this)">儲存備註</button>
+              </div>
+            `;
+            listContainer.appendChild(card);
+          });
+        });
+    }
+
+    function saveNote(id, btn) {
+      const note = btn.previousElementSibling.value;
+      fetch(`https://five-iridescent-flyaway.glitch.me/api/customers/${id}/note`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ note })
+      }).then(res => res.json()).then(() => alert('✅ 備註更新成功'));
+    }
+
+    function openPaymentModal(id) {
+      document.getElementById('payment-modal').style.display = 'block';
+      document.getElementById('submit-payment').onclick = () => {
+        const amount = document.getElementById('payment-amount').value;
+        fetch(`https://five-iridescent-flyaway.glitch.me/api/customers/${id}/pay`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount })
+        })
+        .then(res => res.json())
+        .then(() => {
+          alert('✅ 繳款成功');
+          document.getElementById('payment-modal').style.display = 'none';
+          document.getElementById('payment-amount').value = '';
+          loadCustomerList();
+        });
+      };
+    }
   </script>
 </body>
 </html>
