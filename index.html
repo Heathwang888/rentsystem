@@ -12,8 +12,24 @@
     .page-content { margin-left: 200px; padding: 20px; }
     .page { display: none; }
     .page.active { display: block; }
+    form { background: white; padding: 20px; border-radius: 8px; margin-top: 20px; }
     form label { display: block; margin: 10px 0; }
-    input, select { margin-left: 10px; }
+    input, select { margin-left: 10px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+    button { padding: 8px 16px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #45a049; }
+    .filter-bar { margin-bottom: 20px; }
+    .filter-bar button { background: #f8f9fa; color: #333; margin-right: 10px; }
+    .filter-bar button.active { background: #f3cc00; }
+    .customer-card { border: 1px solid #ccc; border-radius: 8px; padding: 12px; margin-bottom: 10px; background: #fff; }
+    .card-header { display: flex; flex-direction: column; gap: 6px; }
+    .card-top { display: flex; justify-content: space-between; align-items: center; }
+    .right-section span { margin-left: 10px; }
+    .card-summary { display: flex; gap: 12px; align-items: center; justify-content: space-between; }
+    .card-actions button { margin-right: 10px; }
+    .note-input { width: 200px; }
+    .modal { position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); }
+    .modal-content { background-color: #fff; margin: 10% auto; padding: 20px; width: 300px; border-radius: 8px; }
+    .close-modal { float: right; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -27,306 +43,221 @@
 
   <div class="page-content">
     <div id="dashboard" class="page active">
-      <h2>總覽頁（尚未製作）</h2>
+      <h2>總覽</h2>
+      <div class="dashboard-stats">
+        <div class="stat-card">
+          <h3>總客戶數</h3>
+          <p class="stat-number">0</p>
+        </div>
+        <div class="stat-card">
+          <h3>租賃中</h3>
+          <p class="stat-number">0</p>
+        </div>
+        <div class="stat-card">
+          <h3>已買回</h3>
+          <p class="stat-number">0</p>
+        </div>
+        <div class="stat-card">
+          <h3>呆帳</h3>
+          <p class="stat-number">0</p>
+        </div>
+      </div>
     </div>
 
     <div id="list" class="page">
-<!-- 客戶列表頁 HTML 片段 -->
-<div class="filter-bar">
-  <button class="filter-btn active" data-filter="all">全部</button>
-  <button class="filter-btn" data-filter="active">租賃中</button>
-  <button class="filter-btn" data-filter="bought">已買回</button>
-  <button class="filter-btn" data-filter="locked">呆帳</button>
-</div>
-
-<div class="customer-list">
-  <div class="customer-card" data-status="active">
-    <div class="card-header">
-      <div class="card-top">
-        <strong>張三</strong>
-        <span class="note-tag">（備註字眼）</span>
-        <div class="right-section">
-          <span class="balance-info">尚有餘額 $1,000 元</span>
-          <span class="status-tag">租賃中</span>
-          <span class="due-today">本日應繳款</span>
-        </div>
+      <h2>客戶列表</h2>
+      <div class="filter-bar">
+        <button class="active">全部</button>
+        <button>今日須繳款</button>
+        <button>已買回</button>
+        <button>呆帳鎖機</button>
       </div>
-      <div class="card-summary">
-        <span>iPhone 13</span> ｜ 
-        <span>價金：$6,000</span> ｜ 
-        <span>租金：$1,500</span>
-        <button class="pay-btn">繳款</button>
+      <div class="search-box">
+        <input type="text" placeholder="搜尋客戶...">
       </div>
-      <button class="toggle-detail">▼ 展開</button>
-    </div>
-
-    <div class="card-detail" style="display:none;">
-      <p><strong>手機號碼：</strong>0900-123-456</p>
-      <p><strong>身分證字號：</strong>A123456789</p>
-      <p><strong>手機型號：</strong>iPhone 13</p>
-      <p><strong>IMEI：</strong>356789012345678</p>
-      <p><strong>序號：</strong>XYZ12345678</p>
-      <p><strong>戶籍地址：</strong>高雄市苓雅區光華一路123號</p>
-      <p><strong>通訊地址：</strong>同上</p>
-      <p><strong>合約起始日：</strong>2025/05/01</p>
-      <p><strong>買賣價金：</strong>$6,000</p>
-      <p><strong>租金：</strong>$1,500 / 週</p>
-      <p><strong>撥款帳戶：</strong>第一銀行 高雄分行 / 戶名：張三 / 帳號：123-456789-001</p>
-      <p><strong>歷史繳款紀錄：</strong></p>
-      <ul>
-        <li>2025/05/01 - $1,500</li>
-      </ul>
-      <p><strong>備註：</strong> 
-        <input type="text" class="note-input" placeholder="輸入備註..." value="">
-        <button class="save-note">確認</button>
-      </p>
-
-      <div class="card-actions">
-        <button class="download-contract">下載合約</button>
-        <button class="download-id">下載身分證</button>
-        <button class="download-disbursement">下載撥款水單</button>
-        <button class="mark-locked">呆帳(鎖機)</button>
+      <div class="customer-cards">
+        <!-- 客戶卡片將由 JavaScript 動態生成 -->
+      </div>
+      <div class="pagination">
+        <!-- 分頁按鈕將由 JavaScript 動態生成 -->
       </div>
     </div>
-  </div>
-</div>
-
-<!-- 繳款彈窗 -->
-<div id="payment-modal" class="modal" style="display:none;">
-  <div class="modal-content">
-    <span class="close-modal">&times;</span>
-    <h3>繳款紀錄</h3>
-    <label>繳款金額：</label>
-    <input type="number" id="payment-amount" placeholder="請輸入金額">
-    <button id="submit-payment">確認繳款</button>
-  </div>
-</div>
-
-<script>
-  // 切換展開 / 收合
-  document.querySelectorAll('.toggle-detail').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const detail = btn.closest('.customer-card').querySelector('.card-detail');
-      detail.style.display = detail.style.display === 'none' ? 'block' : 'none';
-    });
-  });
-
-  // 篩選邏輯
-  document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const filter = btn.dataset.filter;
-      document.querySelectorAll('.customer-card').forEach(card => {
-        card.style.display = (filter === 'all' || card.dataset.status === filter) ? 'block' : 'none';
-      });
-    });
-  });
-
-  // 彈出繳款視窗
-  document.querySelectorAll('.pay-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.getElementById('payment-modal').style.display = 'block';
-    });
-  });
-
-  // 關閉視窗
-  document.querySelector('.close-modal').addEventListener('click', () => {
-    document.getElementById('payment-modal').style.display = 'none';
-  });
-</script>
-
-<style>
-  .customer-card {
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 12px;
-    margin-bottom: 10px;
-    background: #fff;
-  }
-  .card-header {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .card-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .right-section span {
-    margin-left: 10px;
-  }
-  .card-summary {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .card-actions button {
-    margin-right: 10px;
-  }
-  .filter-bar button.active {
-    background: #f3cc00;
-  }
-  .note-input {
-    width: 200px;
-  }
-  .modal {
-    position: fixed;
-    z-index: 999;
-    left: 0; top: 0;
-    width: 100%; height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-  }
-  .modal-content {
-    background-color: #fff;
-    margin: 10% auto;
-    padding: 20px;
-    width: 300px;
-    border-radius: 8px;
-  }
-  .close-modal {
-    float: right;
-    cursor: pointer;
-  }
-</style>
-
 
     <div id="add" class="page">
-      <!-- 新增客戶頁 HTML 片段 -->
-<h2>新增客戶</h2>
-<form id="add-customer-form" enctype="multipart/form-data">
-  <label>姓名：<input type="text" name="name" required></label><br>
-  <label>身分證字號：<input type="text" name="idNumber" required></label><br>
-  <label>手機號碼：<input type="text" name="mobile" required></label><br>
-  <label>戶籍地址：<input type="text" name="registeredAddress" required></label><br>
-  <label>現居地址：<input type="text" name="currentAddress" id="currentAddress"></label>
-  <label><input type="checkbox" id="sameAsRegistered"> 同戶籍地址</label><br>
+      <h2>新增客戶</h2>
+      <div class="customer-form">
+        <div class="form-header">
+          <h3>新增客戶</h3>
+        </div>
 
-  <label>手機型號：
-    <select name="model">
-      <option>iPhone 12</option>
-      <option>iPhone 12 mini</option>
-      <option>iPhone 12 Pro</option>
-      <option>iPhone 12 Pro Max</option>
-      <option>iPhone 13</option>
-      <option>iPhone 13 mini</option>
-      <option>iPhone 13 Pro</option>
-      <option>iPhone 13 Pro Max</option>
-      <option>iPhone 14</option>
-      <option>iPhone 14 Plus</option>
-      <option>iPhone 14 Pro</option>
-      <option>iPhone 14 Pro Max</option>
-      <option>iPhone 15</option>
-      <option>iPhone 15 Plus</option>
-      <option>iPhone 15 Pro</option>
-      <option>iPhone 15 Pro Max</option>
-      <option>iPhone 16 </option>
-      <option>iPhone 16 e</option>
-      <option>iPhone 16 Plus</option>
-      <option>iPhone 16 Pro</option>
-      <option>iPhone 16 Pro Max</option>
-    </select>
-  </label><br>
-        <label>IMEI：<input type="text" name="imei" required></label>
-        <label>序號：<input type="text" name="serialNumber" required></label>
-        <label>買賣價：<input type="number" name="price" required></label>
-        <label>週租金：<input type="number" name="rent" required></label>
-        <label>收款帳戶銀行：<input type="text" name="bank" required></label>
-        <label>戶名：<input type="text" name="bankAccountName" required></label>
-        <label>帳號：<input type="text" name="bankAccountNumber" required></label>
-        <label>合約起始日：<input type="date" name="contractDate" id="contractDate" required></label>
-        <label>合約 PDF：<input type="file" name="contractPdf" accept="application/pdf"></label>
-        <label>身分證正面：<input type="file" name="idFront" accept="image/*"></label>
-        <label>身分證反面：<input type="file" name="idBack" accept="image/*"></label>
-        <label>撥款水單：<input type="file" name="paymentSlip" accept="image/*,application/pdf"></label>
-        <button type="submit">送出新增</button>
-      </form>
+        <form id="uploadForm" class="form-section active">
+          <div class="form-grid">
+            <!-- 基本資料 -->
+            <div class="form-group">
+              <label>姓名</label>
+              <input type="text" name="name" placeholder="請輸入姓名" required>
+            </div>
+            <div class="form-group">
+              <label>身分證字號</label>
+              <input type="text" name="idNumber" placeholder="請輸入身分證字號" required>
+            </div>
+            <div class="form-group">
+              <label>手機號碼</label>
+              <input type="tel" name="phone" placeholder="請輸入手機號碼" required>
+            </div>
+            <div class="form-group">
+              <label>戶籍地址</label>
+              <input type="text" name="address" placeholder="請輸入戶籍地址" required>
+            </div>
+            <div class="form-group">
+              <label>通訊地址</label>
+              <div class="address-options">
+                <input type="text" name="mailingAddress" placeholder="請輸入通訊地址">
+                <label class="checkbox-label">
+                  <input type="checkbox" name="sameAsResidence" onchange="toggleMailingAddress(this)">
+                  同戶籍地址
+                </label>
+              </div>
+            </div>
+
+            <!-- 手機資訊 -->
+            <div class="form-group">
+              <label>手機型號</label>
+              <select name="phoneModel" required>
+                <option value="">請選擇型號</option>
+                <option>iPhone 12</option>
+                <option>iPhone 12 mini</option>
+                <option>iPhone 12 Pro</option>
+                <option>iPhone 12 Pro Max</option>
+                <option>iPhone 13</option>
+                <option>iPhone 13 mini</option>
+                <option>iPhone 13 Pro</option>
+                <option>iPhone 13 Pro Max</option>
+                <option>iPhone 14</option>
+                <option>iPhone 14 Plus</option>
+                <option>iPhone 14 Pro</option>
+                <option>iPhone 14 Pro Max</option>
+                <option>iPhone 15</option>
+                <option>iPhone 15 Plus</option>
+                <option>iPhone 15 Pro</option>
+                <option>iPhone 15 Pro Max</option>
+                <option>iPhone 16</option>
+                <option>iPhone 16 e</option>
+                <option>iPhone 16 Plus</option>
+                <option>iPhone 16 Pro</option>
+                <option>iPhone 16 Pro Max</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>IMEI</label>
+              <input type="text" name="imei" placeholder="請輸入IMEI碼" required>
+            </div>
+            <div class="form-group">
+              <label>螢幕密碼</label>
+              <input type="text" name="screenPassword" placeholder="請輸入螢幕密碼">
+            </div>
+
+            <!-- 合約資訊 -->
+            <div class="form-group">
+              <label>買賣價金</label>
+              <input type="number" name="price" placeholder="請輸入買賣價金" required>
+            </div>
+            <div class="form-group">
+              <label>租金</label>
+              <input type="number" name="rent" placeholder="請輸入租金" required>
+            </div>
+            <div class="form-group">
+              <label>合約日期</label>
+              <input type="date" name="contractDate" required>
+            </div>
+
+            <!-- 文件上傳 -->
+            <div class="form-group">
+              <label>上傳契約書</label>
+              <input type="file" name="contractFile" accept=".pdf,.jpg,.jpeg,.png" required>
+            </div>
+            <div class="form-group">
+              <label>上傳身分證正面</label>
+              <input type="file" name="idFront" accept=".jpg,.jpeg,.png" required>
+            </div>
+            <div class="form-group">
+              <label>上傳身分證反面</label>
+              <input type="file" name="idBack" accept=".jpg,.jpeg,.png" required>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="button button-primary">儲存</button>
+            <button type="button" class="button button-danger" onclick="this.form.reset()">取消</button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <div id="edit" class="page">
-      <h2>編輯客戶資料</h2>
-      <input type="text" id="searchKeyword" placeholder="輸入姓名或身分證字號">
-      <button onclick="searchCustomer()">搜尋</button>
-      <form id="edit-form" style="display:none;">
-        <input type="hidden" name="id">
-        <label>姓名：<input type="text" name="name" required></label>
-        <label>身分證字號：<input type="text" name="idNumber" required></label>
-        <label>手機號碼：<input type="text" name="mobile" required></label>
-        <label>戶籍地址：<input type="text" name="registeredAddress" required></label>
-        <label>現居地址：<input type="text" name="currentAddress"></label>
-        <label>手機型號：<input type="text" name="model"></label>
-        <label>IMEI：<input type="text" name="imei"></label>
-        <label>序號：<input type="text" name="serialNumber"></label>
-        <label>買賣價：<input type="number" name="price"></label>
-        <label>週租金：<input type="number" name="rent"></label>
-        <label>收款帳戶銀行：<input type="text" name="bank"></label>
-        <label>戶名：<input type="text" name="bankAccountName"></label>
-        <label>帳號：<input type="text" name="bankAccountNumber"></label>
-        <label>合約起始日：<input type="text" name="contractDate"></label>
-        <button type="submit">確認修改</button>
-      </form>
+      <h2>編輯客戶</h2>
+      <!-- 編輯客戶的內容將在此處添加 -->
     </div>
 
     <div id="contract" class="page">
-      <h2>合約產製（空白頁）</h2>
+      <h2>合約產製</h2>
+      <div class="contract-form">
+        <form id="generate-contract-form">
+          <label>客戶姓名：<input type="text" name="customerName" required></label>
+          <label>身分證字號：<input type="text" name="idNumber" required></label>
+          <label>手機型號：<input type="text" name="phoneModel" required></label>
+          <label>買賣價金：<input type="number" name="price" required></label>
+          <label>週租金：<input type="number" name="weeklyRent" required></label>
+          <label>合約起始日：<input type="date" name="startDate" required></label>
+          <button type="submit">產生合約</button>
+        </form>
+      </div>
+      <div class="contract-preview" style="display:none;">
+        <h3>合約預覽</h3>
+        <iframe id="contract-preview-frame"></iframe>
+        <button id="download-contract">下載合約</button>
+      </div>
     </div>
   </div>
 
   <script>
+    // 初始化頁面
+    document.addEventListener('DOMContentLoaded', function() {
+      showPage('dashboard');
+    });
+
     function showPage(pageId) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.getElementById(pageId).classList.add('active');
     }
 
-    document.getElementById('sameAsRegistered').addEventListener('change', function () {
-      const reg = document.querySelector('[name="registeredAddress"]');
-      const cur = document.getElementById('currentAddress');
-      if (this.checked) cur.value = reg.value;
-    });
+    // ... existing code ...
 
-    function toROC(dateStr) {
-      const date = new Date(dateStr);
-      const year = date.getFullYear() - 1911;
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const day = date.getDate().toString().padStart(2, '0');
-      return `${year}/${month}/${day}`;
-    }
-
-    document.getElementById('add-customer-form').addEventListener('submit', function (e) {
-      e.preventDefault();
-      const form = this;
-      const formData = new FormData(form);
-      const rocDate = toROC(document.getElementById('contractDate').value);
-      formData.set('contractDate', rocDate);
-      fetch('/api/customers/create', { method: 'POST', body: formData })
-        .then(res => res.json()).then(() => alert('新增成功'))
-        .catch(() => alert('上傳失敗'));
-    });
-
-    function searchCustomer() {
-      const keyword = document.getElementById('searchKeyword').value;
-      fetch(`/api/customers/search?keyword=${encodeURIComponent(keyword)}`)
-        .then(res => res.json())
-        .then(data => {
-          const form = document.getElementById('edit-form');
-          form.style.display = 'block';
-          for (const key in data) {
-            if (form[key]) form[key].value = data[key];
-          }
-        }).catch(() => alert('查無資料'));
-    }
-
-    document.getElementById('edit-form').addEventListener('submit', function (e) {
+    // 合約產製功能
+    document.getElementById('generate-contract-form').addEventListener('submit', function(e) {
       e.preventDefault();
       const formData = new FormData(this);
-      const id = formData.get('id');
-      fetch(`/api/customers/update/${id}`, { method: 'PATCH', body: formData })
-        .then(res => res.json()).then(() => alert('修改成功'))
-        .catch(() => alert('修改失敗'));
+      fetch('/api/contracts/generate', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.blob())
+      .then(blob => {
+        const previewFrame = document.getElementById('contract-preview-frame');
+        const previewDiv = document.querySelector('.contract-preview');
+        previewDiv.style.display = 'block';
+        previewFrame.src = URL.createObjectURL(blob);
+      })
+      .catch(error => alert('合約產生失敗'));
+    });
+
+    document.getElementById('download-contract').addEventListener('click', function() {
+      const previewFrame = document.getElementById('contract-preview-frame');
+      const link = document.createElement('a');
+      link.href = previewFrame.src;
+      link.download = '合約.pdf';
+      link.click();
     });
   </script>
 </body>
 </html>
-
