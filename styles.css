@@ -90,6 +90,7 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 10px 0;
+  border-top: 1px solid #eee;
 }
 
 .pay-btn {
@@ -100,6 +101,9 @@ body {
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s;
+  font-size: 14px;
+  font-weight: bold;
+  margin-left: 10px;
 }
 
 .pay-btn:hover {
@@ -120,6 +124,8 @@ body {
   display: flex;
   gap: 10px;
   margin-top: 15px;
+  padding: 10px 0;
+  border-top: 1px solid #eee;
 }
 
 .card-actions button {
@@ -128,6 +134,8 @@ body {
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s;
+  font-size: 14px;
+  font-weight: bold;
 }
 
 .download-contract {
