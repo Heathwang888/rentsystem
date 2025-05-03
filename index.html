@@ -5,19 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>手機租賃後台系統</title>
   <style>
-    body { margin: 0; font-family: 'Noto Sans TC', sans-serif; }
-    .sidebar { width: 200px; height: 100vh; background: #333; color: #fff; position: fixed; top: 0; left: 0; display: flex; flex-direction: column; }
-    .sidebar button { background: none; border: none; color: #fff; padding: 20px; text-align: left; cursor: pointer; font-size: 16px; }
+    body { margin: 0; font-family: 'Noto Sans TC', sans-serif; background: #f4f4f4; }
+    .sidebar {
+      width: 200px; height: 100vh; background: #333; color: #fff;
+      position: fixed; top: 0; left: 0; display: flex; flex-direction: column;
+    }
+    .sidebar button {
+      background: none; border: none; color: #fff; padding: 20px;
+      text-align: left; cursor: pointer; font-size: 16px;
+    }
     .sidebar button:hover { background: #444; }
     .page-content { margin-left: 200px; padding: 20px; }
     .page { display: none; }
     .page.active { display: block; }
+
     form label { display: block; margin: 10px 0; }
     input, select { margin-left: 10px; }
   </style>
 </head>
 <body>
 
+  <!-- 側邊欄 -->
   <div class="sidebar">
     <button onclick="showPage('dashboard')">📊 總覽</button>
     <button onclick="showPage('list')">📁 客戶列表</button>
@@ -25,13 +33,16 @@
     <button onclick="showPage('edit')">✏️ 編輯客戶</button>
     <button onclick="showPage('contract')">📄 合約產製</button>
   </div>
-  </div>
 
+  <!-- 主要頁面區 -->
   <div class="page-content">
+
+    <!-- 總覽頁 -->
     <div id="dashboard" class="page active">
-      <h2>總覽頁（尚未製作）</h2>
+      <h2>這是總覽頁</h2>
     </div>
 
+    <!-- 客戶列表 -->
     <div id="list" class="page">
 <!-- 客戶列表頁 HTML 片段 -->
 <div class="filter-bar">
@@ -194,11 +205,13 @@
   }
 </style>
 
+    </div>
 
+    <!-- 新增客戶 -->
     <div id="add" class="page">
       <!-- 新增客戶頁 HTML 片段 -->
-      <h2>新增客戶</h2>
- <form id="add-customer-form" enctype="multipart/form-data">
+<h2>新增客戶</h2>
+<form id="add-customer-form" enctype="multipart/form-data">
   <label>姓名：<input type="text" name="name" required></label><br>
   <label>身分證字號：<input type="text" name="idNumber" required></label><br>
   <label>手機號碼：<input type="text" name="mobile" required></label><br>
@@ -246,8 +259,7 @@
         <button type="submit">送出新增</button>
       </form>
     </div>
-
-    <div id="edit" class="page">
+        <div id="edit" class="page">
       <h2>編輯客戶資料</h2>
       <input type="text" id="searchKeyword" placeholder="輸入姓名或身分證字號">
       <button onclick="searchCustomer()">搜尋</button>
@@ -276,81 +288,44 @@
     </div>
   </div>
 
+
+  <!-- JS 功能 -->
   <script>
     function showPage(pageId) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.getElementById(pageId).classList.add('active');
     }
 
-    document.getElementById('sameAsRegistered').addEventListener('change', function () {
-      const reg = document.querySelector('[name="registeredAddress"]');
-      const cur = document.getElementById('currentAddress');
-      if (this.checked) cur.value = reg.value;
-    });
-
-    function toROC(dateStr) {
-      const date = new Date(dateStr);
-      const year = date.getFullYear() - 1911;
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const day = date.getDate().toString().padStart(2, '0');
-      return ${year}/${month}/${day};
-    }
-
-    document.getElementById('add-customer-form').addEventListener('submit', function (e) {
-      e.preventDefault();
-      const form = this;
-      const formData = new FormData(form);
-      const rocDate = toROC(document.getElementById('contractDate').value);
-      formData.set('contractDate', rocDate);
-      fetch('/api/customers/create', { method: 'POST', body: formData })
-        .then(res => res.json()).then(() => alert('新增成功'))
-        .catch(() => alert('上傳失敗'));
-    });
-
-    function searchCustomer() {
-      const keyword = document.getElementById('searchKeyword').value;
-      fetch(/api/customers/search?keyword=${encodeURIComponent(keyword)})
-        .then(res => res.json())
-        .then(data => {
-          const form = document.getElementById('edit-form');
-          form.style.display = 'block';
-          for (const key in data) {
-            if (form[key]) form[key].value = data[key];
-          }
-        }).catch(() => alert('查無資料'));
-    }
-
-    document.getElementById('edit-form').addEventListener('submit', function (e) {
-      e.preventDefault();
-      const formData = new FormData(this);
-      const id = formData.get('id');
-      fetch(/api/customers/update/${id}, { method: 'PATCH', body: formData })
-        .then(res => res.json()).then(() => alert('修改成功'))
-        .catch(() => alert('修改失敗'));
-    });
-  </script>
-   function showPage(pageId) {
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.getElementById(pageId).classList.add('active');
-    }
-
-    // 避免 JS 錯誤中斷
+    // 保護式綁定避免錯誤
     document.addEventListener('DOMContentLoaded', () => {
       const sameBox = document.getElementById('sameAsRegistered');
       if (sameBox) {
         sameBox.addEventListener('change', () => {
-          const reg = document.querySelector('[name="registeredAddress"]');
+          const reg = document.querySelector('[name=\"registeredAddress\"]');
           const cur = document.getElementById('currentAddress');
           if (sameBox.checked) cur.value = reg.value;
         });
       }
 
-      document.getElementById('add-customer-form').addEventListener('submit', e => {
+      // 新增表單送出處理
+      document.getElementById('add-customer-form').addEventListener('submit', function (e) {
         e.preventDefault();
-        alert('新增成功 (模擬送出)');
+        const form = this;
+        const formData = new FormData(form);
+
+        // 民國格式處理
+        const dateStr = document.getElementById('contractDate').value;
+        const date = new Date(dateStr);
+        const year = date.getFullYear() - 1911;
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        const rocDate = `${year}/${month}/${day}`;
+        formData.set('contractDate', rocDate);
+
+        // 模擬送出（未串接 API）
+        alert('✅ 新增成功（模擬送出，民國起始日為：' + rocDate + '）');
       });
     });
   </script>
-
 </body>
 </html>
