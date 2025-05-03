@@ -39,106 +39,91 @@ async function loadCustomers() {
 function createCustomerCard(customer) {
   const card = document.createElement('div');
   card.className = 'customer-card';
-  card.dataset.status = customer.status;
-
-  // 計算到期日和狀態
+  
+  // 計算繳款狀態
   const contractDate = new Date(customer.contractDate);
   const today = new Date();
-  
-  // 計算累計繳款和未付金額
-  const totalPaid = customer.paymentRecords?.reduce((sum, record) => sum + record.amount, 0) || 0;
-  
-  // 計算當前期數和到期日
-  const currentPeriod = Math.floor(totalPaid / customer.rent);
   const nextDueDate = new Date(contractDate);
-  nextDueDate.setDate(nextDueDate.getDate() + 7); // 固定7天為一個週期
+  nextDueDate.setDate(nextDueDate.getDate() + 7);
   
-  let paymentStatus = '';
-  let isDueToday = false;
+  // 計算逾期天數
+  const daysOverdue = Math.floor((today - nextDueDate) / (1000 * 60 * 60 * 24));
+  
+  // 計算當期應繳金額
+  const currentPeriodAmount = customer.rent;
+  const unpaidAmount = currentPeriodAmount - (customer.totalPaid % customer.rent);
+  
+  // 計算總欠款
+  const overduePeriods = Math.max(0, Math.floor(daysOverdue / 7));
+  const totalUnpaid = (overduePeriods + 1) * customer.rent - (customer.totalPaid % customer.rent);
+  
+  // 計算下次繳款日
+  const nextPaymentDate = new Date(nextDueDate);
+  if (customer.totalPaid > 0) {
+    const paidPeriods = Math.floor(customer.totalPaid / customer.rent);
+    nextPaymentDate.setDate(contractDate.getDate() + (paidPeriods + 1) * 7);
+  }
+  
+  // 格式化日期
+  const formatDate = (date) => {
+    return date.toLocaleDateString('zh-TW', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+  };
+  
+  // 狀態標籤
+  const statusTag = document.createElement('span');
+  statusTag.className = `status-tag ${customer.status}`;
+  statusTag.textContent = getStatusText(customer.status);
+  
+  // 繳款狀態
+  const paymentStatus = document.createElement('div');
+  paymentStatus.className = 'payment-status';
   
   if (customer.status === 'renting') {
-    // 計算逾期天數
-    const daysOverdue = Math.floor((today - nextDueDate) / (1000 * 60 * 60 * 24));
-    
-    if (daysOverdue > 0) {
-      paymentStatus = `逾期 ${daysOverdue} 天`;
-    } else if (daysOverdue === 0) {
-      paymentStatus = '今日須繳款';
-      isDueToday = true;
+    if (totalUnpaid > 0) {
+      paymentStatus.innerHTML = `
+        <div class="status-text overdue">欠繳 ${totalUnpaid} 元</div>
+        <div class="next-payment">下次繳款日：${formatDate(nextPaymentDate)}</div>
+      `;
     } else {
-      const daysRemaining = Math.floor((nextDueDate - today) / (1000 * 60 * 60 * 24));
-      paymentStatus = `下次繳款 ${daysRemaining} 日`;
-    }
-    
-    // 計算當期應繳金額
-    const currentPeriodAmount = customer.rent;
-    const unpaidAmount = currentPeriodAmount - (totalPaid % customer.rent);
-    
-    // 只有在當期未繳足時才顯示未繳金額
-    if (unpaidAmount > 0 && unpaidAmount < customer.rent) {
-      paymentStatus += ` (尚餘 $${unpaidAmount} 未繳納)`;
+      paymentStatus.innerHTML = `
+        <div class="status-text paid">已繳清</div>
+        <div class="next-payment">下次繳款日：${formatDate(nextPaymentDate)}</div>
+      `;
     }
   }
-
+  
   card.innerHTML = `
     <div class="card-header">
-      <div class="card-top">
-        <strong>${customer.name}</strong>
-        <div class="right-section">
-          ${paymentStatus ? `<span class="payment-status">${paymentStatus}</span>` : ''}
-          <span class="status-tag ${customer.status}">${getStatusText(customer.status)}</span>
-        </div>
+      <div class="customer-info">
+        <h3>${customer.name}</h3>
+        <p>${customer.phone}</p>
       </div>
-      <div class="card-summary">
-        <div class="info">
-          <span>${customer.model}</span>
-          <span>價金：$${customer.salePrice}</span>
-          <span>租金：$${customer.rent}</span>
-        </div>
-        ${customer.status === 'renting' ? 
-          `<button class="pay-btn" onclick="showPaymentModal('${customer._id}', ${customer.rent}, ${customer.salePrice})">繳款</button>` : 
-          ''}
+      <div class="status-container">
+        ${statusTag.outerHTML}
+        ${paymentStatus.outerHTML}
       </div>
-      <button class="toggle-detail" onclick="toggleDetails(this)">▼ 展開</button>
     </div>
-    <div class="card-detail" style="display:none;">
-      <p><strong>手機號碼：</strong>${customer.phone}</p>
-      <p><strong>身分證字號：</strong>${customer.idNumber}</p>
-      <p><strong>手機型號：</strong>${customer.model}</p>
-      <p><strong>IMEI：</strong>${customer.imei}</p>
-      <p><strong>序號：</strong>${customer.serialNumber}</p>
-      <p><strong>戶籍地址：</strong>${customer.address}</p>
-      <p><strong>通訊地址：</strong>${customer.contactAddress || '同上'}</p>
-      <p><strong>合約起始日：</strong>${formatDate(customer.contractDate)}</p>
-      <p><strong>買賣價金：</strong>$${customer.salePrice}</p>
-      <p><strong>租金：</strong>$${customer.rent} / 週</p>
-      <p><strong>撥款帳戶：</strong>${customer.bank} / 戶名：${customer.bankAccountName} / 帳號：${customer.bankAccountNumber}</p>
-      <p><strong>歷史繳款紀錄：</strong></p>
-      <ul>
-        ${customer.paymentRecords?.map(record => 
-          `<li>${formatDate(record.date)} - $${record.amount}</li>`
-        ).join('') || ''}
-      </ul>
-      <p><strong>備註：</strong> 
-        <input type="text" class="note-input" placeholder="輸入備註..." value="${customer.notes || ''}">
-        <button class="save-note" onclick="saveNote('${customer._id}', this)">確認</button>
-      </p>
-
-      <div class="card-actions">
-        <button class="download-contract" onclick="downloadFile('${customer._id}', 'contract')">下載合約</button>
-        <button class="download-id" onclick="downloadFile('${customer._id}', 'id')">下載身分證</button>
-        <button class="download-disbursement" onclick="downloadFile('${customer._id}', 'disbursement')">下載撥款水單</button>
-        <button class="mark-locked" onclick="markAsLocked('${customer._id}')">呆帳(鎖機)</button>
-        <button class="delete-customer" onclick="deleteCustomer('${customer._id}')">刪除客戶</button>
-      </div>
+    <div class="card-details">
+      <p><strong>機型：</strong>${customer.model}</p>
+      <p><strong>租金：</strong>${customer.rent} 元/週</p>
+      <p><strong>合約起始日：</strong>${formatDate(contractDate)}</p>
+      <p><strong>累計繳款：</strong>${customer.totalPaid} 元</p>
+    </div>
+    <div class="card-actions">
+      <button class="download-contract" onclick="downloadFile('${customer._id}', 'contract')">下載合約</button>
+      <button class="download-id" onclick="downloadFile('${customer._id}', 'id')">下載身分證</button>
+      ${customer.status === 'renting' ? `
+        <button class="pay-btn" onclick="showPaymentModal('${customer._id}')">繳款</button>
+      ` : ''}
+      <button class="mark-locked" onclick="markAsLocked('${customer._id}')">標記呆帳</button>
+      <button class="delete-customer" onclick="deleteCustomer('${customer._id}')">刪除</button>
     </div>
   `;
-
-  // 添加今日須繳款標記
-  if (isDueToday) {
-    card.dataset.dueToday = 'true';
-  }
-
+  
   return card;
 }
 
