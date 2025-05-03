@@ -54,7 +54,6 @@ function createCustomerCard(customer) {
   const nextDueDate = new Date(contractDate);
   nextDueDate.setDate(nextDueDate.getDate() + (7 * (currentPeriod + 1)));
   
-  let statusTag = '';
   let paymentStatus = '';
   let nextPaymentDate = '';
   
@@ -87,8 +86,8 @@ function createCustomerCard(customer) {
       </div>
       <div class="card-summary">
         <div class="info">
-          <span>${customer.model}</span> ｜ 
-          <span>價金：$${customer.salePrice}</span> ｜ 
+          <span>${customer.model}</span>
+          <span>價金：$${customer.salePrice}</span>
           <span>租金：$${customer.rent}</span>
         </div>
         ${customer.status === 'renting' ? 
@@ -125,6 +124,7 @@ function createCustomerCard(customer) {
         <button class="download-id" onclick="downloadFile('${customer._id}', 'id')">下載身分證</button>
         <button class="download-disbursement" onclick="downloadFile('${customer._id}', 'disbursement')">下載撥款水單</button>
         <button class="mark-locked" onclick="markAsLocked('${customer._id}')">呆帳(鎖機)</button>
+        <button class="delete-customer" onclick="deleteCustomer('${customer._id}')">刪除客戶</button>
       </div>
     </div>
   `;
@@ -276,6 +276,29 @@ function getStatusText(status) {
     'locked': '呆帳'
   };
   return statusMap[status] || status;
+}
+
+// 刪除客戶
+async function deleteCustomer(customerId) {
+  if (!confirm('確定要刪除此客戶嗎？此操作無法復原。')) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/customers/${customerId}`, {
+      method: 'DELETE'
+    });
+
+    if (!response.ok) {
+      throw new Error('刪除失敗');
+    }
+
+    alert('✅ 客戶已刪除');
+    loadCustomers(); // 重新載入客戶列表
+  } catch (error) {
+    console.error('刪除客戶失敗:', error);
+    alert('刪除客戶失敗，請稍後再試');
+  }
 }
 
 // 初始化頁面
