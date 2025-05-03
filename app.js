@@ -61,17 +61,13 @@ function createCustomerCard(customer) {
     // 計算逾期天數
     const daysOverdue = Math.floor((today - nextDueDate) / (1000 * 60 * 60 * 24));
     
-    if (daysOverdue === 0) {
-      paymentStatus = '今日應繳款';
-    } else if (daysOverdue > 0) {
+    if (daysOverdue > 0) {
       paymentStatus = `逾期 ${daysOverdue} 天`;
+    } else if (unpaidAmount > 0) {
+      paymentStatus = `當期尚餘 $${unpaidAmount} 未繳納`;
     }
     
     nextPaymentDate = `下次繳款日：${formatDate(nextDueDate)}`;
-    
-    if (unpaidAmount > 0) {
-      paymentStatus = `當期尚餘 $${unpaidAmount} 未繳納`;
-    }
   }
 
   card.innerHTML = `
@@ -91,7 +87,7 @@ function createCustomerCard(customer) {
           <span>租金：$${customer.rent}</span>
         </div>
         ${customer.status === 'renting' ? 
-          `<button class="pay-btn" onclick="showPaymentModal('${customer._id}', ${unpaidAmount}, ${customer.rent}, ${customer.salePrice})">繳款</button>` : 
+          `<button class="pay-btn" onclick="showPaymentModal('${customer._id}', ${customer.rent}, ${customer.salePrice})">繳款</button>` : 
           ''}
       </div>
       <button class="toggle-detail" onclick="toggleDetails(this)">▼ 展開</button>
@@ -133,13 +129,13 @@ function createCustomerCard(customer) {
 }
 
 // 顯示繳款彈窗
-function showPaymentModal(customerId, unpaidAmount, rent, salePrice) {
+function showPaymentModal(customerId, rent, salePrice) {
   const modal = document.getElementById('payment-modal');
   const amountInput = document.getElementById('payment-amount');
   const submitBtn = document.getElementById('submit-payment');
   
-  amountInput.value = unpaidAmount; // 預設顯示未繳金額
-  amountInput.min = unpaidAmount; // 設置最小繳款金額
+  amountInput.value = ''; // 清空預設金額
+  amountInput.min = 0; // 允許任意金額
   amountInput.max = salePrice; // 設置最大繳款金額為買回金額
   
   // 移除舊的事件監聽器
@@ -149,8 +145,8 @@ function showPaymentModal(customerId, unpaidAmount, rent, salePrice) {
   // 添加新的事件監聽器
   newSubmitBtn.addEventListener('click', async () => {
     const amount = parseFloat(amountInput.value);
-    if (amount < unpaidAmount) {
-      alert('繳款金額不能小於未繳金額');
+    if (!amount || amount <= 0) {
+      alert('請輸入有效的繳款金額');
       return;
     }
     
