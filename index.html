@@ -44,45 +44,83 @@
     <div id="add" class="page">
       <h2>新增客戶</h2>
       <form id="add-customer-form" enctype="multipart/form-data">
-        <label>姓名：<input type="text" name="name" required></label><br>
-        <label>身分證字號：<input type="text" name="idNumber" required></label><br>
-        <label>手機號碼：<input type="text" name="phone" required></label><br>
-        <label>戶籍地址：<input type="text" name="address" required></label><br>
-        <label>現居地址：<input type="text" name="contactAddress" id="currentAddress"></label>
-        <label><input type="checkbox" id="sameAsRegistered"> 同戶籍地址</label><br>
-
-        <label>手機型號：
-          <select name="model" required>
-            <option>iPhone 12</option>
-            <option>iPhone 12 mini</option>
-            <option>iPhone 12 Pro</option>
-            <option>iPhone 12 Pro Max</option>
-            <option>iPhone 13</option>
-            <option>iPhone 13 mini</option>
-            <option>iPhone 13 Pro</option>
-            <option>iPhone 13 Pro Max</option>
-            <option>iPhone 14</option>
-            <option>iPhone 14 Plus</option>
-            <option>iPhone 14 Pro</option>
-            <option>iPhone 14 Pro Max</option>
-            <option>iPhone 15</option>
-            <option>iPhone 15 Plus</option>
-            <option>iPhone 15 Pro</option>
-            <option>iPhone 15 Pro Max</option>
-          </select>
-        </label><br>
-        <label>IMEI：<input type="text" name="imei" required></label><br>
-        <label>序號：<input type="text" name="serialNumber" required></label><br>
-        <label>買賣價：<input type="number" name="salePrice" required></label><br>
-        <label>週租金：<input type="number" name="rent" required></label><br>
-        <label>收款帳戶銀行：<input type="text" name="bank" required></label><br>
-        <label>戶名：<input type="text" name="bankAccountName" required></label><br>
-        <label>帳號：<input type="text" name="bankAccountNumber" required></label><br>
-        <label>合約起始日：<input type="date" name="contractDate" required></label><br>
-        <label>合約 PDF：<input type="file" name="contractFile" accept="application/pdf"></label><br>
-        <label>身分證正面：<input type="file" name="idFront" accept="image/*"></label><br>
-        <label>身分證反面：<input type="file" name="idBack" accept="image/*"></label><br>
-        <button type="submit">送出新增</button>
+        <div class="form-group">
+          <label for="name">姓名</label>
+          <input type="text" id="name" name="name" required>
+        </div>
+        <div class="form-group">
+          <label for="idNumber">身分證字號</label>
+          <input type="text" id="idNumber" name="idNumber" required>
+        </div>
+        <div class="form-group">
+          <label for="phone">手機號碼</label>
+          <input type="text" id="phone" name="phone" required>
+        </div>
+        <div class="form-group">
+          <label for="address">戶籍地址</label>
+          <input type="text" id="address" name="address" required>
+        </div>
+        <div class="form-group">
+          <label for="contactAddress">通訊地址</label>
+          <input type="text" id="contactAddress" name="contactAddress">
+        </div>
+        <div class="form-group">
+          <label for="model">手機型號</label>
+          <input type="text" id="model" name="model" required>
+        </div>
+        <div class="form-group">
+          <label for="imei">IMEI</label>
+          <input type="text" id="imei" name="imei" required>
+        </div>
+        <div class="form-group">
+          <label for="serialNumber">序號</label>
+          <input type="text" id="serialNumber" name="serialNumber" required>
+        </div>
+        <div class="form-group">
+          <label for="screenPassword">螢幕密碼</label>
+          <input type="text" id="screenPassword" name="screenPassword">
+        </div>
+        <div class="form-group">
+          <label for="salePrice">買賣價金</label>
+          <input type="number" id="salePrice" name="salePrice" required>
+        </div>
+        <div class="form-group">
+          <label for="rent">租金</label>
+          <input type="number" id="rent" name="rent" required>
+        </div>
+        <div class="form-group">
+          <label for="contractDate">合約起始日</label>
+          <input type="date" id="contractDate" name="contractDate" required>
+        </div>
+        <div class="form-group">
+          <label for="bank">銀行</label>
+          <input type="text" id="bank" name="bank" required>
+        </div>
+        <div class="form-group">
+          <label for="bankAccountName">戶名</label>
+          <input type="text" id="bankAccountName" name="bankAccountName" required>
+        </div>
+        <div class="form-group">
+          <label for="bankAccountNumber">帳號</label>
+          <input type="text" id="bankAccountNumber" name="bankAccountNumber" required>
+        </div>
+        <div class="form-group">
+          <label for="contractFile">合約文件</label>
+          <input type="file" id="contractFile" name="contractFile" accept=".pdf,.doc,.docx" required>
+        </div>
+        <div class="form-group">
+          <label for="idFront">身分證正面</label>
+          <input type="file" id="idFront" name="idFront" accept="image/*" required>
+        </div>
+        <div class="form-group">
+          <label for="idBack">身分證反面</label>
+          <input type="file" id="idBack" name="idBack" accept="image/*" required>
+        </div>
+        <div class="form-group">
+          <label for="disbursementFile">撥款水單</label>
+          <input type="file" id="disbursementFile" name="disbursementFile" accept=".pdf,.doc,.docx,image/*">
+        </div>
+        <button type="submit">新增客戶</button>
       </form>
     </div>
 
@@ -101,12 +139,17 @@
         <label>手機型號：<input type="text" name="model"></label>
         <label>IMEI：<input type="text" name="imei"></label>
         <label>序號：<input type="text" name="serialNumber"></label>
+        <label>螢幕密碼：<input type="text" name="screenPassword"></label>
         <label>買賣價：<input type="number" name="salePrice"></label>
         <label>週租金：<input type="number" name="rent"></label>
         <label>收款帳戶銀行：<input type="text" name="bank"></label>
         <label>戶名：<input type="text" name="bankAccountName"></label>
         <label>帳號：<input type="text" name="bankAccountNumber"></label>
         <label>合約起始日：<input type="text" name="contractDate"></label>
+        <label>合約 PDF：<input type="file" name="contractFile" accept="application/pdf"></label>
+        <label>身分證正面：<input type="file" name="idFront" accept="image/*"></label>
+        <label>身分證反面：<input type="file" name="idBack" accept="image/*"></label>
+        <label>撥款水單：<input type="file" name="disbursementFile" accept=".pdf,.doc,.docx,image/*"></label>
         <button type="submit">確認修改</button>
       </form>
     </div>
