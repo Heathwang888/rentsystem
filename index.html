@@ -326,5 +326,28 @@
         .catch(() => alert('修改失敗'));
     });
   </script>
+   function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+    }
+
+    // 避免 JS 錯誤中斷
+    document.addEventListener('DOMContentLoaded', () => {
+      const sameBox = document.getElementById('sameAsRegistered');
+      if (sameBox) {
+        sameBox.addEventListener('change', () => {
+          const reg = document.querySelector('[name="registeredAddress"]');
+          const cur = document.getElementById('currentAddress');
+          if (sameBox.checked) cur.value = reg.value;
+        });
+      }
+
+      document.getElementById('add-customer-form').addEventListener('submit', e => {
+        e.preventDefault();
+        alert('新增成功 (模擬送出)');
+      });
+    });
+  </script>
+
 </body>
 </html>
