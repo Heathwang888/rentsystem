@@ -40,14 +40,11 @@ function createCustomerCard(customer) {
   const card = document.createElement('div');
   card.className = 'customer-card';
   card.dataset.status = customer.status;
-  card.dataset.id = customer._id;
 
   // 計算到期日和狀態
   const contractDate = new Date(customer.contractDate);
   const today = new Date();
-  const dueDate = new Date(contractDate);
-  dueDate.setDate(dueDate.getDate() + 7); // 每週繳款
-
+  
   // 計算累計繳款和未付金額
   const totalPaid = customer.paymentRecords?.reduce((sum, record) => sum + record.amount, 0) || 0;
   const unpaidAmount = customer.rent - (totalPaid % customer.rent);
@@ -82,25 +79,24 @@ function createCustomerCard(customer) {
     <div class="card-header">
       <div class="card-top">
         <strong>${customer.name}</strong>
-        ${customer.notes ? `<span class="note-tag">（${customer.notes}）</span>` : ''}
         <div class="right-section">
           ${paymentStatus ? `<span class="payment-status">${paymentStatus}</span>` : ''}
           ${nextPaymentDate ? `<span class="next-payment">${nextPaymentDate}</span>` : ''}
           <span class="status-tag ${customer.status}">${getStatusText(customer.status)}</span>
-          ${statusTag ? `<span class="due-today">${statusTag}</span>` : ''}
         </div>
       </div>
       <div class="card-summary">
-        <span>${customer.model}</span> ｜ 
-        <span>價金：$${customer.salePrice}</span> ｜ 
-        <span>租金：$${customer.rent}</span>
+        <div class="info">
+          <span>${customer.model}</span> ｜ 
+          <span>價金：$${customer.salePrice}</span> ｜ 
+          <span>租金：$${customer.rent}</span>
+        </div>
         ${customer.status === 'renting' ? 
           `<button class="pay-btn" onclick="showPaymentModal('${customer._id}', ${unpaidAmount}, ${customer.rent}, ${customer.salePrice})">繳款</button>` : 
           ''}
       </div>
       <button class="toggle-detail" onclick="toggleDetails(this)">▼ 展開</button>
     </div>
-
     <div class="card-detail" style="display:none;">
       <p><strong>手機號碼：</strong>${customer.phone}</p>
       <p><strong>身分證字號：</strong>${customer.idNumber}</p>
@@ -265,7 +261,11 @@ function toggleDetails(button) {
 // 格式化日期
 function formatDate(dateString) {
   const date = new Date(dateString);
-  return date.toLocaleDateString('zh-TW');
+  return date.toLocaleDateString('zh-TW', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
 }
 
 // 獲取狀態文字
