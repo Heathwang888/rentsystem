@@ -288,6 +288,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // 顯示當前頁面
   showPage(currentPage);
   
+  // 側邊欄按鈕事件
+  document.querySelectorAll('.sidebar button').forEach(button => {
+    button.addEventListener('click', () => {
+      const pageId = button.dataset.page;
+      showPage(pageId);
+    });
+  });
+  
   // 篩選按鈕事件
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
