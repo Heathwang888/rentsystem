@@ -1,205 +1,434 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>手機租賃後台系統</title>
-  <style>
-    body { margin: 0; font-family: 'Noto Sans TC', sans-serif; background: #f4f4f4; }
-    .sidebar {
-      width: 200px; height: 100vh; background: #333; color: #fff;
-      position: fixed; top: 0; left: 0; display: flex; flex-direction: column;
-    }
-    .sidebar button {
-      background: none; border: none; color: #fff; padding: 20px;
-      text-align: left; cursor: pointer; font-size: 16px;
-    }
-    .sidebar button:hover { background: #444; }
-    .page-content { margin-left: 200px; padding: 20px; }
-    .page { display: none; }
-    .page.active { display: block; }
-    .filter-bar button.active { background: #f3cc00; }
-    .customer-card {
-      border: 1px solid #ccc; border-radius: 8px; padding: 12px; margin-bottom: 10px; background: #fff;
-    }
-    .card-header { display: flex; flex-direction: column; gap: 6px; }
-    .card-top { display: flex; justify-content: space-between; align-items: center; }
-    .right-section span { margin-left: 10px; }
-    .card-summary {
-      display: flex; gap: 12px; align-items: center; justify-content: space-between;
-    }
-    .card-actions button { margin-right: 10px; }
-    .note-input { width: 200px; }
-    .modal {
-      position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5);
-    }
-    .modal-content {
-      background-color: #fff; margin: 10% auto; padding: 20px; width: 300px; border-radius: 8px;
-    }
-    .close-modal { float: right; cursor: pointer; }
-  </style>
-</head>
-<body>
-  <div class="sidebar">
-    <button onclick="showPage('dashboard')">📊 總覽</button>
-    <button onclick="showPage('list')">📁 客戶列表</button>
-    <button onclick="showPage('add')">➕ 新增客戶</button>
-  </div>
+require('dotenv').config();
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const { v4: uuidv4 } = require('uuid');
 
-  <div class="page-content">
-    <div id="dashboard" class="page active"><h2>這是總覽頁</h2></div>
+const app = express();
+const port = process.env.PORT || 3000;
 
-    <div id="list" class="page">
-      <div class="filter-bar">
-        <button class="filter-btn active" data-filter="all">全部</button>
-        <button class="filter-btn" data-filter="active">租賃中</button>
-        <button class="filter-btn" data-filter="bought">已買回</button>
-        <button class="filter-btn" data-filter="locked">呆帳</button>
-      </div>
-      <div class="customer-list"></div>
-    </div>
+// 設置 Mongoose strictQuery
+mongoose.set('strictQuery', false);
 
-    <div id="add" class="page">
-      <h2>新增客戶</h2>
-      <form id="add-customer-form" enctype="multipart/form-data">
-        <!-- 表單欄位略，待下方JS填入完整提交處理 -->
-        <label>姓名：<input type="text" name="name" required></label>
-        <label>身分證字號：<input type="text" name="idNumber" required></label>
-        <label>手機號碼：<input type="text" name="mobile" required></label>
-        <label>戶籍地址：<input type="text" name="registeredAddress" required></label>
-        <label>現居地址：<input type="text" name="currentAddress" id="currentAddress"></label>
-        <label><input type="checkbox" id="sameAsRegistered"> 同戶籍地址</label>
-        <label>手機型號：<select name="model">
-          <option>iPhone 13</option><option>iPhone 14</option><option>iPhone 15</option>
-        </select></label>
-        <label>IMEI：<input type="text" name="imei" required></label>
-        <label>序號：<input type="text" name="serialNumber" required></label>
-        <label>買賣價：<input type="number" name="price" required></label>
-        <label>週租金：<input type="number" name="rent" required></label>
-        <label>收款帳戶銀行：<input type="text" name="bank" required></label>
-        <label>戶名：<input type="text" name="bankAccountName" required></label>
-        <label>帳號：<input type="text" name="bankAccountNumber" required></label>
-        <label>合約起始日：<input type="date" name="contractDate" id="contractDate" required></label>
-        <label>合約 PDF：<input type="file" name="contractPdf"></label>
-        <label>身分證正面：<input type="file" name="idFront"></label>
-        <label>身分證反面：<input type="file" name="idBack"></label>
-        <label>撥款水單：<input type="file" name="paymentSlip"></label>
-        <button type="submit">送出新增</button>
-      </form>
-    </div>
-  </div>
+// MongoDB 連接
+const mongoUri = process.env.MONGODB_URI;
+console.log('Connecting to MongoDB at:', mongoUri.replace(/\/\/[^@]+@/, '//****:****@'));
 
-  <div id="payment-modal" class="modal" style="display:none;">
-    <div class="modal-content">
-      <span class="close-modal" onclick="document.getElementById('payment-modal').style.display='none'">&times;</span>
-      <h3>繳款紀錄</h3>
-      <label>繳款金額：</label>
-      <input type="number" id="payment-amount" placeholder="請輸入金額">
-      <button id="submit-payment">確認繳款</button>
-    </div>
-  </div>
+mongoose.connect(mongoUri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log('Connected to MongoDB Atlas'))
+.catch(err => {
+  console.error('MongoDB connection error:', err);
+  process.exit(1);
+});
 
-  <script>
-    const API = 'https://five-iridescent-flyaway.glitch.me';
-    let currentId = null;
+// 定義客戶資料模型
+const customerSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  idNumber: { type: String, required: true },
+  phone: { type: String, required: true },
+  address: { type: String, required: true },
+  contactAddress: { type: String },
+  model: { type: String, required: true },
+  imei: { type: String, required: true },
+  screenPassword: { type: String },
+  salePrice: { type: Number, required: true },
+  rent: { type: Number, required: true },
+  contractDate: { type: Date, required: true },
+  files: {
+    contractFile: String,
+    idFront: String,
+    idBack: String
+  },
+  status: { type: String, default: 'renting' },
+  createdAt: { type: Date, default: Date.now },
+  lastPaymentDate: { type: Date },
+  paymentRecords: [{
+    date: { type: Date, required: true },
+    amount: { type: Number, required: true }
+  }],
+  paidAmount: { type: Number, default: 0 },
+  unpaidAmount: { type: Number, default: 0 },
+  notes: { type: String },
+  buybackDate: { type: Date },
+  lockDate: { type: Date }
+});
 
-    function showPage(id) {
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-      if (id === 'list') loadCustomerList();
+const Customer = mongoose.model('Customer', customerSchema, 'customers');
+
+// 中間件設置
+app.use(cors());
+app.use(express.json());
+app.use(express.static('public'));
+
+// 根路由處理
+app.get('/', (req, res) => {
+  res.send('Phone Contract Management API is running');
+});
+
+// 設置文件上傳
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = 'uploads';
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
     }
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
 
-    document.getElementById('sameAsRegistered').addEventListener('change', function () {
-      const reg = document.querySelector('[name="registeredAddress"]');
-      const cur = document.getElementById('currentAddress');
-      if (this.checked) cur.value = reg.value;
+const upload = multer({ 
+  storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 限制文件大小為 5MB
+  }
+});
+
+// API 路由
+
+// 獲取客戶列表（分頁）
+app.get('/api/customers', async (req, res) => {
+  try {
+    const { page = 1, limit = 5 } = req.query;
+    const skip = (page - 1) * limit;
+    
+    const customers = await Customer.find()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+    
+    const total = await Customer.countDocuments();
+    
+    res.json({
+      customers,
+      total,
+      page: parseInt(page),
+      limit: parseInt(limit)
     });
+  } catch (error) {
+    res.status(500).json({ error: '獲取客戶列表失敗' });
+  }
+});
 
-    document.getElementById('add-customer-form').addEventListener('submit', function (e) {
-      e.preventDefault();
-      const formData = new FormData(this);
-      const date = new Date(document.getElementById('contractDate').value);
-      const rocDate = `${date.getFullYear()-1911}/${date.getMonth()+1}/${date.getDate()}`;
-      formData.set('contractDate', rocDate);
-      fetch(`${API}/api/customers/create`, { method: 'POST', body: formData })
-        .then(res => res.json())
-        .then(() => alert('✅ 新增成功'))
-        .catch(err => alert('❌ 新增失敗'));
+// 搜尋客戶
+app.get('/api/customers/search', async (req, res) => {
+  try {
+    const { q } = req.query;
+    const { page = 1, limit = 5 } = req.query;
+    const skip = (page - 1) * limit;
+    
+    const query = {
+      $or: [
+        { name: { $regex: q, $options: 'i' } },
+        { idNumber: { $regex: q, $options: 'i' } },
+        { phone: { $regex: q, $options: 'i' } }
+      ]
+    };
+    
+    const customers = await Customer.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+    
+    const total = await Customer.countDocuments(query);
+    
+    res.json({
+      customers,
+      total,
+      page: parseInt(page),
+      limit: parseInt(limit)
     });
+  } catch (error) {
+    res.status(500).json({ error: '搜尋客戶失敗' });
+  }
+});
 
-    function loadCustomerList() {
-      fetch(`${API}/customers`).then(res => res.json()).then(data => {
-        const list = document.querySelector('.customer-list');
-        list.innerHTML = '';
-        data.forEach(c => {
-          const card = document.createElement('div');
-          card.className = 'customer-card';
-          card.dataset.status = c.status;
-          const paymentList = (c.payments||[]).map(p => `<li>${p.date} - $${p.amount}</li>`).join('');
-          card.innerHTML = `
-            <div class="card-header">
-              <div class="card-top">
-                <strong>${c.name}</strong><span class="note-tag">（${c.note||'無備註'}）</span>
-                <div class="right-section">
-                  ${c.balance ? `<span class="balance-info">尚有餘額 $${c.balance}</span>` : ''}
-                  <span class="status-tag">${c.status}</span>
-                  ${c.dueToday ? `<span class="due-today">本日應繳款</span>` : ''}
-                </div>
-              </div>
-              <div class="card-summary">
-                <span>${c.model}</span> ｜ <span>價金：$${c.price}</span> ｜ <span>租金：$${c.rent}</span>
-                <button onclick="openPay('${c._id}')">繳款</button>
-              </div>
-              <button onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display==='block'?'none':'block'">▼ 展開</button>
-            </div>
-            <div class="card-detail" style="display:none;">
-              <p><strong>手機號碼：</strong>${c.mobile}</p>
-              <p><strong>身分證字號：</strong>${c.idNumber}</p>
-              <p><strong>IMEI：</strong>${c.imei}</p>
-              <p><strong>序號：</strong>${c.serialNumber}</p>
-              <p><strong>戶籍地址：</strong>${c.registeredAddress}</p>
-              <p><strong>通訊地址：</strong>${c.currentAddress}</p>
-              <p><strong>合約起始日：</strong>${c.contractDate}</p>
-              <p><strong>撥款帳戶：</strong>${c.bank} / ${c.bankAccountName} / ${c.bankAccountNumber}</p>
-              <p><strong>歷史繳款紀錄：</strong></p><ul>${paymentList}</ul>
-              <p><strong>備註：</strong> <input value="${c.note||''}" onchange="saveNote('${c._id}', this.value)"></p>
-              <div class="card-actions">
-                <button onclick="markStatus('${c._id}','bought')">已買回</button>
-                <button onclick="markStatus('${c._id}','locked')">呆帳(鎖機)</button>
-                <button onclick="downloadFile('${c._id}','contract')">下載合約</button>
-                <button onclick="downloadFile('${c._id}','id')">下載身分證</button>
-                <button onclick="downloadFile('${c._id}','payment')">下載撥款水單</button>
-              </div>
-            </div>
-          `;
-          list.appendChild(card);
-        });
+// 創建新客戶
+app.post('/api/customers', upload.fields([
+  { name: 'contractFile', maxCount: 1 },
+  { name: 'idFront', maxCount: 1 },
+  { name: 'idBack', maxCount: 1 }
+]), async (req, res) => {
+  try {
+    console.log('Received request body:', req.body);
+    console.log('Received files:', req.files);
+
+    // 驗證必填欄位
+    const requiredFields = ['name', 'idNumber', 'phone', 'address', 'phoneModel', 'imei', 'price', 'rent', 'contractDate'];
+    for (const field of requiredFields) {
+      if (!req.body[field]) {
+        return res.status(400).json({ error: `缺少必填欄位: ${field}` });
+      }
+    }
+
+    // 轉換數值類型
+    const customerData = {
+      name: req.body.name,
+      idNumber: req.body.idNumber,
+      phone: req.body.phone,
+      address: req.body.address,
+      contactAddress: req.body.mailingAddress,
+      model: req.body.phoneModel,
+      imei: req.body.imei,
+      screenPassword: req.body.screenPassword,
+      salePrice: parseFloat(req.body.price),
+      rent: parseFloat(req.body.rent),
+      contractDate: new Date(req.body.contractDate),
+      files: {
+        contractFile: req.files?.contractFile?.[0]?.filename || null,
+        idFront: req.files?.idFront?.[0]?.filename || null,
+        idBack: req.files?.idBack?.[0]?.filename || null
+      }
+    };
+
+    console.log('Processed customer data:', customerData);
+
+    const customer = new Customer(customerData);
+    await customer.save();
+    
+    res.status(201).json(customer);
+  } catch (error) {
+    console.error('Error creating customer:', error);
+    res.status(500).json({ 
+      error: '創建客戶失敗',
+      details: error.message 
+    });
+  }
+});
+
+// 更新客戶資訊
+app.put('/api/customers/:id', async (req, res) => {
+  try {
+    const customer = await Customer.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    
+    if (!customer) {
+      return res.status(404).json({ error: '客戶不存在' });
+    }
+    
+    res.json(customer);
+  } catch (error) {
+    res.status(500).json({ error: '更新客戶失敗' });
+  }
+});
+
+// 更新客戶狀態
+app.patch('/api/customers/:id/status', async (req, res) => {
+  try {
+    const { status, paidAmount, unpaidAmount } = req.body;
+    const updateData = { status };
+    
+    if (status === 'partial' && paidAmount && unpaidAmount) {
+      updateData.paidAmount = paidAmount;
+      updateData.unpaidAmount = unpaidAmount;
+    }
+    
+    const customer = await Customer.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true }
+    );
+    
+    if (!customer) {
+      return res.status(404).json({ error: '客戶不存在' });
+    }
+    
+    res.json(customer);
+  } catch (error) {
+    console.error('Error updating customer status:', error);
+    res.status(500).json({ error: '更新客戶狀態失敗' });
+  }
+});
+
+// 更新客戶備註
+app.patch('/api/customers/:id/notes', async (req, res) => {
+  try {
+    const { notes } = req.body;
+    const customer = await Customer.findByIdAndUpdate(
+      req.params.id,
+      { notes },
+      { new: true }
+    );
+    
+    if (!customer) {
+      return res.status(404).json({ error: '客戶不存在' });
+    }
+    
+    res.json(customer);
+  } catch (error) {
+    console.error('Error updating customer notes:', error);
+    res.status(500).json({ error: '更新客戶備註失敗' });
+  }
+});
+
+// 刪除客戶
+app.delete('/api/customers/:id', async (req, res) => {
+  try {
+    const customer = await Customer.findById(req.params.id);
+    
+    if (!customer) {
+      return res.status(404).json({ error: '客戶不存在' });
+    }
+    
+    // 刪除相關文件
+    if (customer.files) {
+      Object.values(customer.files).forEach(filename => {
+        if (filename) {
+          const filePath = path.join('uploads', filename);
+          if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+          }
+        }
       });
     }
+    
+    await customer.remove();
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).json({ error: '刪除客戶失敗' });
+  }
+});
 
-    function saveNote(id, note) {
-      fetch(`${API}/customers/note/${id}`, {
-        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ note })
-      });
+// 獲取客戶文件
+app.get('/api/customers/:id/files/:type', async (req, res) => {
+  try {
+    const customer = await Customer.findById(req.params.id);
+    
+    if (!customer) {
+      return res.status(404).json({ error: '客戶不存在' });
+    }
+    
+    let filePath;
+    if (req.params.type === 'contract') {
+      if (!customer.files?.contractFile) {
+        return res.status(404).json({ error: '合約文件不存在' });
+      }
+      filePath = path.join('uploads', customer.files.contractFile);
+    } else if (req.params.type === 'id') {
+      if (!customer.files?.idFront || !customer.files?.idBack) {
+        return res.status(404).json({ error: '身分證文件不存在' });
+      }
+      // 這裡可以實現合併 PDF 的邏輯，暫時只返回正面
+      filePath = path.join('uploads', customer.files.idFront);
+    } else {
+      return res.status(400).json({ error: '無效的文件類型' });
+    }
+    
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: '文件不存在' });
+    }
+    
+    res.sendFile(path.resolve(filePath));
+  } catch (error) {
+    console.error('Error getting customer file:', error);
+    res.status(500).json({ error: '獲取文件失敗' });
+  }
+});
+
+// 處理繳款
+app.post('/api/customers/:id/payment', async (req, res) => {
+  try {
+    const { amount } = req.body;
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ error: '無效的繳款金額' });
     }
 
-    function markStatus(id, type) {
-      fetch(`${API}/customers/${type}/${id}`, { method: 'PATCH' }).then(() => loadCustomerList());
+    const customer = await Customer.findById(req.params.id);
+    if (!customer) {
+      return res.status(404).json({ error: '客戶不存在' });
     }
 
-    function downloadFile(id, type) {
-      window.open(`${API}/customers/file/${id}?type=${type}`, '_blank');
+    // 更新繳款記錄
+    if (!customer.paymentRecords) {
+      customer.paymentRecords = [];
     }
 
-    function openPay(id) {
-      const amount = prompt('輸入繳款金額');
-      if (!amount) return;
-      fetch(`${API}/customers/pay/${id}`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: parseInt(amount) })
-      }).then(() => loadCustomerList());
+    customer.paymentRecords.push({
+      date: new Date(),
+      amount: amount
+    });
+
+    // 更新最後繳款日期
+    customer.lastPaymentDate = new Date();
+
+    // 如果有未付金額，則更新
+    if (customer.unpaidAmount) {
+      customer.unpaidAmount = Math.max(0, customer.unpaidAmount - amount);
     }
-  </script>
-</body>
-</html>
+
+    await customer.save();
+    res.json(customer);
+  } catch (error) {
+    console.error('Error processing payment:', error);
+    res.status(500).json({ error: '處理繳款失敗' });
+  }
+});
+
+// 買回處理
+app.post('/api/customers/:id/buyback', async (req, res) => {
+  try {
+    const customer = await Customer.findByIdAndUpdate(
+      req.params.id,
+      { 
+        status: 'buyback',
+        buybackDate: new Date()
+      },
+      { new: true }
+    );
+    
+    if (!customer) {
+      return res.status(404).json({ error: '客戶不存在' });
+    }
+    
+    res.json(customer);
+  } catch (error) {
+    console.error('Error processing buyback:', error);
+    res.status(500).json({ error: '處理買回失敗' });
+  }
+});
+
+// 呆帳鎖機處理
+app.post('/api/customers/:id/lock', async (req, res) => {
+  try {
+    const customer = await Customer.findByIdAndUpdate(
+      req.params.id,
+      { 
+        status: 'locked',
+        lockDate: new Date()
+      },
+      { new: true }
+    );
+    
+    if (!customer) {
+      return res.status(404).json({ error: '客戶不存在' });
+    }
+    
+    res.json(customer);
+  } catch (error) {
+    console.error('Error processing lock:', error);
+    res.status(500).json({ error: '處理鎖機失敗' });
+  }
+});
+
+// 錯誤處理中間件
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: '伺服器錯誤' });
+});
+
+// 啟動伺服器
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+}); 
