@@ -33,27 +33,91 @@
     </div>
 
     <div id="list" class="page">
-      <h2>客戶列表</h2>
-      <div class="customer-card">
-        <div class="customer-header">
-          <div>
-            <strong>張三</strong>（A123****89）<br>
-            iPhone 12 Pro Max 256G｜租金 $2500／週
-          </div>
-          <div class="customer-status status-rent">租賃中｜剩餘2天</div>
-        </div>
-        <div class="customer-actions" style="margin-top: 10px;">
-          <button>已繳款</button>
-          <button>呆帳</button>
-          <button>下載合約</button>
-          <button>下載身分證</button>
-          <button>撥款紀錄</button>
-        </div>
-        <div class="customer-notes" style="margin-top:10px;">
-          備註：已續約 3 次，螢幕輕微刮痕
-        </div>
+<!-- 客戶列表頁 HTML 片段 -->
+<div class="filter-bar">
+  <button class="filter-btn active" data-filter="all">全部</button>
+  <button class="filter-btn" data-filter="active">租賃中</button>
+  <button class="filter-btn" data-filter="bought">已買回</button>
+  <button class="filter-btn" data-filter="locked">呆帳</button>
+</div>
+
+<div class="customer-list">
+  <div class="customer-card" data-status="active">
+    <div class="card-header">
+      <div>
+        <strong>張三</strong>（價金：$18,000）
+        <button class="pay-btn">繳款</button>
+      </div>
+      <button class="toggle-detail">▼ 展開</button>
+    </div>
+
+    <div class="card-detail" style="display:none;">
+      <p><strong>身分證字號：</strong>A123456789</p>
+      <p><strong>手機型號：</strong>iPhone 12 Pro Max</p>
+      <p><strong>IMEI：</strong>356789012345678</p>
+      <p><strong>戶籍地址：</strong>高雄市苓雅區光華一路123號</p>
+      <p><strong>通訊地址：</strong>同上</p>
+      <p><strong>合約起始日：</strong>2025/05/01</p>
+      <p><strong>買賣價金：</strong>$18,000</p>
+      <p><strong>租金：</strong>$2,500 / 週</p>
+      <p><strong>撥款帳戶：</strong>第一銀行 高雄分行 / 戶名：張三 / 帳號：123-456789-001</p>
+      <p><strong>備註：</strong> <input type="text" class="note-input" placeholder="輸入備註..." value=""></p>
+
+      <div class="card-actions">
+        <button class="download-contract">下載合約</button>
+        <button class="download-id">下載身分證</button>
+        <button class="download-disbursement">下載撥款水單</button>
+        <button class="mark-locked">呆帳(鎖機)</button>
       </div>
     </div>
+  </div>
+
+  <!-- 更多客戶卡片可依照相同結構疊加 -->
+</div>
+
+<script>
+  // 切換展開 / 收合
+  document.querySelectorAll('.toggle-detail').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const detail = btn.closest('.customer-card').querySelector('.card-detail');
+      detail.style.display = detail.style.display === 'none' ? 'block' : 'none';
+    });
+  });
+
+  // 篩選邏輯
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.filter;
+      document.querySelectorAll('.customer-card').forEach(card => {
+        card.style.display = (filter === 'all' || card.dataset.status === filter) ? 'block' : 'none';
+      });
+    });
+  });
+</script>
+
+<style>
+  .customer-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+    background: #fff;
+  }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .card-actions button {
+    margin-right: 10px;
+  }
+  .filter-bar button.active {
+    background: #f3cc00;
+  }
+</style>
+
 
     <div id="add" class="page">
       <h2>新增客戶（尚未製作）</h2>
