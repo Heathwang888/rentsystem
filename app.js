@@ -45,15 +45,17 @@ function createCustomerCard(customer) {
   // 計算到期日和狀態
   const contractDate = new Date(customer.contractDate);
   const today = new Date();
-  
+  const dueDate = new Date(contractDate);
+  dueDate.setDate(dueDate.getDate() + 7); // 每週繳款
+
   // 計算累計繳款和未付金額
   const totalPaid = customer.paymentRecords?.reduce((sum, record) => sum + record.amount, 0) || 0;
   const unpaidAmount = customer.rent - (totalPaid % customer.rent);
   
   // 計算當前期數的到期日（基於合約起始日）
   const currentPeriod = Math.floor(totalPaid / customer.rent);
-  const dueDate = new Date(contractDate);
-  dueDate.setDate(dueDate.getDate() + (7 * (currentPeriod + 1)));
+  const nextDueDate = new Date(contractDate);
+  nextDueDate.setDate(nextDueDate.getDate() + (7 * (currentPeriod + 1)));
   
   let statusTag = '';
   let paymentStatus = '';
@@ -61,21 +63,18 @@ function createCustomerCard(customer) {
   
   if (customer.status === 'renting') {
     // 計算逾期天數
-    const daysOverdue = Math.floor((today - dueDate) / (1000 * 60 * 60 * 24));
+    const daysOverdue = Math.floor((today - nextDueDate) / (1000 * 60 * 60 * 24));
     
-    // 如果有任何繳款記錄，視為已續約
-    if (customer.paymentRecords && customer.paymentRecords.length > 0) {
-      if (unpaidAmount > 0) {
-        paymentStatus = `當期尚餘 $${unpaidAmount} 未繳納`;
-      }
-      nextPaymentDate = `下次繳款日：${formatDate(dueDate)}`;
-    } else {
-      // 完全沒有繳款的情況
-      if (daysOverdue === 0) {
-        statusTag = '本日應繳款';
-      } else if (daysOverdue > 0) {
-        statusTag = `逾期 ${daysOverdue} 日`;
-      }
+    if (daysOverdue === 0) {
+      paymentStatus = '今日應繳款';
+    } else if (daysOverdue > 0) {
+      paymentStatus = `逾期 ${daysOverdue} 天`;
+    }
+    
+    nextPaymentDate = `下次繳款日：${formatDate(nextDueDate)}`;
+    
+    if (unpaidAmount > 0) {
+      paymentStatus = `當期尚餘 $${unpaidAmount} 未繳納`;
     }
   }
 
