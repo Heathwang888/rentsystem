@@ -1510,15 +1510,34 @@
 
       const actionButtons = document.createElement('div');
       actionButtons.className = 'action-buttons';
-      actionButtons.innerHTML = `
-        ${isRenting ? `
-          <button class="button button-success" onclick="handleBuyback('${customer._id}')">買回</button>
-          <button class="button button-danger" onclick="handleLock('${customer._id}')">呆帳鎖機</button>
-        ` : ''}
-        <button class="button button-info" onclick="downloadContract('${customer._id}')">下載合約</button>
-        <button class="button button-info" onclick="downloadIdFront('${customer._id}')">身分證正面</button>
-        <button class="button button-info" onclick="downloadIdBack('${customer._id}')">身分證反面</button>
-      `;
+      if (isRenting) {
+        const buybackBtn = document.createElement('button');
+        buybackBtn.className = 'button button-success';
+        buybackBtn.textContent = '買回';
+        buybackBtn.onclick = () => handleBuyback(customer._id);
+        actionButtons.appendChild(buybackBtn);
+
+        const lockBtn = document.createElement('button');
+        lockBtn.className = 'button button-danger';
+        lockBtn.textContent = '呆帳鎖機';
+        lockBtn.onclick = () => handleLock(customer._id);
+        actionButtons.appendChild(lockBtn);
+      }
+      const contractBtn = document.createElement('button');
+      contractBtn.className = 'button button-info';
+      contractBtn.textContent = '下載合約';
+      contractBtn.onclick = () => downloadContract(customer._id);
+      actionButtons.appendChild(contractBtn);
+      const idFrontBtn = document.createElement('button');
+      idFrontBtn.className = 'button button-info';
+      idFrontBtn.textContent = '身分證正面';
+      idFrontBtn.onclick = () => downloadIdFront(customer._id);
+      actionButtons.appendChild(idFrontBtn);
+      const idBackBtn = document.createElement('button');
+      idBackBtn.className = 'button button-info';
+      idBackBtn.textContent = '身分證反面';
+      idBackBtn.onclick = () => downloadIdBack(customer._id);
+      actionButtons.appendChild(idBackBtn);
 
       const notesSection = document.createElement('div');
       notesSection.className = 'notes-section';
@@ -1526,7 +1545,7 @@
         <h4>備註</h4>
         <textarea placeholder="輸入備註內容">${customer.notes || ''}</textarea>
         <div class="button-group">
-          <button class="button button-primary" onclick="saveNotes('${customer._id}')">儲存備註</button>
+          <button class="button button-primary">儲存備註</button>
         </div>
       `;
 
