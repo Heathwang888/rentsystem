@@ -1,406 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>手機租賃後台系統</title>
   <style>
     body { margin: 0; font-family: 'Noto Sans TC', sans-serif; background: #f4f4f4; }
     .sidebar {
       width: 200px; height: 100vh; background: #333; color: #fff;
       position: fixed; top: 0; left: 0; display: flex; flex-direction: column;
-      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
     }
     .sidebar button {
       background: none; border: none; color: #fff; padding: 20px;
       text-align: left; cursor: pointer; font-size: 16px;
-      transition: background-color 0.3s;
     }
     .sidebar button:hover { background: #444; }
-    .page-content { 
-      margin-left: 200px; 
-      padding: 20px;
-      min-height: 100vh;
-      background: #f4f4f4;
-    }
-    .page { 
-      display: none;
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
+    .page-content { margin-left: 200px; padding: 20px; }
+    .page { display: none; }
     .page.active { display: block; }
 
-    form label { 
-      display: block; 
-      margin: 10px 0;
-      font-weight: 500;
-    }
-    input, select { 
-      margin-left: 10px;
-      padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      width: 200px;
-    }
-    button {
-      padding: 8px 16px;
-      background: #007bff;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    button:hover {
-      background: #0056b3;
-    }
-    .filter-bar {
-      margin-bottom: 20px;
-      display: flex;
-      gap: 10px;
-    }
-    .filter-btn {
-      padding: 8px 16px;
-      background: #f8f9fa;
-      color: #333;
-      border: 1px solid #ddd;
-    }
-    .filter-btn.active {
-      background: #f3cc00;
-      border-color: #f3cc00;
-      color: #333;
-    }
-    .customer-card {
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 15px;
-      background: white;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    .status-tag {
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      background: #28a745;
-      color: white;
-    }
-    .due-today {
-      color: #dc3545;
-      font-weight: bold;
-    }
-    .modal {
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0,0,0,0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .modal-content {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      width: 90%;
-      max-width: 500px;
-    }
-    @media (max-width: 768px) {
-      .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-        flex-direction: row;
-        flex-wrap: wrap;
-      }
-      .page-content {
-        margin-left: 0;
-      }
-      .sidebar button {
-        padding: 10px;
-        flex: 1;
-        min-width: 100px;
-      }
-    }
-  </style> 
-  <script>
-    const API_BASE_URL = 'https://five-iridescent-flyaway.glitch.me/api';
+    form label { display: block; margin: 10px 0; }
+    input, select { margin-left: 10px; }
+  </style>
+</head>
+<body>
 
-    // 切換頁面
+  <!-- 側邊欄 -->
+  <div class="sidebar">
+    <button onclick="showPage('dashboard')">📊 總覽</button>
+    <button onclick="showPage('list')">📁 客戶列表</button>
+    <button onclick="showPage('add')">➕ 新增客戶</button>
+    <button onclick="showPage('edit')">✏️ 編輯客戶</button>
+    <button onclick="showPage('contract')">📄 合約產製</button>
+  </div>
+
+  <!-- 主要頁面區 -->
+  <div class="page-content">
+
+    <!-- 總覽頁 -->
+    <div id="dashboard" class="page active">
+      <h2>這是總覽頁</h2>
+    </div>
+
+    <!-- 客戶列表 -->
+    <div id="list" class="page">
+<!-- 客戶列表頁 HTML 片段 -->
+<div class="filter-bar">
+  <button class="filter-btn active" data-filter="all">全部</button>
+  <button class="filter-btn" data-filter="active">租賃中</button>
+  <button class="filter-btn" data-filter="bought">已買回</button>
+  <button class="filter-btn" data-filter="locked">呆帳</button>
+</div>
+
+<div class="customer-list">
+  <div class="customer-card" data-status="active">
+    <div class="card-header">
+      <div class="card-top">
+        <strong>張三</strong>
+        <span class="note-tag">（備註字眼）</span>
+        <div class="right-section">
+          <span class="balance-info">尚有餘額 $1,000 元</span>
+          <span class="status-tag">租賃中</span>
+          <span class="due-today">本日應繳款</span>
+        </div>
+      </div>
+      <div class="card-summary">
+        <span>iPhone 13</span> ｜ 
+        <span>價金：$6,000</span> ｜ 
+        <span>租金：$1,500</span>
+        <button class="pay-btn">繳款</button>
+      </div>
+      <button class="toggle-detail">▼ 展開</button>
+    </div>
+
+    <div class="card-detail" style="display:none;">
+      <p><strong>手機號碼：</strong>0900-123-456</p>
+      <p><strong>身分證字號：</strong>A123456789</p>
+      <p><strong>手機型號：</strong>iPhone 13</p>
+      <p><strong>IMEI：</strong>356789012345678</p>
+      <p><strong>序號：</strong>XYZ12345678</p>
+      <p><strong>戶籍地址：</strong>高雄市苓雅區光華一路123號</p>
+      <p><strong>通訊地址：</strong>同上</p>
+      <p><strong>合約起始日：</strong>2025/05/01</p>
+      <p><strong>買賣價金：</strong>$6,000</p>
+      <p><strong>租金：</strong>$1,500 / 週</p>
+      <p><strong>撥款帳戶：</strong>第一銀行 高雄分行 / 戶名：張三 / 帳號：123-456789-001</p>
+      <p><strong>歷史繳款紀錄：</strong></p>
+      <ul>
+        <li>2025/05/01 - $1,500</li>
+      </ul>
+      <p><strong>備註：</strong> 
+        <input type="text" class="note-input" placeholder="輸入備註..." value="">
+        <button class="save-note">確認</button>
+      </p>
+
+      <div class="card-actions">
+        <button class="download-contract">下載合約</button>
+        <button class="download-id">下載身分證</button>
+        <button class="download-disbursement">下載撥款水單</button>
+        <button class="mark-locked">呆帳(鎖機)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 繳款彈窗 -->
+<div id="payment-modal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <span class="close-modal">&times;</span>
+    <h3>繳款紀錄</h3>
+    <label>繳款金額：</label>
+    <input type="number" id="payment-amount" placeholder="請輸入金額">
+    <button id="submit-payment">確認繳款</button>
+  </div>
+</div>
+
+<script>
+  // 切換展開 / 收合
+  document.querySelectorAll('.toggle-detail').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const detail = btn.closest('.customer-card').querySelector('.card-detail');
+      detail.style.display = detail.style.display === 'none' ? 'block' : 'none';
+    });
+  });
+
+  // 篩選邏輯
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.filter;
+      document.querySelectorAll('.customer-card').forEach(card => {
+        card.style.display = (filter === 'all' || card.dataset.status === filter) ? 'block' : 'none';
+      });
+    });
+  });
+
+  // 彈出繳款視窗
+  document.querySelectorAll('.pay-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('payment-modal').style.display = 'block';
+    });
+  });
+
+  // 關閉視窗
+  document.querySelector('.close-modal').addEventListener('click', () => {
+    document.getElementById('payment-modal').style.display = 'none';
+  });
+</script>
+
+<style>
+  .customer-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+    background: #fff;
+  }
+  .card-header {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .right-section span {
+    margin-left: 10px;
+  }
+  .card-summary {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-actions button {
+    margin-right: 10px;
+  }
+  .filter-bar button.active {
+    background: #f3cc00;
+  }
+  .note-input {
+    width: 200px;
+  }
+  .modal {
+    position: fixed;
+    z-index: 999;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  .modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 20px;
+    width: 300px;
+    border-radius: 8px;
+  }
+  .close-modal {
+    float: right;
+    cursor: pointer;
+  }
+</style>
+
+    </div>
+
+    <!-- 新增客戶 -->
+    <div id="add" class="page">
+      <!-- 新增客戶頁 HTML 片段 -->
+<h2>新增客戶</h2>
+<form id="add-customer-form" enctype="multipart/form-data">
+  <label>姓名：<input type="text" name="name" required></label><br>
+  <label>身分證字號：<input type="text" name="idNumber" required></label><br>
+  <label>手機號碼：<input type="text" name="mobile" required></label><br>
+  <label>戶籍地址：<input type="text" name="registeredAddress" required></label><br>
+  <label>現居地址：<input type="text" name="currentAddress" id="currentAddress"></label>
+  <label><input type="checkbox" id="sameAsRegistered"> 同戶籍地址</label><br>
+
+  <label>手機型號：
+    <select name="model">
+      <option>iPhone 12</option>
+      <option>iPhone 12 mini</option>
+      <option>iPhone 12 Pro</option>
+      <option>iPhone 12 Pro Max</option>
+      <option>iPhone 13</option>
+      <option>iPhone 13 mini</option>
+      <option>iPhone 13 Pro</option>
+      <option>iPhone 13 Pro Max</option>
+      <option>iPhone 14</option>
+      <option>iPhone 14 Plus</option>
+      <option>iPhone 14 Pro</option>
+      <option>iPhone 14 Pro Max</option>
+      <option>iPhone 15</option>
+      <option>iPhone 15 Plus</option>
+      <option>iPhone 15 Pro</option>
+      <option>iPhone 15 Pro Max</option>
+      <option>iPhone 16 </option>
+      <option>iPhone 16 e</option>
+      <option>iPhone 16 Plus</option>
+      <option>iPhone 16 Pro</option>
+      <option>iPhone 16 Pro Max</option>
+    </select>
+  </label><br>
+        <label>IMEI：<input type="text" name="imei" required></label>
+        <label>序號：<input type="text" name="serialNumber" required></label>
+        <label>買賣價：<input type="number" name="price" required></label>
+        <label>週租金：<input type="number" name="rent" required></label>
+        <label>收款帳戶銀行：<input type="text" name="bank" required></label>
+        <label>戶名：<input type="text" name="bankAccountName" required></label>
+        <label>帳號：<input type="text" name="bankAccountNumber" required></label>
+        <label>合約起始日：<input type="date" name="contractDate" id="contractDate" required></label>
+        <label>合約 PDF：<input type="file" name="contractPdf" accept="application/pdf"></label>
+        <label>身分證正面：<input type="file" name="idFront" accept="image/*"></label>
+        <label>身分證反面：<input type="file" name="idBack" accept="image/*"></label>
+        <label>撥款水單：<input type="file" name="paymentSlip" accept="image/*,application/pdf"></label>
+        <button type="submit">送出新增</button>
+      </form>
+    </div>
+        <div id="edit" class="page">
+      <h2>編輯客戶資料</h2>
+      <input type="text" id="searchKeyword" placeholder="輸入姓名或身分證字號">
+      <button onclick="searchCustomer()">搜尋</button>
+      <form id="edit-form" style="display:none;">
+        <input type="hidden" name="id">
+        <label>姓名：<input type="text" name="name" required></label>
+        <label>身分證字號：<input type="text" name="idNumber" required></label>
+        <label>手機號碼：<input type="text" name="mobile" required></label>
+        <label>戶籍地址：<input type="text" name="registeredAddress" required></label>
+        <label>現居地址：<input type="text" name="currentAddress"></label>
+        <label>手機型號：<input type="text" name="model"></label>
+        <label>IMEI：<input type="text" name="imei"></label>
+        <label>序號：<input type="text" name="serialNumber"></label>
+        <label>買賣價：<input type="number" name="price"></label>
+        <label>週租金：<input type="number" name="rent"></label>
+        <label>收款帳戶銀行：<input type="text" name="bank"></label>
+        <label>戶名：<input type="text" name="bankAccountName"></label>
+        <label>帳號：<input type="text" name="bankAccountNumber"></label>
+        <label>合約起始日：<input type="text" name="contractDate"></label>
+        <button type="submit">確認修改</button>
+      </form>
+    </div>
+
+    <div id="contract" class="page">
+      <h2>合約產製（空白頁）</h2>
+    </div>
+  </div>
+
+
+  <!-- JS 功能 -->
+  <script>
     function showPage(pageId) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.getElementById(pageId).classList.add('active');
-      
-      // 當切換到客戶列表頁時，載入客戶資料
-      if (pageId === 'list') {
-        loadCustomers();
-      }
     }
 
-    // 載入客戶列表
-    async function loadCustomers() {
-      try {
-        const response = await fetch(`${API_BASE_URL}/customers`);
-        const data = await response.json();
-        displayCustomers(data.customers);
-      } catch (error) {
-        console.error('載入客戶列表失敗:', error);
-        alert('載入客戶列表失敗，請稍後再試');
-      }
-    }
-
-    // 顯示客戶列表
-    function displayCustomers(customers) {
-      const customerList = document.querySelector('.customer-list');
-      customerList.innerHTML = '';
-
-      customers.forEach(customer => {
-        const card = createCustomerCard(customer);
-        customerList.appendChild(card);
-      });
-    }
-
-    // 創建客戶卡片
-    function createCustomerCard(customer) {
-      const card = document.createElement('div');
-      card.className = 'customer-card';
-      card.dataset.status = customer.status;
-
-      const statusClass = {
-        'renting': '租賃中',
-        'buyback': '已買回',
-        'locked': '呆帳'
-      };
-
-      card.innerHTML = `
-        <div class="card-header">
-          <div class="card-top">
-            <strong>${customer.name}</strong>
-            ${customer.notes ? `<span class="note-tag">（${customer.notes}）</span>` : ''}
-            <div class="right-section">
-              <span class="balance-info">尚有餘額 $${customer.unpaidAmount || 0} 元</span>
-              <span class="status-tag">${statusClass[customer.status]}</span>
-              ${customer.unpaidAmount > 0 ? '<span class="due-today">本日應繳款</span>' : ''}
-            </div>
-          </div>
-          <div class="card-summary">
-            <span>${customer.model}</span> ｜ 
-            <span>價金：$${customer.salePrice}</span> ｜ 
-            <span>租金：$${customer.rent}</span>
-            <button class="pay-btn" onclick="showPaymentModal('${customer._id}')">繳款</button>
-          </div>
-          <button class="toggle-detail" onclick="toggleDetails(this)">▼ 展開</button>
-        </div>
-        <div class="card-detail" style="display:none;">
-          <p><strong>手機號碼：</strong>${customer.phone}</p>
-          <p><strong>身分證字號：</strong>${customer.idNumber}</p>
-          <p><strong>手機型號：</strong>${customer.model}</p>
-          <p><strong>IMEI：</strong>${customer.imei}</p>
-          <p><strong>合約起始日：</strong>${new Date(customer.contractDate).toLocaleDateString()}</p>
-          <p><strong>買賣價金：</strong>$${customer.salePrice}</p>
-          <p><strong>租金：</strong>$${customer.rent} / 週</p>
-          <p><strong>備註：</strong> 
-            <input type="text" class="note-input" placeholder="輸入備註..." value="${customer.notes || ''}">
-            <button class="save-note" onclick="saveNote('${customer._id}', this)">確認</button>
-          </p>
-          <div class="card-actions">
-            <button onclick="downloadContract('${customer._id}')">下載合約</button>
-            <button onclick="downloadId('${customer._id}')">下載身分證</button>
-            <button onclick="markLocked('${customer._id}')">呆帳(鎖機)</button>
-          </div>
-        </div>
-      `;
-      return card;
-    }
-
-    // 顯示繳款視窗
-    function showPaymentModal(customerId) {
-      const modal = document.getElementById('payment-modal');
-      modal.style.display = 'block';
-      modal.dataset.customerId = customerId;
-    }
-
-    // 處理繳款
-    async function submitPayment() {
-      const modal = document.getElementById('payment-modal');
-      const customerId = modal.dataset.customerId;
-      const amount = document.getElementById('payment-amount').value;
-
-      try {
-        const response = await fetch(`${API_BASE_URL}/customers/${customerId}/payment`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ amount: parseFloat(amount) })
-        });
-
-        if (response.ok) {
-          alert('繳款成功');
-          modal.style.display = 'none';
-          loadCustomers(); // 重新載入客戶列表
-        } else {
-          throw new Error('繳款失敗');
-        }
-      } catch (error) {
-        console.error('繳款失敗:', error);
-        alert('繳款失敗，請稍後再試');
-      }
-    }
-
-    // 儲存備註
-    async function saveNote(customerId, button) {
-      const noteInput = button.previousElementSibling;
-      const note = noteInput.value;
-
-      try {
-        const response = await fetch(`${API_BASE_URL}/customers/${customerId}/notes`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ notes: note })
-        });
-
-        if (response.ok) {
-          alert('備註更新成功');
-          loadCustomers(); // 重新載入客戶列表
-        } else {
-          throw new Error('更新備註失敗');
-        }
-      } catch (error) {
-        console.error('更新備註失敗:', error);
-        alert('更新備註失敗，請稍後再試');
-      }
-    }
-
-    // 標記為呆帳
-    async function markLocked(customerId) {
-      if (!confirm('確定要將此客戶標記為呆帳嗎？')) return;
-
-      try {
-        const response = await fetch(`${API_BASE_URL}/customers/${customerId}/lock`, {
-          method: 'POST'
-        });
-
-        if (response.ok) {
-          alert('已標記為呆帳');
-          loadCustomers(); // 重新載入客戶列表
-        } else {
-          throw new Error('標記呆帳失敗');
-        }
-      } catch (error) {
-        console.error('標記呆帳失敗:', error);
-        alert('標記呆帳失敗，請稍後再試');
-      }
-    }
-
-    // 下載合約
-    async function downloadContract(customerId) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/customers/${customerId}/files/contract`);
-        if (response.ok) {
-          const blob = await response.blob();
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `contract_${customerId}.pdf`;
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
-          a.remove();
-        } else {
-          throw new Error('下載合約失敗');
-        }
-      } catch (error) {
-        console.error('下載合約失敗:', error);
-        alert('下載合約失敗，請稍後再試');
-      }
-    }
-
-    // 下載身分證
-    async function downloadId(customerId) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/customers/${customerId}/files/id`);
-        if (response.ok) {
-          const blob = await response.blob();
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `id_${customerId}.pdf`;
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
-          a.remove();
-        } else {
-          throw new Error('下載身分證失敗');
-        }
-      } catch (error) {
-        console.error('下載身分證失敗:', error);
-        alert('下載身分證失敗，請稍後再試');
-      }
-    }
-
-    // 切換詳細資料顯示
-    function toggleDetails(button) {
-      const detail = button.closest('.customer-card').querySelector('.card-detail');
-      detail.style.display = detail.style.display === 'none' ? 'block' : 'none';
-    }
-
-    // 初始化頁面
+    // 保護式綁定避免錯誤
     document.addEventListener('DOMContentLoaded', () => {
-      // 篩選按鈕事件
-      document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          const filter = btn.dataset.filter;
-          document.querySelectorAll('.customer-card').forEach(card => {
-            card.style.display = (filter === 'all' || card.dataset.status === filter) ? 'block' : 'none';
-          });
-        });
-      });
-
-      // 關閉繳款視窗
-      document.querySelector('.close-modal').addEventListener('click', () => {
-        document.getElementById('payment-modal').style.display = 'none';
-      });
-
-      // 提交繳款
-      document.getElementById('submit-payment').addEventListener('click', submitPayment);
-
-      // 同戶籍地址勾選
       const sameBox = document.getElementById('sameAsRegistered');
       if (sameBox) {
         sameBox.addEventListener('change', () => {
-          const reg = document.querySelector('[name="registeredAddress"]');
+          const reg = document.querySelector('[name=\"registeredAddress\"]');
           const cur = document.getElementById('currentAddress');
           if (sameBox.checked) cur.value = reg.value;
         });
       }
 
-      // 新增客戶表單提交
-      document.getElementById('add-customer-form').addEventListener('submit', async function(e) {
+      // 新增表單送出處理
+      document.getElementById('add-customer-form').addEventListener('submit', function (e) {
         e.preventDefault();
-        const formData = new FormData(this);
+        const form = this;
+        const formData = new FormData(form);
 
-        try {
-          const response = await fetch(`${API_BASE_URL}/customers`, {
-            method: 'POST',
-            body: formData
-          });
+        // 民國格式處理
+        const dateStr = document.getElementById('contractDate').value;
+        const date = new Date(dateStr);
+        const year = date.getFullYear() - 1911;
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        const rocDate = `${year}/${month}/${day}`;
+        formData.set('contractDate', rocDate);
 
-          if (response.ok) {
-            alert('新增客戶成功');
-            this.reset();
-            showPage('list');
-            loadCustomers();
-          } else {
-            throw new Error('新增客戶失敗');
-          }
-        } catch (error) {
-          console.error('新增客戶失敗:', error);
-          alert('新增客戶失敗，請稍後再試');
-        }
+        // 模擬送出（未串接 API）
+        alert('✅ 新增成功（模擬送出，民國起始日為：' + rocDate + '）');
       });
     });
-  </script> 
+  </script>
+</body>
+</html>
