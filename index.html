@@ -12,11 +12,8 @@
     .page-content { margin-left: 200px; padding: 20px; }
     .page { display: none; }
     .page.active { display: block; }
-    .customer-card { background: #fff; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .customer-header { display: flex; justify-content: space-between; align-items: center; }
-    .customer-status { font-size: 14px; padding: 4px 8px; border-radius: 4px; }
-    .status-rent { background: #ffd700; color: #000; }
-    .customer-actions button { margin-left: 8px; }
+    form label { display: block; margin: 10px 0; }
+    input, select { margin-left: 10px; }
   </style>
 </head>
 <body>
@@ -24,6 +21,7 @@
     <button onclick="showPage('dashboard')">📊 總覽</button>
     <button onclick="showPage('list')">📁 客戶列表</button>
     <button onclick="showPage('add')">➕ 新增客戶</button>
+    <button onclick="showPage('edit')">✏️ 編輯客戶</button>
     <button onclick="showPage('contract')">📄 合約產製</button>
   </div>
 
@@ -231,68 +229,48 @@
       <option>iPhone 16 Pro Max</option>
     </select>
   </label><br>
-  <label>IMEI：<input type="text" name="imei" required></label><br>
-  <label>序號：<input type="text" name="serialNumber" required></label><br>
-  <label>買賣價（元）：<input type="number" name="price" required></label><br>
-  <label>週租金（元）：<input type="number" name="rent" required></label><br>
-  <label>收款帳戶銀行：<input type="text" name="bank" required></label><br>
-  <label>戶名：<input type="text" name="bankAccountName" required></label><br>
-  <label>帳號：<input type="text" name="bankAccountNumber" required></label><br>
-  <label>合約起始日：<input type="date" name="contractDate" id="contractDate" required></label><br>
+        <label>IMEI：<input type="text" name="imei" required></label>
+        <label>序號：<input type="text" name="serialNumber" required></label>
+        <label>買賣價：<input type="number" name="price" required></label>
+        <label>週租金：<input type="number" name="rent" required></label>
+        <label>收款帳戶銀行：<input type="text" name="bank" required></label>
+        <label>戶名：<input type="text" name="bankAccountName" required></label>
+        <label>帳號：<input type="text" name="bankAccountNumber" required></label>
+        <label>合約起始日：<input type="date" name="contractDate" id="contractDate" required></label>
+        <label>合約 PDF：<input type="file" name="contractPdf" accept="application/pdf"></label>
+        <label>身分證正面：<input type="file" name="idFront" accept="image/*"></label>
+        <label>身分證反面：<input type="file" name="idBack" accept="image/*"></label>
+        <label>撥款水單：<input type="file" name="paymentSlip" accept="image/*,application/pdf"></label>
+        <button type="submit">送出新增</button>
+      </form>
+    </div>
 
-  <label>上傳合約 PDF：<input type="file" name="contractPdf" accept="application/pdf" required></label><br>
-  <label>上傳身分證正面：<input type="file" name="idFront" accept="image/*" required></label><br>
-  <label>上傳身分證反面：<input type="file" name="idBack" accept="image/*" required></label><br>
-  <label>上傳撥款水單：<input type="file" name="paymentSlip" accept="image/*,application/pdf" required></label><br>
-
-  <button type="submit">送出新增</button>
-</form>
-
-<script>
-  document.getElementById('sameAsRegistered').addEventListener('change', function () {
-    const reg = document.querySelector('[name="registeredAddress"]');
-    const cur = document.getElementById('currentAddress');
-    if (this.checked) cur.value = reg.value;
-  });
-
-  function toROC(dateStr) {
-    const date = new Date(dateStr);
-    const year = date.getFullYear() - 1911;
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    return `${year}/${month}/${day}`;
-  }
-
-  document.getElementById('add-customer-form').addEventListener('submit', function (e) {
-    e.preventDefault();
-    const form = this;
-    const formData = new FormData(form);
-
-    const rocDate = toROC(document.getElementById('contractDate').value);
-    formData.set('contractDate', rocDate);
-
-    fetch('/api/customers/create', {
-      method: 'POST',
-      body: formData
-    }).then(res => res.json())
-      .then(data => alert('新增成功'))
-      .catch(err => alert('上傳失敗'));
-  });
-</script>
-
-<style>
-  form label {
-    display: block;
-    margin: 10px 0;
-  }
-  input, select {
-    margin-left: 10px;
-  }
-</style>
+    <div id="edit" class="page">
+      <h2>編輯客戶資料</h2>
+      <input type="text" id="searchKeyword" placeholder="輸入姓名或身分證字號">
+      <button onclick="searchCustomer()">搜尋</button>
+      <form id="edit-form" style="display:none;">
+        <input type="hidden" name="id">
+        <label>姓名：<input type="text" name="name" required></label>
+        <label>身分證字號：<input type="text" name="idNumber" required></label>
+        <label>手機號碼：<input type="text" name="mobile" required></label>
+        <label>戶籍地址：<input type="text" name="registeredAddress" required></label>
+        <label>現居地址：<input type="text" name="currentAddress"></label>
+        <label>手機型號：<input type="text" name="model"></label>
+        <label>IMEI：<input type="text" name="imei"></label>
+        <label>序號：<input type="text" name="serialNumber"></label>
+        <label>買賣價：<input type="number" name="price"></label>
+        <label>週租金：<input type="number" name="rent"></label>
+        <label>收款帳戶銀行：<input type="text" name="bank"></label>
+        <label>戶名：<input type="text" name="bankAccountName"></label>
+        <label>帳號：<input type="text" name="bankAccountNumber"></label>
+        <label>合約起始日：<input type="text" name="contractDate"></label>
+        <button type="submit">確認修改</button>
+      </form>
     </div>
 
     <div id="contract" class="page">
-      <h2>合約產製（空白頁，尚未製作）</h2>
+      <h2>合約產製（空白頁）</h2>
     </div>
   </div>
 
@@ -301,6 +279,54 @@
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.getElementById(pageId).classList.add('active');
     }
+
+    document.getElementById('sameAsRegistered').addEventListener('change', function () {
+      const reg = document.querySelector('[name="registeredAddress"]');
+      const cur = document.getElementById('currentAddress');
+      if (this.checked) cur.value = reg.value;
+    });
+
+    function toROC(dateStr) {
+      const date = new Date(dateStr);
+      const year = date.getFullYear() - 1911;
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      return `${year}/${month}/${day}`;
+    }
+
+    document.getElementById('add-customer-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const form = this;
+      const formData = new FormData(form);
+      const rocDate = toROC(document.getElementById('contractDate').value);
+      formData.set('contractDate', rocDate);
+      fetch('/api/customers/create', { method: 'POST', body: formData })
+        .then(res => res.json()).then(() => alert('新增成功'))
+        .catch(() => alert('上傳失敗'));
+    });
+
+    function searchCustomer() {
+      const keyword = document.getElementById('searchKeyword').value;
+      fetch(`/api/customers/search?keyword=${encodeURIComponent(keyword)}`)
+        .then(res => res.json())
+        .then(data => {
+          const form = document.getElementById('edit-form');
+          form.style.display = 'block';
+          for (const key in data) {
+            if (form[key]) form[key].value = data[key];
+          }
+        }).catch(() => alert('查無資料'));
+    }
+
+    document.getElementById('edit-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const id = formData.get('id');
+      fetch(`/api/customers/update/${id}`, { method: 'PATCH', body: formData })
+        .then(res => res.json()).then(() => alert('修改成功'))
+        .catch(() => alert('修改失敗'));
+    });
   </script>
 </body>
 </html>
+
