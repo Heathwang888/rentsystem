@@ -47,12 +47,15 @@ function createCustomerCard(customer) {
   
   // 計算累計繳款和未付金額
   const totalPaid = customer.paymentRecords?.reduce((sum, record) => sum + record.amount, 0) || 0;
-  const unpaidAmount = customer.rent - (totalPaid % customer.rent);
   
-  // 計算當前期數的到期日（基於合約起始日）
+  // 計算當前期數和到期日
   const currentPeriod = Math.floor(totalPaid / customer.rent);
   const nextDueDate = new Date(contractDate);
   nextDueDate.setDate(nextDueDate.getDate() + (7 * (currentPeriod + 1)));
+  
+  // 計算當期應繳金額
+  const currentPeriodAmount = customer.rent * (currentPeriod + 1);
+  const unpaidAmount = currentPeriodAmount - totalPaid;
   
   let paymentStatus = '';
   let nextPaymentDate = '';
@@ -70,9 +73,7 @@ function createCustomerCard(customer) {
       paymentStatus = `下次繳款 ${daysRemaining} 日`;
     }
     
-    nextPaymentDate = `下次繳款日：${formatDate(nextDueDate)}`;
-    
-    // 如果有未繳金額，顯示在狀態中
+    // 只有在當期未繳足時才顯示未繳金額
     if (unpaidAmount > 0) {
       paymentStatus += ` (尚餘 $${unpaidAmount} 未繳納)`;
     }
@@ -84,7 +85,6 @@ function createCustomerCard(customer) {
         <strong>${customer.name}</strong>
         <div class="right-section">
           ${paymentStatus ? `<span class="payment-status">${paymentStatus}</span>` : ''}
-          ${nextPaymentDate ? `<span class="next-payment">${nextPaymentDate}</span>` : ''}
           <span class="status-tag ${customer.status}">${getStatusText(customer.status)}</span>
         </div>
       </div>
