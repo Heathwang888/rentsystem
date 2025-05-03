@@ -51,14 +51,10 @@ function createCustomerCard(customer) {
   // 計算當前期數和到期日
   const currentPeriod = Math.floor(totalPaid / customer.rent);
   const nextDueDate = new Date(contractDate);
-  nextDueDate.setDate(nextDueDate.getDate() + (7 * (currentPeriod + 1)));
-  
-  // 計算當期應繳金額
-  const currentPeriodAmount = customer.rent * (currentPeriod + 1);
-  const unpaidAmount = currentPeriodAmount - totalPaid;
+  nextDueDate.setDate(nextDueDate.getDate() + 7); // 固定7天為一個週期
   
   let paymentStatus = '';
-  let nextPaymentDate = '';
+  let isDueToday = false;
   
   if (customer.status === 'renting') {
     // 計算逾期天數
@@ -68,13 +64,18 @@ function createCustomerCard(customer) {
       paymentStatus = `逾期 ${daysOverdue} 天`;
     } else if (daysOverdue === 0) {
       paymentStatus = '今日須繳款';
+      isDueToday = true;
     } else {
       const daysRemaining = Math.floor((nextDueDate - today) / (1000 * 60 * 60 * 24));
       paymentStatus = `下次繳款 ${daysRemaining} 日`;
     }
     
+    // 計算當期應繳金額
+    const currentPeriodAmount = customer.rent;
+    const unpaidAmount = currentPeriodAmount - (totalPaid % customer.rent);
+    
     // 只有在當期未繳足時才顯示未繳金額
-    if (unpaidAmount > 0) {
+    if (unpaidAmount > 0 && unpaidAmount < customer.rent) {
       paymentStatus += ` (尚餘 $${unpaidAmount} 未繳納)`;
     }
   }
@@ -132,6 +133,11 @@ function createCustomerCard(customer) {
       </div>
     </div>
   `;
+
+  // 添加今日須繳款標記
+  if (isDueToday) {
+    card.dataset.dueToday = 'true';
+  }
 
   return card;
 }
@@ -329,7 +335,11 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.classList.add('active');
       const filter = btn.dataset.filter;
       document.querySelectorAll('.customer-card').forEach(card => {
-        card.style.display = (filter === 'all' || card.dataset.status === filter) ? 'block' : 'none';
+        if (filter === 'due-today') {
+          card.style.display = card.dataset.dueToday === 'true' ? 'block' : 'none';
+        } else {
+          card.style.display = (filter === 'all' || card.dataset.status === filter) ? 'block' : 'none';
+        }
       });
     });
   });
