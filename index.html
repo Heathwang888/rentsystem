@@ -98,10 +98,11 @@
       const rocDate = `${date.getFullYear() - 1911}/${(date.getMonth()+1).toString().padStart(2,'0')}/${date.getDate().toString().padStart(2,'0')}`;
       formData.set('contractDate', rocDate);
 
-      fetch('https://five-iridescent-flyaway.glitch.me/api/customers/create', {
-        method: 'POST',
-        body: formData
-      }).then(res => res.json()).then(() => {
+     fetch('https://five-iridescent-flyaway.glitch.me/api/customers/create', {
+  method: 'POST',
+  body: formData,
+})
+.then(res => res.json()).then(() => {
         alert('✅ 新增成功');
         form.reset();
         showPage('list');
