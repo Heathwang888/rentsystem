@@ -44,24 +44,42 @@
 <div class="customer-list">
   <div class="customer-card" data-status="active">
     <div class="card-header">
-      <div>
-        <strong>張三</strong>（價金：$18,000）
+      <div class="card-top">
+        <strong>張三</strong>
+        <span class="note-tag">（備註字眼）</span>
+        <span class="balance-info">尚有餘額 $1,000 元</span>
+        <span class="status-tag">租賃中</span>
+        <span class="due-today">本日應繳款</span>
+      </div>
+      <div class="card-summary">
+        <span>iPhone 13</span> ｜ 
+        <span>價金：$6,000</span> ｜ 
+        <span>租金：$1,500</span>
         <button class="pay-btn">繳款</button>
       </div>
       <button class="toggle-detail">▼ 展開</button>
     </div>
 
     <div class="card-detail" style="display:none;">
+      <p><strong>手機號碼：</strong>0900-123-456</p>
       <p><strong>身分證字號：</strong>A123456789</p>
-      <p><strong>手機型號：</strong>iPhone 12 Pro Max</p>
+      <p><strong>手機型號：</strong>iPhone 13</p>
       <p><strong>IMEI：</strong>356789012345678</p>
+      <p><strong>序號：</strong>XYZ12345678</p>
       <p><strong>戶籍地址：</strong>高雄市苓雅區光華一路123號</p>
       <p><strong>通訊地址：</strong>同上</p>
       <p><strong>合約起始日：</strong>2025/05/01</p>
-      <p><strong>買賣價金：</strong>$18,000</p>
-      <p><strong>租金：</strong>$2,500 / 週</p>
+      <p><strong>買賣價金：</strong>$6,000</p>
+      <p><strong>租金：</strong>$1,500 / 週</p>
       <p><strong>撥款帳戶：</strong>第一銀行 高雄分行 / 戶名：張三 / 帳號：123-456789-001</p>
-      <p><strong>備註：</strong> <input type="text" class="note-input" placeholder="輸入備註..." value=""></p>
+      <p><strong>歷史繳款紀錄：</strong></p>
+      <ul>
+        <li>2025/05/01 - $1,500</li>
+      </ul>
+      <p><strong>備註：</strong> 
+        <input type="text" class="note-input" placeholder="輸入備註..." value="">
+        <button class="save-note">確認</button>
+      </p>
 
       <div class="card-actions">
         <button class="download-contract">下載合約</button>
@@ -96,6 +114,41 @@
     });
   });
 </script>
+
+<style>
+  .customer-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+    background: #fff;
+  }
+  .card-header {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .card-top {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    font-weight: bold;
+  }
+  .card-summary {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .card-actions button {
+    margin-right: 10px;
+  }
+  .filter-bar button.active {
+    background: #f3cc00;
+  }
+  .note-input {
+    width: 200px;
+  }
+</style>
 
 <style>
   .customer-card {
