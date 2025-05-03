@@ -322,10 +322,75 @@
         const rocDate = `${year}/${month}/${day}`;
         formData.set('contractDate', rocDate);
 
-        // 模擬送出（未串接 API）
-        alert('✅ 新增成功（模擬送出，民國起始日為：' + rocDate + '）');
+        function loadCustomerList() {
+  fetch('https://five-iridescent-flyaway.glitch.me/customers')
+    .then(res => res.json())
+    .then(data => {
+      const list = document.querySelector('.customer-list');
+      list.innerHTML = ''; // 清空原本範例
+
+      data.forEach(cust => {
+        const card = document.createElement('div');
+        card.className = 'customer-card';
+        card.dataset.status = cust.status;
+
+        card.innerHTML = `
+          <div class="card-header">
+            <div class="card-top">
+              <strong>${cust.name}</strong>
+              <span class="note-tag">（${cust.note || '無備註'}）</span>
+              <div class="right-section">
+                ${cust.balance > 0 ? `<span class="balance-info">尚有餘額 $${cust.balance} 元</span>` : ''}
+                <span class="status-tag">${cust.status}</span>
+                ${cust.dueToday ? `<span class="due-today">本日應繳款</span>` : ''}
+              </div>
+            </div>
+            <div class="card-summary">
+              <span>${cust.model}</span> ｜ 
+              <span>價金：$${cust.price}</span> ｜ 
+              <span>租金：$${cust.rent}</span>
+              <button class="pay-btn" onclick="openPaymentModal('${cust._id}')">繳款</button>
+            </div>
+            <button class="toggle-detail">▼ 展開</button>
+          </div>
+
+          <div class="card-detail" style="display:none;">
+            <p><strong>手機號碼：</strong>${cust.mobile}</p>
+            <p><strong>身分證字號：</strong>${cust.idNumber}</p>
+            <p><strong>IMEI：</strong>${cust.imei}</p>
+            <p><strong>序號：</strong>${cust.serialNumber}</p>
+            <p><strong>戶籍地址：</strong>${cust.registeredAddress}</p>
+            <p><strong>通訊地址：</strong>${cust.currentAddress}</p>
+            <p><strong>合約起始日：</strong>${cust.contractDate}</p>
+            <p><strong>撥款帳戶：</strong>${cust.bank} / ${cust.bankAccountName} / ${cust.bankAccountNumber}</p>
+            <p><strong>歷史繳款紀錄：</strong></p>
+            <ul>${(cust.payments || []).map(p => `<li>${p.date} - $${p.amount}</li>`).join('')}</ul>
+            <p><strong>備註：</strong> 
+              <input type="text" class="note-input" value="${cust.note || ''}">
+              <button onclick="saveNote('${cust._id}', this)">確認</button>
+            </p>
+            <div class="card-actions">
+              <button>下載合約</button>
+              <button>下載身分證</button>
+              <button>下載撥款水單</button>
+              <button>呆帳(鎖機)</button>
+            </div>
+          </div>
+        `;
+
+        card.querySelector('.toggle-detail').addEventListener('click', () => {
+          const detail = card.querySelector('.card-detail');
+          detail.style.display = detail.style.display === 'none' ? 'block' : 'none';
+        });
+
+        list.appendChild(card);
+      });
+    })
+    .catch(err => console.error('載入客戶失敗:', err));
+}
       });
     });
+    
   </script>
 </body>
 </html>
