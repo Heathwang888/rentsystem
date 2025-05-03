@@ -2,6 +2,11 @@ const API_BASE_URL = 'https://five-iridescent-flyaway.glitch.me';
 
 // 切換頁面
 function showPage(pageId) {
+  // 更新 URL
+  const newUrl = `${window.location.pathname}?page=${pageId}`;
+  window.history.pushState({ page: pageId }, '', newUrl);
+  
+  // 切換頁面顯示
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById(pageId).classList.add('active');
   
@@ -276,6 +281,13 @@ function getStatusText(status) {
 
 // 初始化頁面
 document.addEventListener('DOMContentLoaded', () => {
+  // 從 URL 獲取當前頁面
+  const urlParams = new URLSearchParams(window.location.search);
+  const currentPage = urlParams.get('page') || 'dashboard';
+  
+  // 顯示當前頁面
+  showPage(currentPage);
+  
   // 篩選按鈕事件
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
