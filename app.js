@@ -63,11 +63,19 @@ function createCustomerCard(customer) {
     
     if (daysOverdue > 0) {
       paymentStatus = `逾期 ${daysOverdue} 天`;
-    } else if (unpaidAmount > 0) {
-      paymentStatus = `當期尚餘 $${unpaidAmount} 未繳納`;
+    } else if (daysOverdue === 0) {
+      paymentStatus = '今日須繳款';
+    } else {
+      const daysRemaining = Math.floor((nextDueDate - today) / (1000 * 60 * 60 * 24));
+      paymentStatus = `下次繳款 ${daysRemaining} 日`;
     }
     
     nextPaymentDate = `下次繳款日：${formatDate(nextDueDate)}`;
+    
+    // 如果有未繳金額，顯示在狀態中
+    if (unpaidAmount > 0) {
+      paymentStatus += ` (尚餘 $${unpaidAmount} 未繳納)`;
+    }
   }
 
   card.innerHTML = `
