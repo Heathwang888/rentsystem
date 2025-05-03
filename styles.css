@@ -14,16 +14,18 @@ body {
   left: 0;
   display: flex;
   flex-direction: column;
+  padding: 20px 0;
 }
 
 .sidebar button {
   background: none;
   border: none;
   color: #fff;
-  padding: 20px;
+  padding: 15px 20px;
   text-align: left;
   cursor: pointer;
   font-size: 16px;
+  transition: background-color 0.3s;
 }
 
 .sidebar button:hover {
@@ -43,86 +45,118 @@ body {
   display: block;
 }
 
-form label {
-  display: block;
-  margin: 10px 0;
-}
-
-input, select {
-  margin-left: 10px;
-}
-
 /* 客戶列表樣式 */
+.customer-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 20px 0;
+}
+
 .customer-card {
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 10px;
   background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+  overflow: hidden;
 }
 
 .card-header {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  padding: 15px;
+  border-bottom: 1px solid #eee;
 }
 
 .card-top {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  margin-bottom: 10px;
 }
 
-.right-section span {
-  margin-left: 10px;
+.card-top strong {
+  font-size: 18px;
+  color: #333;
+}
+
+.right-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
 }
 
 .card-summary {
   display: flex;
-  gap: 12px;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.pay-btn {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.pay-btn:hover {
+  background: #45a049;
+}
+
+.card-detail {
+  padding: 15px;
+  background: #f9f9f9;
+}
+
+.card-detail p {
+  margin: 8px 0;
+  color: #666;
+}
+
+.card-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
 }
 
 .card-actions button {
-  margin-right: 10px;
-}
-
-.filter-bar button.active {
-  background: #f3cc00;
-}
-
-.note-input {
-  width: 200px;
-}
-
-.modal {
-  position: fixed;
-  z-index: 999;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-}
-
-.modal-content {
-  background-color: #fff;
-  margin: 10% auto;
-  padding: 20px;
-  width: 300px;
-  border-radius: 8px;
-}
-
-.close-modal {
-  float: right;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
+  transition: background-color 0.3s;
 }
 
+.download-contract {
+  background: #2196F3;
+  color: white;
+}
+
+.download-id {
+  background: #FF9800;
+  color: white;
+}
+
+.download-disbursement {
+  background: #9C27B0;
+  color: white;
+}
+
+.mark-locked {
+  background: #f44336;
+  color: white;
+}
+
+/* 狀態標籤樣式 */
 .status-tag {
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 14px;
+  font-weight: bold;
+  margin-left: 10px;
 }
 
 .status-tag.renting {
@@ -140,17 +174,139 @@ input, select {
   color: #c62828;
 }
 
+/* 繳款狀態樣式 */
+.payment-status {
+  color: #d32f2f;
+  font-weight: bold;
+  background: #ffebee;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-right: 10px;
+}
+
+.next-payment {
+  color: #1976d2;
+  font-weight: bold;
+  background: #e3f2fd;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-right: 10px;
+}
+
 .due-today {
   background: #fff3e0;
   color: #e65100;
   padding: 4px 8px;
   border-radius: 4px;
-  font-size: 14px;
+  font-weight: bold;
+  margin-right: 10px;
 }
 
-.balance-info {
-  color: #d32f2f;
-  font-weight: bold;
+/* 篩選欄樣式 */
+.filter-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 10px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.filter-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  background: #f0f0f0;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.filter-btn.active {
+  background: #4CAF50;
+  color: white;
+}
+
+/* 表單樣式 */
+form {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+form label {
+  display: block;
+  margin: 10px 0;
+  color: #666;
+}
+
+form input,
+form select {
+  width: 100%;
+  padding: 8px;
+  margin: 5px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+form button[type="submit"] {
+  background: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+/* 彈窗樣式 */
+.modal {
+  position: fixed;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 300px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.close-modal {
+  float: right;
+  cursor: pointer;
+  font-size: 24px;
+  color: #666;
+}
+
+/* 備註輸入樣式 */
+.note-input {
+  width: 200px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.save-note {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 10px;
 }
 
 /* 新增客戶表單樣式 */
