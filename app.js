@@ -39,23 +39,38 @@ function createCustomerCard(customer) {
 
   // 計算到期日和狀態
   const contractDate = new Date(customer.contractDate);
-  const dueDate = new Date(contractDate);
-  dueDate.setDate(dueDate.getDate() + 7);
   const today = new Date();
   
-  let statusTag = '';
-  if (customer.status === 'renting') {
-    if (today.toDateString() === dueDate.toDateString()) {
-      statusTag = '本日應繳款';
-    } else if (today > dueDate) {
-      const daysOverdue = Math.floor((today - dueDate) / (1000 * 60 * 60 * 24));
-      statusTag = `逾期 ${daysOverdue} 日`;
-    }
-  }
-
   // 計算累計繳款和未付金額
   const totalPaid = customer.paymentRecords?.reduce((sum, record) => sum + record.amount, 0) || 0;
   const unpaidAmount = customer.rent - (totalPaid % customer.rent);
+  
+  // 計算當前期數的到期日
+  const currentPeriod = Math.floor(totalPaid / customer.rent);
+  const dueDate = new Date(contractDate);
+  dueDate.setDate(dueDate.getDate() + (7 * (currentPeriod + 1)));
+  
+  let statusTag = '';
+  let paymentStatus = '';
+  let nextPaymentDate = '';
+  
+  if (customer.status === 'renting') {
+    // 計算逾期天數
+    const daysOverdue = Math.floor((today - dueDate) / (1000 * 60 * 60 * 24));
+    
+    if (daysOverdue === 0) {
+      statusTag = '本日應繳款';
+    } else if (daysOverdue > 0) {
+      statusTag = `逾期 ${daysOverdue} 日`;
+    }
+    
+    // 計算繳款狀態
+    if (unpaidAmount > 0) {
+      paymentStatus = `當期尚餘 $${unpaidAmount} 未繳納`;
+    } else {
+      nextPaymentDate = `下次繳款日：${formatDate(dueDate)}`;
+    }
+  }
 
   card.innerHTML = `
     <div class="card-header">
@@ -63,7 +78,8 @@ function createCustomerCard(customer) {
         <strong>${customer.name}</strong>
         ${customer.notes ? `<span class="note-tag">（${customer.notes}）</span>` : ''}
         <div class="right-section">
-          ${unpaidAmount > 0 ? `<span class="balance-info">尚有餘額 $${unpaidAmount} 元</span>` : ''}
+          ${paymentStatus ? `<span class="payment-status">${paymentStatus}</span>` : ''}
+          ${nextPaymentDate ? `<span class="next-payment">${nextPaymentDate}</span>` : ''}
           <span class="status-tag ${customer.status}">${getStatusText(customer.status)}</span>
           ${statusTag ? `<span class="due-today">${statusTag}</span>` : ''}
         </div>
@@ -72,7 +88,9 @@ function createCustomerCard(customer) {
         <span>${customer.model}</span> ｜ 
         <span>價金：$${customer.salePrice}</span> ｜ 
         <span>租金：$${customer.rent}</span>
-        <button class="pay-btn" onclick="showPaymentModal('${customer._id}', ${customer.rent})">繳款</button>
+        ${customer.status === 'renting' && unpaidAmount > 0 ? 
+          `<button class="pay-btn" onclick="showPaymentModal('${customer._id}', ${unpaidAmount}, ${customer.rent}, ${customer.salePrice})">繳款</button>` : 
+          ''}
       </div>
       <button class="toggle-detail" onclick="toggleDetails(this)">▼ 展開</button>
     </div>
@@ -113,12 +131,14 @@ function createCustomerCard(customer) {
 }
 
 // 顯示繳款彈窗
-function showPaymentModal(customerId, rent) {
+function showPaymentModal(customerId, unpaidAmount, rent, salePrice) {
   const modal = document.getElementById('payment-modal');
   const amountInput = document.getElementById('payment-amount');
   const submitBtn = document.getElementById('submit-payment');
   
-  amountInput.value = rent; // 預設顯示租金金額
+  amountInput.value = unpaidAmount; // 預設顯示未繳金額
+  amountInput.min = unpaidAmount; // 設置最小繳款金額
+  amountInput.max = salePrice; // 設置最大繳款金額為買回金額
   
   // 移除舊的事件監聽器
   const newSubmitBtn = submitBtn.cloneNode(true);
@@ -127,8 +147,8 @@ function showPaymentModal(customerId, rent) {
   // 添加新的事件監聽器
   newSubmitBtn.addEventListener('click', async () => {
     const amount = parseFloat(amountInput.value);
-    if (!amount || amount <= 0) {
-      alert('請輸入有效的金額');
+    if (amount < unpaidAmount) {
+      alert('繳款金額不能小於未繳金額');
       return;
     }
     
