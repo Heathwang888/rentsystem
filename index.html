@@ -98,17 +98,20 @@
       const rocDate = `${date.getFullYear() - 1911}/${(date.getMonth()+1).toString().padStart(2,'0')}/${date.getDate().toString().padStart(2,'0')}`;
       formData.set('contractDate', rocDate);
 
-     fetch('https://five-iridescent-flyaway.glitch.me/api/customers/create', {
-  method: 'POST',
-  body: formData,
-})
-.then(res => res.json()).then(() => {
-        alert('✅ 新增成功');
-        form.reset();
-        showPage('list');
-        loadCustomerList();
-      }).catch(() => alert('❌ 新增失敗'));
+  fetch('https://five-iridescent-flyaway.glitch.me/api/customers/create', {
+    method: 'POST',
+    body: formData,
+  })
+    .then(async res => {
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || '上傳失敗');
+      alert('✅ 新增成功');
+    })
+    .catch(err => {
+      console.error('新增錯誤：', err);
+      alert('❌ 新增失敗，請檢查輸入或後端設定');
     });
+});
 
     function loadCustomerList() {
       fetch('https://five-iridescent-flyaway.glitch.me/customers')
