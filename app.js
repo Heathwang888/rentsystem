@@ -112,10 +112,12 @@ function createCustomerCard(customer) {
       <p><strong>租金：</strong>${customer.rent} 元/週</p>
       <p><strong>合約起始日：</strong>${formatDate(contractDate)}</p>
       <p><strong>累計繳款：</strong>${customer.totalPaid} 元</p>
+      <p><strong>螢幕密碼：</strong>${customer.screenPassword || '未設定'}</p>
     </div>
     <div class="card-actions">
       <button class="download-contract" onclick="downloadFile('${customer._id}', 'contract')">下載合約</button>
       <button class="download-id" onclick="downloadFile('${customer._id}', 'id')">下載身分證</button>
+      <button class="download-disbursement" onclick="downloadFile('${customer._id}', 'disbursement')">下載撥款水單</button>
       ${customer.status === 'renting' ? `
         <button class="pay-btn" onclick="showPaymentModal('${customer._id}')">繳款</button>
       ` : ''}
