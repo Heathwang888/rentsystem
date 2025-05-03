@@ -196,7 +196,99 @@
 
 
     <div id="add" class="page">
-      <h2>新增客戶（尚未製作）</h2>
+      <!-- 新增客戶頁 HTML 片段 -->
+<h2>新增客戶</h2>
+<form id="add-customer-form" enctype="multipart/form-data">
+  <label>姓名：<input type="text" name="name" required></label><br>
+  <label>身分證字號：<input type="text" name="idNumber" required></label><br>
+  <label>手機號碼：<input type="text" name="mobile" required></label><br>
+  <label>戶籍地址：<input type="text" name="registeredAddress" required></label><br>
+  <label>現居地址：<input type="text" name="currentAddress" id="currentAddress"></label>
+  <label><input type="checkbox" id="sameAsRegistered"> 同戶籍地址</label><br>
+
+  <label>手機型號：
+    <select name="model">
+      <option>iPhone 12</option>
+      <option>iPhone 12 mini</option>
+      <option>iPhone 12 Pro</option>
+      <option>iPhone 12 Pro Max</option>
+      <option>iPhone 13</option>
+      <option>iPhone 13 mini</option>
+      <option>iPhone 13 Pro</option>
+      <option>iPhone 13 Pro Max</option>
+      <option>iPhone 14</option>
+      <option>iPhone 14 Plus</option>
+      <option>iPhone 14 Pro</option>
+      <option>iPhone 14 Pro Max</option>
+      <option>iPhone 15</option>
+      <option>iPhone 15 Plus</option>
+      <option>iPhone 15 Pro</option>
+      <option>iPhone 15 Pro Max</option>
+      <option>iPhone 16 </option>
+      <option>iPhone 16 e</option>
+      <option>iPhone 16 Plus</option>
+      <option>iPhone 16 Pro</option>
+      <option>iPhone 16 Pro Max</option>
+    </select>
+  </label><br>
+  <label>IMEI：<input type="text" name="imei" required></label><br>
+  <label>序號：<input type="text" name="serialNumber" required></label><br>
+  <label>買賣價（元）：<input type="number" name="price" required></label><br>
+  <label>週租金（元）：<input type="number" name="rent" required></label><br>
+  <label>收款帳戶銀行：<input type="text" name="bank" required></label><br>
+  <label>戶名：<input type="text" name="bankAccountName" required></label><br>
+  <label>帳號：<input type="text" name="bankAccountNumber" required></label><br>
+  <label>合約起始日：<input type="date" name="contractDate" id="contractDate" required></label><br>
+
+  <label>上傳合約 PDF：<input type="file" name="contractPdf" accept="application/pdf" required></label><br>
+  <label>上傳身分證正面：<input type="file" name="idFront" accept="image/*" required></label><br>
+  <label>上傳身分證反面：<input type="file" name="idBack" accept="image/*" required></label><br>
+  <label>上傳撥款水單：<input type="file" name="paymentSlip" accept="image/*,application/pdf" required></label><br>
+
+  <button type="submit">送出新增</button>
+</form>
+
+<script>
+  document.getElementById('sameAsRegistered').addEventListener('change', function () {
+    const reg = document.querySelector('[name="registeredAddress"]');
+    const cur = document.getElementById('currentAddress');
+    if (this.checked) cur.value = reg.value;
+  });
+
+  function toROC(dateStr) {
+    const date = new Date(dateStr);
+    const year = date.getFullYear() - 1911;
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}/${month}/${day}`;
+  }
+
+  document.getElementById('add-customer-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const form = this;
+    const formData = new FormData(form);
+
+    const rocDate = toROC(document.getElementById('contractDate').value);
+    formData.set('contractDate', rocDate);
+
+    fetch('/api/customers/create', {
+      method: 'POST',
+      body: formData
+    }).then(res => res.json())
+      .then(data => alert('新增成功'))
+      .catch(err => alert('上傳失敗'));
+  });
+</script>
+
+<style>
+  form label {
+    display: block;
+    margin: 10px 0;
+  }
+  input, select {
+    margin-left: 10px;
+  }
+</style>
     </div>
 
     <div id="contract" class="page">
