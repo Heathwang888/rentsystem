@@ -1411,7 +1411,7 @@
       const header = document.createElement('div');
       header.className = 'card-header';
 
-      // 👉 繳款按鈕（只有在租賃中才顯示）
+      // 👉 繳款按鈕（只有在租賃中才顯示，並放在姓名後面）
       if (isRenting) {
         const paymentButton = document.createElement('button');
         paymentButton.className = 'payment-button';
@@ -1546,14 +1546,13 @@
             <input type="number" placeholder="輸入繳款金額" id="payment-amount-${customer._id}" value="${customer.rent || ''}">
             <div id="payment-type-${customer._id}" class="payment-type-info"></div>
             <div class="form-actions">
-              <button class="button button-success" onclick="handlePayment(${JSON.stringify(customer)})">確認繳款</button>
-              <button class="button button-danger" onclick="hidePaymentForm('${customer._id}')">取消</button>
+              <button class="button button-success">確認繳款</button>
+              <button class="button button-danger" type="button">取消</button>
             </div>
           </div>
         `;
         content.appendChild(paymentForm);
 
-        // 修正：appendChild 之後再加事件監聽
         setTimeout(() => {
           const amountInput = document.getElementById(`payment-amount-${customer._id}`);
           const typeInfo = document.getElementById(`payment-type-${customer._id}`);
@@ -1579,6 +1578,12 @@
               typeInfo.className = `payment-type-info ${typeClass}`;
             });
           }
+          // 綁定確認繳款按鈕
+          const confirmBtn = paymentForm.querySelector('.button-success');
+          if (confirmBtn) confirmBtn.onclick = () => handlePayment(customer);
+          // 綁定取消按鈕
+          const cancelBtn = paymentForm.querySelector('.button-danger');
+          if (cancelBtn) cancelBtn.onclick = () => hidePaymentForm(customer._id);
         }, 0);
       }
 
