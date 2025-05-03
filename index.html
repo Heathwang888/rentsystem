@@ -47,9 +47,11 @@
       <div class="card-top">
         <strong>張三</strong>
         <span class="note-tag">（備註字眼）</span>
-        <span class="balance-info">尚有餘額 $1,000 元</span>
-        <span class="status-tag">租賃中</span>
-        <span class="due-today">本日應繳款</span>
+        <div class="right-section">
+          <span class="balance-info">尚有餘額 $1,000 元</span>
+          <span class="status-tag">租賃中</span>
+          <span class="due-today">本日應繳款</span>
+        </div>
       </div>
       <div class="card-summary">
         <span>iPhone 13</span> ｜ 
@@ -89,8 +91,17 @@
       </div>
     </div>
   </div>
+</div>
 
-  <!-- 更多客戶卡片可依照相同結構疊加 -->
+<!-- 繳款彈窗 -->
+<div id="payment-modal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <span class="close-modal">&times;</span>
+    <h3>繳款紀錄</h3>
+    <label>繳款金額：</label>
+    <input type="number" id="payment-amount" placeholder="請輸入金額">
+    <button id="submit-payment">確認繳款</button>
+  </div>
 </div>
 
 <script>
@@ -113,6 +124,18 @@
       });
     });
   });
+
+  // 彈出繳款視窗
+  document.querySelectorAll('.pay-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('payment-modal').style.display = 'block';
+    });
+  });
+
+  // 關閉視窗
+  document.querySelector('.close-modal').addEventListener('click', () => {
+    document.getElementById('payment-modal').style.display = 'none';
+  });
 </script>
 
 <style>
@@ -130,14 +153,17 @@
   }
   .card-top {
     display: flex;
-    gap: 10px;
+    justify-content: space-between;
     align-items: center;
-    font-weight: bold;
+  }
+  .right-section span {
+    margin-left: 10px;
   }
   .card-summary {
     display: flex;
     gap: 12px;
     align-items: center;
+    justify-content: space-between;
   }
   .card-actions button {
     margin-right: 10px;
@@ -148,26 +174,23 @@
   .note-input {
     width: 200px;
   }
-</style>
-
-<style>
-  .customer-card {
-    border: 1px solid #ccc;
+  .modal {
+    position: fixed;
+    z-index: 999;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  .modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 20px;
+    width: 300px;
     border-radius: 8px;
-    padding: 12px;
-    margin-bottom: 10px;
-    background: #fff;
   }
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .card-actions button {
-    margin-right: 10px;
-  }
-  .filter-bar button.active {
-    background: #f3cc00;
+  .close-modal {
+    float: right;
+    cursor: pointer;
   }
 </style>
 
