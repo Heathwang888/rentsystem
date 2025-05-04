@@ -307,8 +307,49 @@ async function deleteCustomer(customerId) {
   }
 }
 
-// 初始化頁面
+// 新增客戶
+async function addCustomer(event) {
+  event.preventDefault();
+  
+  const formData = new FormData(event.target);
+  
+  // 驗證必填欄位
+  const requiredFields = ['name', 'idNumber', 'phone', 'address', 'model', 'imei', 'serialNumber', 'salePrice', 'rent', 'contractDate', 'bank', 'bankAccountName', 'bankAccountNumber'];
+  for (const field of requiredFields) {
+    if (!formData.get(field)) {
+      alert(`請填寫${field}欄位`);
+      return;
+    }
+  }
+  
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/customers`, {
+      method: 'POST',
+      body: formData
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || '新增客戶失敗');
+    }
+    
+    const customer = await response.json();
+    loadCustomers();
+    event.target.reset();
+    document.getElementById('add-customer-modal').style.display = 'none';
+  } catch (error) {
+    console.error('Error:', error);
+    alert(error.message);
+  }
+}
+
+// 在頁面載入時設置水單上傳的檔案類型
 document.addEventListener('DOMContentLoaded', () => {
+  const disbursementFileInput = document.querySelector('input[name="disbursementFile"]');
+  if (disbursementFileInput) {
+    disbursementFileInput.accept = 'image/jpeg,image/png';
+  }
+
   // 從 URL 獲取當前頁面
   const urlParams = new URLSearchParams(window.location.search);
   const currentPage = urlParams.get('page') || 'dashboard';
@@ -358,28 +399,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // 新增客戶表單提交
   const addForm = document.getElementById('add-customer-form');
   if (addForm) {
-    addForm.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const formData = new FormData(this);
-
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/customers`, {
-          method: 'POST',
-          body: formData
-        });
-
-        if (!response.ok) {
-          throw new Error('新增客戶失敗');
-        }
-
-        alert('✅ 新增成功');
-        this.reset();
-        showPage('list'); // 切換到列表頁
-        loadCustomers(); // 重新載入客戶列表
-      } catch (error) {
-        console.error('新增客戶失敗:', error);
-        alert('新增客戶失敗，請稍後再試');
-      }
-    });
+    addForm.addEventListener('submit', addCustomer);
   }
 }); 
