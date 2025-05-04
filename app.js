@@ -51,6 +51,11 @@ function createCustomerCard(customer) {
     });
   };
 
+  // 計算剩餘天數
+  const today = new Date();
+  const nextDueDate = new Date(customer.nextDueDate);
+  const daysRemaining = Math.floor((nextDueDate - today) / (1000 * 60 * 60 * 24));
+
   // 計算顯示狀態
   let statusText = '';
   if (customer.status === 'buyback') {
@@ -62,13 +67,17 @@ function createCustomerCard(customer) {
       statusText = `逾期 ${customer.overdueDays} 天`;
     } else if (customer.isDueToday) {
       statusText = '本日應繳款';
+    } else if (daysRemaining > 0) {
+      statusText = `下次繳款剩餘 ${daysRemaining} 日`;
     }
   }
 
   // 計算顯示金額
   let amountText = '';
-  if (customer.status === 'renting' && customer.unpaid > 0) {
-    amountText = `尚餘 ${customer.unpaid.toLocaleString()} 未繳納`;
+  if (customer.status === 'renting') {
+    if (customer.unpaid > 0) {
+      amountText = `欠繳 ${customer.unpaid.toLocaleString()}`;
+    }
   }
 
   card.innerHTML = `
@@ -86,7 +95,6 @@ function createCustomerCard(customer) {
           <span>${customer.model}</span>
           <span>價金：${customer.salePrice.toLocaleString()}</span>
           <span>租金：${customer.rent.toLocaleString()}</span>
-          <span>已繳：${customer.totalPaid.toLocaleString()}</span>
         </div>
         ${customer.status === 'renting' ? 
           `<button class="pay-btn" onclick="showPaymentModal('${customer._id}', ${customer.rent}, ${customer.salePrice})">繳款</button>` : 
