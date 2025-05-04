@@ -40,6 +40,7 @@ function createCustomerCard(customer) {
   const card = document.createElement('div');
   card.className = 'customer-card';
   card.dataset.customerId = customer._id;
+  card.dataset.status = customer.status;
 
   // 格式化日期
   const formatDate = (date) => {
@@ -83,96 +84,66 @@ function createCustomerCard(customer) {
 
   card.innerHTML = `
     <div class="card-header">
-      <div class="customer-info">
-        <h3>${customer.name}</h3>
-        <p>${customer.phone}</p>
+      <div class="card-top">
+        <strong>${customer.name}</strong>
+        <div class="right-section">
+          ${statusText ? `<span class="payment-status">${statusText}</span>` : ''}
+          ${amountText ? `<span class="amount">${amountText}</span>` : ''}
+          <span class="status-tag ${customer.status}">${getStatusText(customer.status)}</span>
+        </div>
       </div>
-      <div class="payment-status">
-        <span class="status ${customer.status}">${statusText}</span>
-        ${amountText ? `<span class="amount">${amountText}</span>` : ''}
+      <div class="card-summary">
+        <div class="info">
+          <span>${customer.model}</span>
+          <span>價金：${customer.salePrice.toLocaleString()}</span>
+          <span>租金：${customer.rent.toLocaleString()}</span>
+        </div>
+        ${customer.status === 'renting' ? 
+          `<button class="pay-btn" onclick="showPaymentModal('${customer._id}', ${customer.rent}, ${customer.salePrice})">繳款</button>` : 
+          ''}
       </div>
+      <button class="toggle-detail" onclick="toggleDetails(this)">▼ 展開</button>
     </div>
-    <div class="card-details" style="display: none;">
-      <div class="detail-row">
-        <span class="label">身分證字號：</span>
-        <span>${customer.idNumber}</span>
+    <div class="card-detail" style="display:none;">
+      <p><strong>手機號碼：</strong>${customer.phone}</p>
+      <p><strong>身分證字號：</strong>${customer.idNumber}</p>
+      <p><strong>手機型號：</strong>${customer.model}</p>
+      <p><strong>IMEI：</strong>${customer.imei}</p>
+      <p><strong>序號：</strong>${customer.serialNumber}</p>
+      <p><strong>螢幕密碼：</strong>${customer.screenPassword || '未設定'}</p>
+      <p><strong>戶籍地址：</strong>${customer.address}</p>
+      <p><strong>通訊地址：</strong>${customer.contactAddress || '同上'}</p>
+      <p><strong>合約起始日：</strong>${formatDate(customer.contractDate)}</p>
+      <p><strong>買賣價金：</strong>${customer.salePrice.toLocaleString()}</p>
+      <p><strong>租金：</strong>${customer.rent.toLocaleString()} / 週</p>
+      <p><strong>撥款帳戶：</strong>${customer.bank} / 戶名：${customer.bankAccountName} / 帳號：${customer.bankAccountNumber}</p>
+      <p><strong>歷史繳款紀錄：</strong></p>
+      <ul>
+        ${customer.paymentRecords?.map(record => 
+          `<li>${formatDate(record.date)} - ${record.amount.toLocaleString()}</li>`
+        ).join('') || ''}
+      </ul>
+      <p><strong>備註：</strong> 
+        <input type="text" class="note-input" placeholder="輸入備註..." value="${customer.notes || ''}">
+        <button class="save-note" onclick="saveNote('${customer._id}', this)">確認</button>
+      </p>
+      <div class="card-actions">
+        <button class="download-contract" onclick="downloadFile('${customer._id}', 'contract')">下載合約</button>
+        <button class="download-id" onclick="downloadFile('${customer._id}', 'id')">下載身分證</button>
+        <button class="download-disbursement" onclick="downloadFile('${customer._id}', 'disbursement')">下載撥款水單</button>
+        ${customer.status === 'renting' ? `
+          <button class="mark-locked" onclick="markAsLocked('${customer._id}')">呆帳(鎖機)</button>
+        ` : ''}
+        <button class="delete-customer" onclick="deleteCustomer('${customer._id}')">刪除客戶</button>
       </div>
-      <div class="detail-row">
-        <span class="label">地址：</span>
-        <span>${customer.address}</span>
-      </div>
-      <div class="detail-row">
-        <span class="label">聯絡地址：</span>
-        <span>${customer.contactAddress || '無'}</span>
-      </div>
-      <div class="detail-row">
-        <span class="label">機型：</span>
-        <span>${customer.model}</span>
-      </div>
-      <div class="detail-row">
-        <span class="label">IMEI：</span>
-        <span>${customer.imei}</span>
-      </div>
-      <div class="detail-row">
-        <span class="label">序號：</span>
-        <span>${customer.serialNumber}</span>
-      </div>
-      <div class="detail-row">
-        <span class="label">螢幕密碼：</span>
-        <span>${customer.screenPassword || '無'}</span>
-      </div>
-      <div class="detail-row">
-        <span class="label">售價：</span>
-        <span>${customer.salePrice.toLocaleString()}</span>
-      </div>
-      <div class="detail-row">
-        <span class="label">租金：</span>
-        <span>${customer.rent.toLocaleString()}</span>
-      </div>
-      <div class="detail-row">
-        <span class="label">合約日期：</span>
-        <span>${formatDate(customer.contractDate)}</span>
-      </div>
-      <div class="detail-row">
-        <span class="label">銀行：</span>
-        <span>${customer.bank}</span>
-      </div>
-      <div class="detail-row">
-        <span class="label">戶名：</span>
-        <span>${customer.bankAccountName}</span>
-      </div>
-      <div class="detail-row">
-        <span class="label">帳號：</span>
-        <span>${customer.bankAccountNumber}</span>
-      </div>
-      <div class="detail-row">
-        <span class="label">累計繳款：</span>
-        <span>${customer.totalPaid.toLocaleString()}</span>
-      </div>
-      <div class="detail-row">
-        <span class="label">下次繳款日：</span>
-        <span>${formatDate(customer.nextDueDate)}</span>
-      </div>
-      <div class="detail-row">
-        <span class="label">備註：</span>
-        <textarea class="notes" placeholder="輸入備註...">${customer.notes || ''}</textarea>
-        <button class="save-notes" onclick="saveNote('${customer._id}', this)">儲存備註</button>
-      </div>
-    </div>
-    <div class="card-actions">
-      <button class="toggle-details" onclick="toggleDetails(this)">顯示詳細資料</button>
-      <button class="download-contract" onclick="downloadFile('${customer._id}', 'contract')">下載合約</button>
-      <button class="download-id" onclick="downloadFile('${customer._id}', 'id')">下載身分證</button>
-      <button class="download-disbursement" onclick="downloadFile('${customer._id}', 'disbursement')">下載撥款水單</button>
-      ${customer.status === 'renting' ? `
-        <button class="pay-btn" onclick="showPaymentModal('${customer._id}')">繳款</button>
-      ` : ''}
-      ${customer.status === 'renting' ? `
-        <button class="mark-locked" onclick="markAsLocked('${customer._id}')">標記為呆帳</button>
-      ` : ''}
-      <button class="delete-customer" onclick="deleteCustomer('${customer._id}')">刪除客戶</button>
     </div>
   `;
+  
+  // 添加今日須繳款標記
+  if (isDueToday) {
+    card.dataset.dueToday = 'true';
+  }
+  
   return card;
 }
 
