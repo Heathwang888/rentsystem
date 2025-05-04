@@ -337,12 +337,6 @@ async function addCustomer(event) {
     loadCustomers();
     event.target.reset();
     
-    // 關閉新增客戶視窗
-    const modal = document.getElementById('add-customer-modal');
-    if (modal) {
-      modal.style.display = 'none';
-    }
-    
     // 切換到列表頁
     showPage('list');
   } catch (error) {
