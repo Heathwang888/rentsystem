@@ -336,7 +336,15 @@ async function addCustomer(event) {
     const customer = await response.json();
     loadCustomers();
     event.target.reset();
-    document.getElementById('add-customer-modal').style.display = 'none';
+    
+    // 關閉新增客戶視窗
+    const modal = document.getElementById('add-customer-modal');
+    if (modal) {
+      modal.style.display = 'none';
+    }
+    
+    // 切換到列表頁
+    showPage('list');
   } catch (error) {
     console.error('Error:', error);
     alert(error.message);
